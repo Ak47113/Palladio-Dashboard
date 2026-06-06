@@ -303,15 +303,36 @@ async function fetchBrand(brand){
   const text=await r.text();
   if(text.includes('Sign in')||text.includes('accounts.google.com'))throw new Error('Sheet not public');
   const rows=parseCSV(text);
-  // On first brand, show first 12 rows in debug panel
+  // On first brand, show header row with indices
   if(brand.name===BRANDS[0].name){
-    const preview=rows.slice(0,12).map((r,i)=>
-      `<tr><td style="color:var(--text3);padding:2px 8px;font-size:11px">${i+1}</td><td style="padding:2px 8px;font-size:11px;max-width:600px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.join(' | ')}</td></tr>`
+    // Find header row
+    let hdrIdx=-1;
+    for(let i=0;i<Math.min(15,rows.length);i++){
+      const r=rows[i].map(c=>(c||'').toLowerCase().trim());
+      if(r.some(c=>c==='account name'||c==='account')&&r.some(c=>c.includes('ss27')||c==='fx')){hdrIdx=i;break}
+    }
+    const hdrRow=hdrIdx>=0?rows[hdrIdx]:[];
+    const colTable=hdrRow.map((h,i)=>
+      `<tr><td style="padding:2px 8px;font-size:11px;color:var(--text3)">${i}</td><td style="padding:2px 8px;font-size:11px;font-weight:500">${h||'(empty)'}</td></tr>`
+    ).join('');
+    // Also show a data row
+    const dataRow=hdrIdx>=0&&rows[hdrIdx+2]?rows[hdrIdx+2]:[];
+    const dataTable=dataRow.map((v,i)=>
+      `<tr><td style="padding:2px 8px;font-size:11px;color:var(--text3)">${i}</td><td style="padding:2px 8px;font-size:11px">${v||'(empty)'}</td></tr>`
     ).join('');
     document.getElementById('debug-panel').innerHTML=
       `<div style="margin-bottom:16px;background:var(--surface);border:.5px solid var(--border);border-radius:var(--rl);overflow:hidden">
-        <div style="padding:10px 16px;border-bottom:.5px solid var(--border);font-size:12px;font-weight:600">DEBUG — First 12 rows of "${brand.name}" sheet (so we can see column structure)</div>
-        <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">${preview}</table></div>
+        <div style="padding:10px 16px;border-bottom:.5px solid var(--border);font-size:12px;font-weight:600">DEBUG — Header row found at index ${hdrIdx} | Total rows: ${rows.length}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0">
+          <div style="border-right:.5px solid var(--border)">
+            <div style="padding:6px 8px;font-size:11px;font-weight:600;border-bottom:.5px solid var(--border)">HEADERS (col index → name)</div>
+            <div style="overflow-y:auto;max-height:300px"><table style="width:100%;border-collapse:collapse">${colTable}</table></div>
+          </div>
+          <div>
+            <div style="padding:6px 8px;font-size:11px;font-weight:600;border-bottom:.5px solid var(--border)">SAMPLE DATA ROW (col index → value)</div>
+            <div style="overflow-y:auto;max-height:300px"><table style="width:100%;border-collapse:collapse">${dataTable}</table></div>
+          </div>
+        </div>
       </div>`;
   }
   return rows;

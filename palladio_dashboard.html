@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Palladio SS27 — Sales Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#f7f7f5;--surface:#fff;--surface2:#f2f1ee;--border:rgba(0,0,0,.10);--border2:rgba(0,0,0,.18);--text:#1a1a18;--text2:#6b6b67;--text3:#9b9b96;--green:#1D9E75;--green-dk:#0F6E56;--green-lt:#EAF3DE;--green-tx:#3B6D11;--blue:#378ADD;--blue-lt:#E6F1FB;--blue-tx:#185FA5;--red:#E24B4A;--red-lt:#FCEBEB;--red-tx:#A32D2D;--amb-lt:#FAEEDA;--amb-tx:#854F0B;--r:8px;--rl:12px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:220px;background:var(--surface);border-right:.5px solid var(--border);display:flex;flex-direction:column;z-index:100}
+.main{margin-left:220px;min-height:100vh;padding:24px 28px}
+.sidebar-logo{padding:20px 18px 16px;border-bottom:.5px solid var(--border)}
+.logo-text{font-size:17px;font-weight:600;letter-spacing:-.5px}
+.logo-text span{color:var(--green)}
+.logo-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.nav-section{padding:12px 0;flex:1;overflow-y:auto}
+.nav-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;padding:0 18px;margin-bottom:4px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 18px;cursor:pointer;color:var(--text2);font-size:13px;border-left:2px solid transparent}
+.nav-item:hover{background:var(--surface2);color:var(--text)}
+.nav-item.active{color:var(--green);background:var(--green-lt);border-left-color:var(--green);font-weight:500}
+.nav-icon{font-size:16px;width:18px;text-align:center}
+.sidebar-footer{padding:14px 18px;border-top:.5px solid var(--border)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--text3);display:inline-block;flex-shrink:0}
+.dot.on{background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.status-pill{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3)}
+.page{display:none}.page.active{display:block}
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+.page-title{font-size:20px;font-weight:600}
+.page-sub{font-size:13px;color:var(--text2);margin-top:2px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;font-size:13px;border:.5px solid var(--border2);border-radius:var(--r);background:var(--surface);color:var(--text);cursor:pointer;font-family:inherit}
+.btn:hover{background:var(--surface2)}
+.btn-green{background:var(--green);color:#fff;border-color:var(--green)}
+.btn-green:hover{background:var(--green-dk)}
+.metrics-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:20px}
+.metric{background:var(--surface2);border-radius:var(--r);padding:14px 16px}
+.metric-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
+.metric-value{font-size:24px;font-weight:600;line-height:1}
+.metric-sub{font-size:11px;color:var(--text2);margin-top:4px}
+.up{color:var(--green-tx)}.dn{color:var(--red-tx)}
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.chart-card{background:var(--surface);border:.5px solid var(--border);border-radius:var(--rl);padding:18px}
+.chart-card.full{grid-column:1/-1}
+.chart-title{font-size:13px;font-weight:500;margin-bottom:14px}
+.table-card{background:var(--surface);border:.5px solid var(--border);border-radius:var(--rl);overflow:hidden;margin-bottom:16px}
+.table-toolbar{padding:14px 16px;border-bottom:.5px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.search-input,.filter-sel{padding:6px 10px;font-size:13px;border:.5px solid var(--border2);border-radius:var(--r);background:var(--surface);color:var(--text);font-family:inherit}
+.search-input{width:200px}.search-input:focus,.filter-sel:focus{outline:none;border-color:var(--green)}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:9px 14px;border-bottom:.5px solid var(--border);font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;cursor:pointer;white-space:nowrap}
+th:hover{color:var(--text)}
+td{padding:10px 14px;border-bottom:.5px solid var(--border);font-size:13px}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface2)}
+.badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:500}
+.bg{background:var(--green-lt);color:var(--green-tx)}
+.br{background:var(--red-lt);color:var(--red-tx)}
+.ba{background:var(--amb-lt);color:var(--amb-tx)}
+.bb{background:var(--blue-lt);color:var(--blue-tx)}
+/* Loading overlay */
+#loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999}
+.load-logo{font-size:28px;font-weight:600;letter-spacing:-.5px;margin-bottom:8px}
+.load-logo span{color:var(--green)}
+.load-sub{font-size:14px;color:var(--text2);margin-bottom:32px}
+.load-bar-wrap{width:320px;background:var(--surface2);border-radius:99px;height:6px;overflow:hidden;margin-bottom:12px}
+.load-bar{height:100%;background:var(--green);border-radius:99px;width:0%;transition:width .3s}
+.load-txt{font-size:13px;color:var(--text2)}
+.err-banner{background:var(--red-lt);color:var(--red-tx);border-radius:var(--r);padding:12px 16px;margin-bottom:16px;font-size:13px;line-height:1.6}
+.brand-sel-wrap select{padding:8px 12px;font-size:14px;border:.5px solid var(--border2);border-radius:var(--r);background:var(--surface);color:var(--text);font-family:inherit;margin-bottom:20px;min-width:220px}
+</style>
+</head>
+<body>
+
+<!-- Loading Overlay -->
+<div id="loading-overlay">
+  <div class="load-logo">Palladio <span>SS27</span></div>
+  <div class="load-sub">Loading data from 28 brand sheets...</div>
+  <div class="load-bar-wrap"><div class="load-bar" id="load-bar"></div></div>
+  <div class="load-txt" id="load-txt">Starting...</div>
+</div>
+
+<!-- App -->
+<div id="app" style="display:none">
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-text">Palladio <span>SS27</span></div>
+      <div class="logo-sub">Sales Dashboard</div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label" style="margin-top:8px">Reports</div>
+      <div class="nav-item active" onclick="showPage('overview')"><span class="nav-icon">▦</span> Business Overview</div>
+      <div class="nav-item" onclick="showPage('brands')"><span class="nav-icon">▤</span> By Brand</div>
+      <div class="nav-item" onclick="showPage('customers')"><span class="nav-icon">◎</span> By Customer</div>
+      <div class="nav-item" onclick="showPage('single')"><span class="nav-icon">⊕</span> Single Brand</div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="status-pill"><div class="dot on" id="sdot"></div><span id="slabel">Connected</span></div>
+      <div style="margin-top:8px"><button class="btn" style="width:100%;justify-content:center;font-size:12px" onclick="refreshAll()">↻ Refresh Data</button></div>
+      <div style="font-size:10px;color:var(--text3);margin-top:8px" id="last-upd"></div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div id="error-area"></div>
+
+    <!-- Overview -->
+    <div class="page active" id="page-overview">
+      <div class="page-header"><div><div class="page-title">Business Overview</div><div class="page-sub">All 28 brands combined</div></div></div>
+      <div class="metrics-row" id="ov-metrics"></div>
+      <div class="charts-row">
+        <div class="chart-card"><div class="chart-title">Target vs Reforecast vs Actual</div><div style="position:relative;height:220px"><canvas id="ch-tvr"></canvas></div></div>
+        <div class="chart-card"><div class="chart-title">GBP vs EUR — Reforecast split</div><div style="position:relative;height:220px"><canvas id="ch-cur"></canvas></div></div>
+      </div>
+      <div class="chart-card full" style="margin-bottom:16px"><div class="chart-title">Reforecast by brand</div><div id="ch-brands-wrap" style="position:relative"><canvas id="ch-brands"></canvas></div></div>
+    </div>
+
+    <!-- Brands -->
+    <div class="page" id="page-brands">
+      <div class="page-header"><div><div class="page-title">Brand Performance</div><div class="page-sub">Click column headers to sort</div></div></div>
+      <div class="table-card"><div class="table-wrap">
+        <table><thead><tr>
+          <th onclick="sortB('name')">Brand</th>
+          <th onclick="sortB('target')">Target</th>
+          <th onclick="sortB('reforecast')">Reforecast</th>
+          <th onclick="sortB('actual')">Actual</th>
+          <th onclick="sortB('rfVsTarget')">vs Target</th>
+          <th onclick="sortB('rfVsSS26')">vs SS26</th>
+          <th onclick="sortB('reforecastGBP')">GBP Rf</th>
+          <th onclick="sortB('reforecastEUR')">EUR Rf</th>
+          <th onclick="sortB('activeCount')">Active Accs</th>
+        </tr></thead><tbody id="brands-tbody"></tbody></table>
+      </div></div>
+    </div>
+
+    <!-- Customers -->
+    <div class="page" id="page-customers">
+      <div class="page-header"><div><div class="page-title">Customer Performance</div><div class="page-sub">Cross-brand view — search, filter, find multi-brand buyers</div></div></div>
+      <div class="table-card">
+        <div class="table-toolbar">
+          <input class="search-input" id="cs-search" placeholder="Search customer..." oninput="renderCust()"/>
+          <select class="filter-sel" id="cs-country" onchange="renderCust()"><option value="">All countries</option></select>
+          <select class="filter-sel" id="cs-brand" onchange="renderCust()"><option value="">All brands</option></select>
+          <select class="filter-sel" id="cs-multi" onchange="renderCust()">
+            <option value="">All customers</option>
+            <option value="multi">Multi-brand only</option>
+            <option value="single">Single brand only</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table><thead><tr>
+            <th>Customer</th><th>Country</th><th>Reforecast</th><th>Actual</th><th>SS26</th><th>Brands bought</th><th># Brands</th>
+          </tr></thead><tbody id="cust-tbody"></tbody></table>
+        </div>
+        <div style="padding:10px 16px;font-size:12px;color:var(--text3)" id="cust-count"></div>
+      </div>
+    </div>
+
+    <!-- Single Brand -->
+    <div class="page" id="page-single">
+      <div class="page-header"><div><div class="page-title">Single Brand Drill-Down</div><div class="page-sub">Full account-level detail</div></div></div>
+      <div class="brand-sel-wrap">
+        <select id="sb-select" onchange="renderSingle()"><option value="">— Select a brand —</option></select>
+      </div>
+      <div id="sb-content"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const BRANDS=[
+  {name:'Alohas',id:'125lA2rd4WMBGhlci0y4U2MCe8xO3Zk996h0zwp1Yqic'},
+  {name:'Artlove',id:'1_AEyRn1PV7x-RAznKeI2eWy_lG6bEoBl_a2fl36YyVc'},
+  {name:'Beaumont Organic',id:'1QiVpnJxp1iGwvmU8ch_2OTuiXn55mEy2v0ryBN7YwjY'},
+  {name:'Brodie Cashmere',id:'1jB0RMnoYTIy6CyXLDS1ZSQC8U_IGMg1lbjCIH4I5SIE'},
+  {name:'Dixie',id:'1EV5Kuw6l6FVXmabkG6WcV25_D0mSuBJhlW8QRmU0LvY'},
+  {name:'Emin & Paul',id:'1Wy_4HdvOBoBrhIrfp3vMJubPz6MNerGpoltWRWc-_zo'},
+  {name:'European Culture',id:'19CmKixy1XXRt5u7rVMAGWE5J3kdrCiQ4lz6PrpIcLyY'},
+  {name:'Floor',id:'16WP-1Y_rMEqjTwgkXxt_s_fOnIvei3WdXFWcwyogo-4'},
+  {name:'Goodnews',id:'1No9GgxXIBiaD65rB8NJ3ZlJ3KpHa6m5Q5-ooA8rxuQI'},
+  {name:'Handprint Dream Apparel',id:'1_hef5A6YaOQtYCQIjdcdqnLa8-R-dFsBM97VbIkLQC0'},
+  {name:'Hartford',id:'1n9MJdakaiIsl5fnlQd2TgU8gWqTTaTRUBMEazWnPri0'},
+  {name:'Lady Pipa',id:'1xcRhE8mI1n69AZgyRZtvFXJS3uAMKhJJ-dL73JKkXM8'},
+  {name:'Louise Misha',id:'1LixMCMAMuWSk0fmMJJr9DDBnJ2mPi8EsPEi3ZvWZ2aw'},
+  {name:'Milla',id:'1vcJT8JN-0DT-J5jxbqa5FPZkSEZnqlkt_IlOzu98OAw'},
+  {name:'Muse Assembly',id:'1pz2omvdyXCiZnt-5V2hl-vC0hGJrPgqWSbjF1Ig8A0c'},
+  {name:'Orfeo',id:'1dLAuJyBggrankGq1hr_SfM6RKVsRsfWWd566KWT3eB8'},
+  {name:"Ottod'Ame",id:'1kLzfeetSwuvZlKXDmphkXfHwbtKPxKua2idOIVD9gkQ'},
+  {name:'POM',id:'1d0MKKow4YO6THtj3XiJLsCEDJHO1kjvP5OZXcTS3624'},
+  {name:'Psophia',id:'1pAo02f72eZcQ_MKHctIlKPBk6zQd4v-2svsKew3s3_M'},
+  {name:'Rino & Pelle',id:'1JPAOV1fWn0O1D_AuAgSedghkqdT2PSbj7S006qxvEwQ'},
+  {name:'Rose and Rose',id:'1uLJ5FthcVyrLSXKlLiSMpeH5z1gDsBlW9iR6-Y99y3M'},
+  {name:'Sancia',id:'1dkEBKYjkEI6j_U3q8P5LSzg3UZbh1HjVKnoFvFtksUQ'},
+  {name:'See u Soon',id:'1Llri5WS09VIvcM4lVhTvsoFSvPpyh99AaDUNUAMNusg'},
+  {name:'Sofie Schnoor',id:'159BkInEfKPpucfFPmfZIBBUjSl695p4aXSv3iGRMsUI'},
+  {name:'Starlove',id:'1X14tiv4UJUGENWAOhTcRYARvSOC2yqdDK-cP0dI3y2s'},
+  {name:'The Tiny Big Sister',id:'1WaWqwbLlWzSt0sVRXawA43M6FJ-5kcmmosQXXFfu4SU'},
+  {name:'Thinking Mu Womens',id:'1DU9BwbdCtHSGdGvkShksMBs9YxFKjvUleUsbmOwHwOY'},
+  {name:'Vilagallo',id:'1RKTAUDvoNEItpxc7AsEracSdmlWkh_mPCXgfTqwQvBY'}
+];
+
+const ACTIVE=['active','new aw26','new ss26','reactivated'];
+let allRows=[],brandSums=[],custData=[],charts={};
+let bSort={col:'reforecast',dir:-1};
+
+const fmt=n=>{if(n===null||n===undefined||isNaN(n))return'—';if(Math.abs(n)>=1e6)return(n/1e6).toFixed(1)+'M';if(Math.abs(n)>=1000)return(n/1000).toFixed(0)+'K';return Math.round(n).toLocaleString()};
+const pctStr=(v,t)=>{if(!t||isNaN(t)||isNaN(v))return null;return((v-t)/Math.abs(t)*100).toFixed(1)};
+const badgePct=(v,t)=>{const p=pctStr(v,t);if(p===null)return'<span class="badge ba">—</span>';return`<span class="badge ${parseFloat(p)>=0?'bg':'br'}">${parseFloat(p)>=0?'+':''}${p}%</span>`};
+const sum=(arr,key)=>arr.reduce((a,r)=>a+(r[key]||0),0);
+
+function csvURL(id){
+  // Use Google Sheets CSV export - works with "Anyone with link can view", no API key, no CORS
+  return`https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv&sheet=2025%2B`;
+}
+
+function parseCSV(text){
+  const lines=text.split(/\r?\n/);
+  return lines.map(line=>{
+    const cells=[];let cur='',inQ=false;
+    for(let i=0;i<line.length;i++){
+      const c=line[i];
+      if(c==='"'){if(inQ&&line[i+1]==='"'){cur+='"';i++}else inQ=!inQ}
+      else if(c===','&&!inQ){cells.push(cur);cur=''}
+      else cur+=c;
+    }
+    cells.push(cur);
+    return cells.map(c=>c.trim());
+  }).filter(r=>r.length>1||r[0]);
+}
+
+function detectCols(headers){
+  const h=headers.map(x=>(x||'').toString().toLowerCase().replace(/"/g,'').trim());
+  const find=(...terms)=>{for(const t of terms){const i=h.findIndex(x=>x.includes(t));if(i>=0)return i}return -1};
+  return{
+    account:find('account name','account','customer','retailer','store name'),
+    country:find('country'),city:find('major city','city'),
+    status:find('status'),currency:find('currency'),
+    ss26:find('ss26 actual','ss26actual','ss26 rev','ss26'),
+    target:find('ss27 target','ss27target','target'),
+    reforecast:find('ss27 reforecast','reforecast','ss27 ref'),
+    actual:find('ss27 actual','ss27actual','ss27 act')
+  }
+}
+
+function toNum(row,idx){
+  if(idx<0||idx>=row.length)return 0;
+  const v=parseFloat((row[idx]||'').toString().replace(/[£€$,"\s]/g,''));
+  return isNaN(v)?0:v;
+}
+
+function parseRows(rows,brandName){
+  if(!rows||rows.length<2)return[];
+  let hr=-1;
+  for(let i=0;i<Math.min(30,rows.length);i++){
+    const r=rows[i].map(c=>(c||'').replace(/"/g,'').toLowerCase());
+    if(r.some(c=>c.includes('account')||c.includes('customer')||c.includes('retailer'))){hr=i;break}
+  }
+  if(hr<0)return[];
+  const cols=detectCols(rows[hr]);
+  if(cols.account<0)return[];
+  const result=[];
+  for(let i=hr+1;i<rows.length;i++){
+    const row=rows[i];
+    const acc=(row[cols.account]||'').replace(/"/g,'').trim();
+    if(!acc||acc.toLowerCase().includes('total')||acc.toLowerCase().includes('subtotal')||acc.toLowerCase().includes('grand'))continue;
+    const status=cols.status>=0?(row[cols.status]||'').replace(/"/g,'').toLowerCase().trim():'active';
+    const isActive=ACTIVE.some(s=>status.includes(s));
+    const currency=cols.currency>=0?(row[cols.currency]||'GBP').replace(/"/g,'').trim().toUpperCase():'GBP';
+    result.push({
+      brand:brandName,account:acc,
+      country:cols.country>=0?(row[cols.country]||'').replace(/"/g,'').trim():'',
+      status,isActive,currency,
+      ss26:toNum(row,cols.ss26),target:toNum(row,cols.target),
+      reforecast:toNum(row,cols.reforecast),actual:toNum(row,cols.actual)
+    });
+  }
+  return result;
+}
+
+async function fetchBrand(brand){
+  const url=csvURL(brand.id);
+  const r=await fetch(url);
+  if(!r.ok)throw new Error(`HTTP ${r.status}`);
+  const text=await r.text();
+  if(text.includes('Sign in')|| text.includes('accounts.google.com'))throw new Error('Sheet not public');
+  return parseCSV(text);
+}
+
+async function loadAll(){
+  allRows=[];brandSums=[];
+  const errors=[];let loaded=0;
+  document.getElementById('load-bar').style.width='0%';
+  document.getElementById('load-txt').textContent='Starting...';
+
+  await Promise.all(BRANDS.map(async brand=>{
+    try{
+      const rows=await fetchBrand(brand);
+      const parsed=parseRows(rows,brand.name);
+      allRows.push(...parsed);
+      const gbp=parsed.filter(r=>r.currency==='GBP'),eur=parsed.filter(r=>r.currency==='EUR');
+      const bs={
+        name:brand.name,rows:parsed,
+        target:sum(parsed,'target'),reforecast:sum(parsed,'reforecast'),
+        actual:sum(parsed,'actual'),ss26:sum(parsed,'ss26'),
+        reforecastGBP:sum(gbp,'reforecast'),reforecastEUR:sum(eur,'reforecast'),
+        activeCount:parsed.filter(r=>r.isActive).length,totalCount:parsed.length
+      };
+      bs.rfVsTarget=bs.target?((bs.reforecast-bs.target)/Math.abs(bs.target)*100):null;
+      bs.rfVsSS26=bs.ss26?((bs.reforecast-bs.ss26)/Math.abs(bs.ss26)*100):null;
+      brandSums.push(bs);
+    }catch(e){errors.push(`${brand.name}: ${e.message}`)}
+    loaded++;
+    document.getElementById('load-bar').style.width=Math.round(loaded/BRANDS.length*100)+'%';
+    document.getElementById('load-txt').textContent=`Loading ${loaded} of ${BRANDS.length} brands...`;
+  }));
+
+  buildCustData();
+  document.getElementById('loading-overlay').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('last-upd').textContent='Updated '+new Date().toLocaleTimeString();
+  document.getElementById('slabel').textContent=`${BRANDS.length-errors.length}/${BRANDS.length} brands`;
+
+  if(errors.length){
+    document.getElementById('error-area').innerHTML=
+      `<div class="err-banner"><strong>${errors.length} sheet(s) failed:</strong><br>${errors.join('<br>')}<br><small>Make sure each listed sheet is shared as "Anyone with the link can view".</small></div>`;
+  }
+
+  populateSelects();renderAll();
+}
+
+async function refreshAll(){
+  document.getElementById('sdot').classList.remove('on');
+  document.getElementById('slabel').textContent='Refreshing...';
+  document.getElementById('error-area').innerHTML='';
+  document.getElementById('loading-overlay').style.display='flex';
+  await loadAll();
+  document.getElementById('sdot').classList.add('on');
+}
+
+function buildCustData(){
+  const map={};
+  for(const r of allRows){
+    if(!r.account)continue;
+    const key=r.account.toLowerCase().trim();
+    if(!map[key])map[key]={account:r.account,country:r.country||'',brands:new Set(),reforecast:0,actual:0,ss26:0};
+    map[key].brands.add(r.brand);
+    map[key].reforecast+=r.reforecast;map[key].actual+=r.actual;map[key].ss26+=r.ss26;
+    if(r.country)map[key].country=r.country;
+  }
+  custData=Object.values(map).sort((a,b)=>b.reforecast-a.reforecast);
+}
+
+function populateSelects(){
+  document.getElementById('sb-select').innerHTML='<option value="">— Select a brand —</option>'+brandSums.map(b=>`<option value="${b.name}">${b.name}</option>`).join('');
+  const countries=[...new Set(custData.map(c=>c.country).filter(Boolean))].sort();
+  document.getElementById('cs-country').innerHTML='<option value="">All countries</option>'+countries.map(c=>`<option>${c}</option>`).join('');
+  document.getElementById('cs-brand').innerHTML='<option value="">All brands</option>'+brandSums.map(b=>`<option>${b.name}</option>`).join('');
+}
+
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  const map={overview:'Overview',brands:'Brand',customers:'Customer',single:'Single'};
+  document.querySelectorAll('.nav-item').forEach(n=>{if(n.textContent.includes(map[id]))n.classList.add('active')});
+}
+
+function renderAll(){renderOverview();renderBrandsTable();renderCust()}
+
+function renderOverview(){
+  const tT=sum(brandSums,'target'),tR=sum(brandSums,'reforecast'),tA=sum(brandSums,'actual'),tS=sum(brandSums,'ss26');
+  const tAc=brandSums.reduce((a,b)=>a+b.activeCount,0);
+  const tGBP=sum(brandSums,'reforecastGBP'),tEUR=sum(brandSums,'reforecastEUR');
+  const rvt=pctStr(tR,tT),rvs=pctStr(tR,tS);
+  document.getElementById('ov-metrics').innerHTML=`
+    <div class="metric"><div class="metric-label">Total Target</div><div class="metric-value">${fmt(tT)}</div><div class="metric-sub">All currencies</div></div>
+    <div class="metric"><div class="metric-label">Total Reforecast</div><div class="metric-value">${fmt(tR)}</div><div class="metric-sub ${rvt&&parseFloat(rvt)>=0?'up':'dn'}">${rvt?(parseFloat(rvt)>=0?'+':'')+rvt+'% vs target':'—'}</div></div>
+    <div class="metric"><div class="metric-label">Total Actual</div><div class="metric-value">${fmt(tA)}</div><div class="metric-sub">SS27 to date</div></div>
+    <div class="metric"><div class="metric-label">Rf vs SS26</div><div class="metric-value ${rvs&&parseFloat(rvs)>=0?'up':'dn'}">${rvs?(parseFloat(rvs)>=0?'+':'')+rvs+'%':'—'}</div><div class="metric-sub">Year on year</div></div>
+    <div class="metric"><div class="metric-label">GBP Reforecast</div><div class="metric-value">${fmt(tGBP)}</div></div>
+    <div class="metric"><div class="metric-label">EUR Reforecast</div><div class="metric-value">${fmt(tEUR)}</div></div>
+    <div class="metric"><div class="metric-label">Active Accounts</div><div class="metric-value">${tAc.toLocaleString()}</div></div>
+    <div class="metric"><div class="metric-label">Active Brands</div><div class="metric-value">${brandSums.filter(b=>b.activeCount>0).length}<span style="font-size:14px;color:var(--text2)"> / ${BRANDS.length}</span></div></div>`;
+
+  if(charts.tvr)charts.tvr.destroy();
+  charts.tvr=new Chart(document.getElementById('ch-tvr'),{type:'bar',data:{labels:['Target','Reforecast','Actual'],datasets:[{data:[tT,tR,tA],backgroundColor:['#85B7EB','#1D9E75','#5DCAA5'],borderRadius:5,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>fmt(v)},grid:{color:'rgba(128,128,128,.1)'}},x:{grid:{display:false}}}}});
+
+  if(charts.cur)charts.cur.destroy();
+  charts.cur=new Chart(document.getElementById('ch-cur'),{type:'doughnut',data:{labels:['GBP','EUR','Other'],datasets:[{data:[tGBP,tEUR,Math.max(0,tR-tGBP-tEUR)],backgroundColor:['#1D9E75','#378ADD','#888780'],borderWidth:0,hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{position:'bottom',labels:{padding:16,font:{size:12}}}}}});
+
+  const sorted=[...brandSums].sort((a,b)=>b.reforecast-a.reforecast);
+  document.getElementById('ch-brands-wrap').style.height=Math.max(320,sorted.length*30+60)+'px';
+  if(charts.brands)charts.brands.destroy();
+  charts.brands=new Chart(document.getElementById('ch-brands'),{type:'bar',data:{labels:sorted.map(b=>b.name),datasets:[{label:'Target',data:sorted.map(b=>b.target),backgroundColor:'#B5D4F4',borderRadius:2},{label:'Reforecast',data:sorted.map(b=>b.reforecast),backgroundColor:'#1D9E75',borderRadius:2}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{padding:16,font:{size:12}}}},scales:{x:{ticks:{callback:v=>fmt(v)},grid:{color:'rgba(128,128,128,.1)'}},y:{grid:{display:false},ticks:{font:{size:11}}}}}});
+}
+
+function renderBrandsTable(){
+  const s=bSort;
+  const sorted=[...brandSums].sort((a,b)=>{const av=a[s.col]??-Infinity,bv=b[s.col]??-Infinity;return typeof av==='string'?av.localeCompare(bv)*s.dir:(av-bv)*s.dir});
+  document.getElementById('brands-tbody').innerHTML=sorted.map(b=>`<tr>
+    <td style="font-weight:500">${b.name}</td><td>${fmt(b.target)}</td>
+    <td style="font-weight:500">${fmt(b.reforecast)}</td><td>${fmt(b.actual)}</td>
+    <td>${badgePct(b.reforecast,b.target)}</td><td>${badgePct(b.reforecast,b.ss26)}</td>
+    <td>${fmt(b.reforecastGBP)}</td><td>${fmt(b.reforecastEUR)}</td>
+    <td><span class="badge bb">${b.activeCount}</span></td></tr>`).join('');
+}
+
+function sortB(col){if(bSort.col===col)bSort.dir*=-1;else{bSort.col=col;bSort.dir=-1}renderBrandsTable()}
+
+function renderCust(){
+  const search=document.getElementById('cs-search').value.toLowerCase();
+  const country=document.getElementById('cs-country').value;
+  const brand=document.getElementById('cs-brand').value;
+  const multi=document.getElementById('cs-multi').value;
+  const filtered=custData.filter(c=>{
+    if(search&&!c.account.toLowerCase().includes(search))return false;
+    if(country&&c.country!==country)return false;
+    if(brand&&!c.brands.has(brand))return false;
+    if(multi==='multi'&&c.brands.size<2)return false;
+    if(multi==='single'&&c.brands.size!==1)return false;
+    return true;
+  });
+  document.getElementById('cust-count').textContent=`Showing ${Math.min(filtered.length,200)} of ${filtered.length} customers`;
+  document.getElementById('cust-tbody').innerHTML=filtered.slice(0,200).map(c=>`<tr>
+    <td style="font-weight:500">${c.account}</td><td>${c.country||'—'}</td>
+    <td style="font-weight:500">${fmt(c.reforecast)}</td><td>${fmt(c.actual)}</td><td>${fmt(c.ss26)}</td>
+    <td style="font-size:12px;color:var(--text2);max-width:220px">${[...c.brands].join(', ')}</td>
+    <td><span class="badge ${c.brands.size>2?'bg':c.brands.size>1?'bb':'ba'}">${c.brands.size}</span></td></tr>`).join('');
+}
+
+function renderSingle(){
+  const name=document.getElementById('sb-select').value;
+  const el=document.getElementById('sb-content');
+  if(!name){el.innerHTML='';return}
+  const b=brandSums.find(x=>x.name===name);if(!b)return;
+  el.innerHTML=`
+    <div class="metrics-row">
+      <div class="metric"><div class="metric-label">Target</div><div class="metric-value">${fmt(b.target)}</div></div>
+      <div class="metric"><div class="metric-label">Reforecast</div><div class="metric-value">${fmt(b.reforecast)}</div><div class="metric-sub ${b.rfVsTarget>=0?'up':'dn'}">${b.rfVsTarget!==null?(b.rfVsTarget>=0?'+':'')+b.rfVsTarget.toFixed(1)+'% vs target':'—'}</div></div>
+      <div class="metric"><div class="metric-label">Actual</div><div class="metric-value">${fmt(b.actual)}</div></div>
+      <div class="metric"><div class="metric-label">vs SS26</div><div class="metric-value ${b.rfVsSS26>=0?'up':'dn'}">${b.rfVsSS26!==null?(b.rfVsSS26>=0?'+':'')+b.rfVsSS26.toFixed(1)+'%':'—'}</div></div>
+      <div class="metric"><div class="metric-label">GBP Rf</div><div class="metric-value">${fmt(b.reforecastGBP)}</div></div>
+      <div class="metric"><div class="metric-label">EUR Rf</div><div class="metric-value">${fmt(b.reforecastEUR)}</div></div>
+      <div class="metric"><div class="metric-label">Active Accounts</div><div class="metric-value">${b.activeCount}</div></div>
+      <div class="metric"><div class="metric-label">Total Accounts</div><div class="metric-value">${b.totalCount}</div></div>
+    </div>
+    <div class="table-card">
+      <div class="table-toolbar" style="font-size:13px;color:var(--text2)">All accounts — ${b.name}</div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Account</th><th>Country</th><th>Status</th><th>Currency</th><th>SS26</th><th>Target</th><th>Reforecast</th><th>Actual</th><th>Rf vs Target</th></tr></thead>
+        <tbody>${b.rows.map(r=>`<tr>
+          <td style="font-weight:500">${r.account}</td><td>${r.country||'—'}</td>
+          <td><span class="badge ${r.isActive?'bg':'ba'}" style="font-size:10px">${r.status||'unknown'}</span></td>
+          <td style="font-size:11px;color:var(--text2)">${r.currency}</td>
+          <td>${fmt(r.ss26)}</td><td>${fmt(r.target)}</td>
+          <td style="font-weight:500">${fmt(r.reforecast)}</td><td>${fmt(r.actual)}</td>
+          <td>${badgePct(r.reforecast,r.target)}</td></tr>`).join('')}
+        </tbody>
+      </table></div>
+    </div>`;
+}
+
+// Auto-start on load
+window.addEventListener('load',loadAll);
+</script>
+</body>
+</html>

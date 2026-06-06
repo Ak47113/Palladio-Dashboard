@@ -232,25 +232,21 @@ function parseCSV(text){
 }
 
 function detectCols(headers){
-  const h=headers.map(x=>(x||'').toString().toLowerCase().replace(/["\n\r]/g,'').trim());
-  const find=(...terms)=>{
-    for(const t of terms){const i=h.findIndex(x=>x===t);if(i>=0)return i}
-    for(const t of terms){const i=h.findIndex(x=>x.includes(t));if(i>=0)return i}
-    return -1;
-  };
+  // The sheets have merged cells which breaks CSV column header detection.
+  // Column positions are fixed across all 28 brand sheets:
+  // 0=Account Name, 1=Location, 2=Major City, 3=Country, 4=Account Comments,
+  // 5=Email, 6=FX, 7=Status, 8=Payment Terms,
+  // 9=SS25 Actuals, 10=SS25 Units, 11=SS25 2 Actuals, 12=SS25 2 Units,
+  // 13=AW25 Actuals, 14=AW25 Units, 15=AW25 2 Actuals, 16=AW25 2 Units,
+  // 17=SS26 Actuals, 18=SS26 Units, 19=SS26 2 Actuals, 20=SS26 2 Units,
+  // 21=AW26 Actuals, 22=AW26 Units, 23=AW26 2 Actuals, 24=AW26 2 Units,
+  // 25=SS27 Targets, 26=SS27 Reforecast, 27=SS27 Actuals, 28=SS27 Units,
+  // 29=SS27 2 Targets, 30=SS27 2 Reforecast, 31=SS27 2 Actuals, 32=SS27 2 Units
   return{
-    account:find('account name','account','customer name','customer'),
-    country:find('country'),
-    city:find('major city','city'),
-    status:find('status'),
-    currency:find('fx','currency','ccy'),
-    ss26:find('ss26 actuals','ss26 actual','ss26'),
-    target:find('ss27 targets','ss27 target'),
-    reforecast:find('ss27 reforecast','reforecast'),
-    actual:find('ss27 actuals','ss27 actual'),
-    target2:find('ss27 2 targets','ss27 2 target'),
-    reforecast2:find('ss27 2 reforecast'),
-    actual2:find('ss27 2 actuals','ss27 2 actual')
+    account:0, country:3, city:2, status:7, currency:6,
+    ss26:17,
+    target:25, reforecast:26, actual:27,
+    target2:29, reforecast2:30, actual2:31
   };
 }
 
@@ -264,16 +260,22 @@ function toNum(row,idx){
 
 function parseRows(rows,brandName){
   if(!rows||rows.length<2)return[];
+  // Find header row: look for row containing "Account Name" in col 0
+  // With hardcoded cols we just need to find where real data starts
   let hr=-1;
   for(let i=0;i<Math.min(15,rows.length);i++){
-    const r=rows[i].map(c=>(c||'').replace(/"/g,'').toLowerCase().trim());
-    const hasAccount=r.some(c=>c==='account name'||c==='account'||c==='customer name'||c==='customer');
-    const hasData=r.some(c=>c.includes('ss27')||c.includes('target')||c.includes('reforecast')||c==='fx'||c.includes('currency'));
-    if(hasAccount&&hasData){hr=i;break}
+    const cell=(rows[i][0]||'').replace(/"/g,'').toLowerCase().trim();
+    if(cell==='account name'||cell==='account'){hr=i;break}
   }
-  if(hr<0)return[];
+  // fallback: find any row where col 0 looks like a header word
+  if(hr<0){
+    for(let i=0;i<Math.min(15,rows.length);i++){
+      const cell=(rows[i][0]||'').replace(/"/g,'').toLowerCase().trim();
+      if(cell&&!cell.match(/^[0-9]/)){hr=i;break}
+    }
+  }
+  if(hr<0)hr=4; // last resort: row 5 (index 4)
   const cols=detectCols(rows[hr]);
-  if(cols.account<0)return[];
   const result=[];
   for(let i=hr+1;i<rows.length;i++){
     const row=rows[i];

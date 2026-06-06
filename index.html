@@ -105,6 +105,7 @@ tr:hover td{background:var(--surface2)}
 
   <div class="main">
     <div id="error-area"></div>
+    <div id="debug-panel"></div>
 
     <!-- Overview -->
     <div class="page active" id="page-overview">
@@ -300,8 +301,20 @@ async function fetchBrand(brand){
   const r=await fetch(url);
   if(!r.ok)throw new Error(`HTTP ${r.status}`);
   const text=await r.text();
-  if(text.includes('Sign in')|| text.includes('accounts.google.com'))throw new Error('Sheet not public');
-  return parseCSV(text);
+  if(text.includes('Sign in')||text.includes('accounts.google.com'))throw new Error('Sheet not public');
+  const rows=parseCSV(text);
+  // On first brand, show first 12 rows in debug panel
+  if(brand.name===BRANDS[0].name){
+    const preview=rows.slice(0,12).map((r,i)=>
+      `<tr><td style="color:var(--text3);padding:2px 8px;font-size:11px">${i+1}</td><td style="padding:2px 8px;font-size:11px;max-width:600px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.join(' | ')}</td></tr>`
+    ).join('');
+    document.getElementById('debug-panel').innerHTML=
+      `<div style="margin-bottom:16px;background:var(--surface);border:.5px solid var(--border);border-radius:var(--rl);overflow:hidden">
+        <div style="padding:10px 16px;border-bottom:.5px solid var(--border);font-size:12px;font-weight:600">DEBUG — First 12 rows of "${brand.name}" sheet (so we can see column structure)</div>
+        <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">${preview}</table></div>
+      </div>`;
+  }
+  return rows;
 }
 
 async function loadAll(){

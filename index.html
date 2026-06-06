@@ -232,32 +232,31 @@ function parseCSV(text){
 
 function detectCols(headers){
   const h=headers.map(x=>(x||'').toString().toLowerCase().replace(/["\n\r]/g,'').trim());
-  console.log('HEADERS:',JSON.stringify(h));
-  // exact match first, then partial
   const find=(...terms)=>{
     for(const t of terms){const i=h.findIndex(x=>x===t);if(i>=0)return i}
     for(const t of terms){const i=h.findIndex(x=>x.includes(t));if(i>=0)return i}
     return -1;
   };
-  const cols = {
-    account:find('account name','account','customer name','customer','retailer','store name','store','buyer','client name','client'),
+  return{
+    account:find('account name','account','customer name','customer'),
     country:find('country'),
-    city:find('major city','city','location'),
-    status:find('status','account status'),
-    currency:find('currency','ccy','curr'),
-    ss26:find('ss26 actuals','ss26 actual','ss26actual','ss26 rev','ss26 revenue','ss26 total','ss26 net','ss26'),
-    target:find('ss27 targets','ss27 target','ss27target','target ss27','target','budget'),
-    reforecast:find('ss27 reforecast','ss27reforecast','reforecast ss27','ss27 rf','reforecast','rf','forecast'),
-    actual:find('ss27 actuals','ss27 actual','ss27actual','actual ss27','ss27 net','actuals','actual')
+    city:find('major city','city'),
+    status:find('status'),
+    currency:find('fx','currency','ccy'),
+    ss26:find('ss26 actuals','ss26 actual','ss26'),
+    target:find('ss27 targets','ss27 target'),
+    reforecast:find('ss27 reforecast','reforecast'),
+    actual:find('ss27 actuals','ss27 actual'),
+    target2:find('ss27 2 targets','ss27 2 target'),
+    reforecast2:find('ss27 2 reforecast'),
+    actual2:find('ss27 2 actuals','ss27 2 actual')
   };
-  console.log('COLS MAPPED:',JSON.stringify(cols));
-  return cols;
 }
 
 function toNum(row,idx){
   if(idx<0||idx>=row.length)return 0;
   const raw=(row[idx]||'').toString().replace(/[£€$,"\s]/g,'').trim();
-  if(raw===''||raw==='-'||raw==='n/a'||raw==='tbc')return 0;
+  if(!raw||raw==='-'||raw.toLowerCase()==='n/a'||raw.toLowerCase()==='tbc')return 0;
   const v=parseFloat(raw);
   return isNaN(v)?0:v;
 }
@@ -265,9 +264,11 @@ function toNum(row,idx){
 function parseRows(rows,brandName){
   if(!rows||rows.length<2)return[];
   let hr=-1;
-  for(let i=0;i<Math.min(30,rows.length);i++){
-    const r=rows[i].map(c=>(c||'').replace(/"/g,'').toLowerCase());
-    if(r.some(c=>c.includes('account')||c.includes('customer')||c.includes('retailer'))){hr=i;break}
+  for(let i=0;i<Math.min(15,rows.length);i++){
+    const r=rows[i].map(c=>(c||'').replace(/"/g,'').toLowerCase().trim());
+    const hasAccount=r.some(c=>c==='account name'||c==='account'||c==='customer name'||c==='customer');
+    const hasData=r.some(c=>c.includes('ss27')||c.includes('target')||c.includes('reforecast')||c==='fx'||c.includes('currency'));
+    if(hasAccount&&hasData){hr=i;break}
   }
   if(hr<0)return[];
   const cols=detectCols(rows[hr]);
@@ -279,13 +280,16 @@ function parseRows(rows,brandName){
     if(!acc||acc.toLowerCase().includes('total')||acc.toLowerCase().includes('subtotal')||acc.toLowerCase().includes('grand'))continue;
     const status=cols.status>=0?(row[cols.status]||'').replace(/"/g,'').toLowerCase().trim():'active';
     const isActive=ACTIVE.some(s=>status.includes(s));
-    const currency=cols.currency>=0?(row[cols.currency]||'GBP').replace(/"/g,'').trim().toUpperCase():'GBP';
+    const fxRaw=cols.currency>=0?(row[cols.currency]||'').replace(/"/g,'').trim().toUpperCase():'';
+    const currency=fxRaw==='EUR'?'EUR':'GBP';
+    const target=toNum(row,cols.target)+toNum(row,cols.target2);
+    const reforecast=toNum(row,cols.reforecast)+toNum(row,cols.reforecast2);
+    const actual=toNum(row,cols.actual)+toNum(row,cols.actual2);
     result.push({
       brand:brandName,account:acc,
       country:cols.country>=0?(row[cols.country]||'').replace(/"/g,'').trim():'',
       status,isActive,currency,
-      ss26:toNum(row,cols.ss26),target:toNum(row,cols.target),
-      reforecast:toNum(row,cols.reforecast),actual:toNum(row,cols.actual)
+      ss26:toNum(row,cols.ss26),target,reforecast,actual
     });
   }
   return result;

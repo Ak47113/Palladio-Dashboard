@@ -231,22 +231,34 @@ function parseCSV(text){
 }
 
 function detectCols(headers){
-  const h=headers.map(x=>(x||'').toString().toLowerCase().replace(/"/g,'').trim());
-  const find=(...terms)=>{for(const t of terms){const i=h.findIndex(x=>x.includes(t));if(i>=0)return i}return -1};
-  return{
-    account:find('account name','account','customer','retailer','store name'),
-    country:find('country'),city:find('major city','city'),
-    status:find('status'),currency:find('currency'),
-    ss26:find('ss26 actual','ss26actual','ss26 rev','ss26'),
-    target:find('ss27 target','ss27target','target'),
-    reforecast:find('ss27 reforecast','reforecast','ss27 ref'),
-    actual:find('ss27 actual','ss27actual','ss27 act')
-  }
+  const h=headers.map(x=>(x||'').toString().toLowerCase().replace(/["\n\r]/g,'').trim());
+  console.log('HEADERS:',JSON.stringify(h));
+  // exact match first, then partial
+  const find=(...terms)=>{
+    for(const t of terms){const i=h.findIndex(x=>x===t);if(i>=0)return i}
+    for(const t of terms){const i=h.findIndex(x=>x.includes(t));if(i>=0)return i}
+    return -1;
+  };
+  const cols = {
+    account:find('account name','account','customer name','customer','retailer','store name','store','buyer','client name','client'),
+    country:find('country'),
+    city:find('major city','city','location'),
+    status:find('status','account status'),
+    currency:find('currency','ccy','curr'),
+    ss26:find('ss26 actuals','ss26 actual','ss26actual','ss26 rev','ss26 revenue','ss26 total','ss26 net','ss26'),
+    target:find('ss27 targets','ss27 target','ss27target','target ss27','target','budget'),
+    reforecast:find('ss27 reforecast','ss27reforecast','reforecast ss27','ss27 rf','reforecast','rf','forecast'),
+    actual:find('ss27 actuals','ss27 actual','ss27actual','actual ss27','ss27 net','actuals','actual')
+  };
+  console.log('COLS MAPPED:',JSON.stringify(cols));
+  return cols;
 }
 
 function toNum(row,idx){
   if(idx<0||idx>=row.length)return 0;
-  const v=parseFloat((row[idx]||'').toString().replace(/[£€$,"\s]/g,''));
+  const raw=(row[idx]||'').toString().replace(/[£€$,"\s]/g,'').trim();
+  if(raw===''||raw==='-'||raw==='n/a'||raw==='tbc')return 0;
+  const v=parseFloat(raw);
   return isNaN(v)?0:v;
 }
 
@@ -323,9 +335,18 @@ async function loadAll(){
   document.getElementById('last-upd').textContent='Updated '+new Date().toLocaleTimeString();
   document.getElementById('slabel').textContent=`${BRANDS.length-errors.length}/${BRANDS.length} brands`;
 
-  if(errors.length){
-    document.getElementById('error-area').innerHTML=
-      `<div class="err-banner"><strong>${errors.length} sheet(s) failed:</strong><br>${errors.join('<br>')}<br><small>Make sure each listed sheet is shared as "Anyone with the link can view".</small></div>`;
+  // Show debug info so we can see what columns were found
+  const totalRows=allRows.length;
+  const withTarget=allRows.filter(r=>r.target>0).length;
+  const withRf=allRows.filter(r=>r.reforecast>0).length;
+  const debugInfo=`Rows loaded: ${totalRows} | With target data: ${withTarget} | With reforecast data: ${withRf}`;
+  console.log('DEBUG:',debugInfo);
+
+  if(errors.length||withTarget===0){
+    let msg='';
+    if(errors.length)msg+=`<strong>${errors.length} sheet(s) failed to load.</strong><br>${errors.join('<br>')}<br><br>`;
+    if(withTarget===0&&totalRows>0)msg+=`<strong>⚠ Data loaded (${totalRows} rows) but no Target/Reforecast values found.</strong> The column headers in the sheets may not match expected names. Check browser Console (F12) for "HEADERS:" log to see actual column names.<br>`;
+    document.getElementById('error-area').innerHTML=`<div class="err-banner">${msg}</div>`;
   }
 
   populateSelects();renderAll();

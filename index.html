@@ -158,6 +158,24 @@ tr:hover td{background:var(--surface2)}
 .progress-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--green),var(--blue))}
 .progress-fill.red{background:linear-gradient(90deg,var(--red),var(--amber))}
 
+/* Brand Cards */
+.brand-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rxl);overflow:hidden;margin-bottom:20px;transition:border-color .2s}
+.brand-card:hover{border-color:var(--border2)}
+.brand-card-header{padding:18px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:var(--bg2)}
+.brand-card-name{font-size:18px;font-weight:700;color:var(--text);letter-spacing:-.3px}
+.brand-card-badges{display:flex;gap:8px;align-items:center}
+.brand-card-body{display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid var(--border)}
+.brand-card-section{padding:20px 24px;border-right:1px solid var(--border)}
+.brand-card-section:last-child{border-right:none}
+.brand-card-section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.bcs-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.03)}
+.bcs-row:last-child{border-bottom:none}
+.bcs-label{font-size:12px;color:var(--text2)}
+.bcs-value{font-size:13px;font-weight:600;color:var(--text)}
+.brand-card-chart{padding:20px 24px}
+.brand-card-chart-title{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px}
+.brand-accs-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.03);font-size:12px}
+.brand-accs-row:last-child{border-bottom:none}
 /* Divider */
 .section-gap{margin-bottom:24px}
 </style>
@@ -184,6 +202,7 @@ tr:hover td{background:var(--surface2)}
       <div class="nav-group-label">Reports</div>
       <div class="nav-item active" onclick="showPage('overview')"><span class="nav-icon">◈</span> Business Overview</div>
       <div class="nav-item" onclick="showPage('brands')"><span class="nav-icon">◧</span> Brand Performance</div>
+      <div class="nav-item" onclick="showPage('brandcards')"><span class="nav-icon">▦</span> Brand Top Sheets</div>
       <div class="nav-item" onclick="showPage('customers')"><span class="nav-icon">◎</span> Customer Analysis</div>
       <div class="nav-item" onclick="showPage('single')"><span class="nav-icon">⊕</span> Single Brand Detail</div>
     </div>
@@ -294,6 +313,25 @@ tr:hover td{background:var(--surface2)}
           <div style="position:relative;height:260px"><canvas id="ch-eur-brand"></canvas></div>
         </div>
       </div>
+    </div>
+
+    <!-- BRAND TOP SHEETS -->
+    <div class="page" id="page-brandcards">
+      <div class="page-header">
+        <div class="page-title">Brand Top Sheets</div>
+        <div class="page-sub">Full performance summary for every brand — the same metrics your client tracks, one card per brand</div>
+      </div>
+      <div style="margin-bottom:20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <input class="search-input" id="bc-search" placeholder="🔍  Filter brands..." oninput="filterBrandCards()" style="width:200px"/>
+        <select class="filter-sel" id="bc-sort" onchange="filterBrandCards()">
+          <option value="reforecast">Sort by Reforecast (High → Low)</option>
+          <option value="target">Sort by Target (High → Low)</option>
+          <option value="rfVsTarget">Sort by vs Target %</option>
+          <option value="rfVsSS26">Sort by vs SS26 %</option>
+          <option value="name">Sort Alphabetically</option>
+        </select>
+      </div>
+      <div id="brand-cards-container"></div>
     </div>
 
     <!-- CUSTOMERS -->
@@ -558,13 +596,125 @@ function populateSelects(){
     [...brandSums].sort((a,b)=>a.name.localeCompare(b.name)).map(b=>`<option>${b.name}</option>`).join('');
 }
 
+function filterBrandCards(){
+  const search=document.getElementById('bc-search').value.toLowerCase();
+  const sortKey=document.getElementById('bc-sort').value;
+  let filtered=[...brandSums].filter(b=>b.name.toLowerCase().includes(search));
+  if(sortKey==='name') filtered.sort((a,b)=>a.name.localeCompare(b.name));
+  else filtered.sort((a,b)=>(b[sortKey]??-Infinity)-(a[sortKey]??-Infinity));
+  renderBrandCards(filtered);
+}
+
+function renderBrandCards(brands){
+  const container=document.getElementById('brand-cards-container');
+  if(!container)return;
+  const rows=brands||[...brandSums].sort((a,b)=>b.reforecast-a.reforecast);
+  container.innerHTML=rows.map(b=>{
+    const rvtVal=b.reforecast-b.target;
+    const rvsVal=b.reforecast-b.ss26;
+    const rvtPct=b.rfVsTarget;
+    const rvsPct=b.rfVsSS26;
+    const aovGBP=b.activeCount>0?b.reforecastGBP/Math.max(1,b.rows.filter(r=>r.isActive&&r.currency==='GBP').length):0;
+    const dc=v=>v>=0?'up':'dn';
+    const fp=v=>{if(v===null||isNaN(v))return'—';return(v>=0?'+':'')+v.toFixed(1)+'%'};
+    const fd=v=>{if(isNaN(v))return'—';return(v>=0?'+':'')+fmt(v)};
+    const pctBadge=v=>{
+      if(v===null||isNaN(v))return'<span class="badge badge-amber">—</span>';
+      return\`<span class="badge \${v>=0?'badge-green':'badge-red'}">\${v>=0?'▲':'▼'} \${Math.abs(v).toFixed(1)}%</span>\`;
+    };
+    // Top 5 active accounts by reforecast
+    const topAccs=b.rows.filter(r=>r.isActive).sort((a,c)=>c.reforecast-a.reforecast).slice(0,5);
+    return\`
+    <div class="brand-card">
+      <div class="brand-card-header">
+        <div>
+          <div class="brand-card-name">\${b.name}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:3px">Spring/Summer 2027 Season Performance</div>
+        </div>
+        <div class="brand-card-badges">
+          \${pctBadge(rvtPct)}
+          <span class="badge badge-blue">\${b.activeCount} active accounts</span>
+          \${b.reforecastGBP>0?'<span class="badge badge-green">GBP</span>':''}
+          \${b.reforecastEUR>0?'<span class="badge badge-blue" style="background:var(--blue-lt);color:var(--blue-tx)">EUR</span>':''}
+        </div>
+      </div>
+
+      <div class="brand-card-body">
+        <!-- All currencies -->
+        <div class="brand-card-section">
+          <div class="brand-card-section-title">All Currencies</div>
+          <div class="bcs-row"><span class="bcs-label">SS27 Target</span><span class="bcs-value">\${fmt(b.target)}</span></div>
+          <div class="bcs-row"><span class="bcs-label">SS27 Reforecast</span><span class="bcs-value">\${fmt(b.reforecast)}</span></div>
+          <div class="bcs-row"><span class="bcs-label">SS27 Actual</span><span class="bcs-value">\${fmt(b.actual)}</span></div>
+          <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+          <div class="bcs-row"><span class="bcs-label">Reforecast vs Target (value)</span><span class="bcs-value \${dc(rvtVal)}">\${fd(rvtVal)}</span></div>
+          <div class="bcs-row"><span class="bcs-label">Reforecast vs Target (%)</span><span class="bcs-value \${dc(rvtPct)}">\${fp(rvtPct)}</span></div>
+          <div class="bcs-row"><span class="bcs-label">Reforecast vs SS26 Forecast (value)</span><span class="bcs-value \${dc(rvsVal)}">\${fd(rvsVal)}</span></div>
+          <div class="bcs-row"><span class="bcs-label">Reforecast vs SS26 Forecast (%)</span><span class="bcs-value \${dc(rvsPct)}">\${fp(rvsPct)}</span></div>
+          </div>
+        </div>
+
+        <!-- GBP -->
+        <div class="brand-card-section">
+          <div class="brand-card-section-title" style="color:var(--green-tx)">GBP Accounts</div>
+          <div class="bcs-row"><span class="bcs-label">SS27 Target</span><span class="bcs-value">\${fmt(b.targetGBP)}</span></div>
+          <div class="bcs-row"><span class="bcs-label">SS27 Reforecast</span><span class="bcs-value">\${fmt(b.reforecastGBP)}</span></div>
+          <div class="bcs-row"><span class="bcs-label">SS27 Actual</span><span class="bcs-value">\${fmt(b.actualGBP)}</span></div>
+          <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+          <div class="bcs-row"><span class="bcs-label">Average Order Value</span><span class="bcs-value">\${fmt(aovGBP)}</span></div>
+          <div class="bcs-row"><span class="bcs-label">Active GBP Accounts</span><span class="bcs-value">\${b.rows.filter(r=>r.isActive&&r.currency==='GBP').length}</span></div>
+          <div class="bcs-row"><span class="bcs-label">Total GBP Accounts</span><span class="bcs-value">\${b.rows.filter(r=>r.currency==='GBP').length}</span></div>
+          </div>
+        </div>
+
+        <!-- EUR -->
+        <div class="brand-card-section">
+          <div class="brand-card-section-title" style="color:var(--blue-tx)">EUR Accounts</div>
+          <div class="bcs-row"><span class="bcs-label">SS27 Target</span><span class="bcs-value">\${fmt(b.targetEUR)}</span></div>
+          <div class="bcs-row"><span class="bcs-label">SS27 Reforecast</span><span class="bcs-value">\${fmt(b.reforecastEUR)}</span></div>
+          <div class="bcs-row"><span class="bcs-label">SS27 Actual</span><span class="bcs-value">\${fmt(b.actualEUR)}</span></div>
+          <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+          <div class="bcs-row"><span class="bcs-label">Active EUR Accounts</span><span class="bcs-value">\${b.rows.filter(r=>r.isActive&&r.currency==='EUR').length}</span></div>
+          <div class="bcs-row"><span class="bcs-label">Total EUR Accounts</span><span class="bcs-value">\${b.rows.filter(r=>r.currency==='EUR').length}</span></div>
+          <div class="bcs-row"><span class="bcs-label">Total Active Accounts</span><span class="bcs-value">\${b.activeCount}</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top accounts strip -->
+      \${topAccs.length>0?\`
+      <div style="padding:16px 24px;border-bottom:1px solid var(--border)">
+        <div class="brand-card-chart-title">Top Active Accounts by Reforecast</div>
+        \${topAccs.map(a=>\`
+          <div class="brand-accs-row">
+            <span style="font-weight:500;color:var(--text)">\${a.account}</span>
+            <span style="color:var(--text3)">\${a.country||'—'}</span>
+            <span class="badge \${a.currency==='GBP'?'badge-green':'badge-blue'}" style="font-size:10px">\${a.currency}</span>
+            <span style="font-weight:600">\${fmt(a.reforecast)}</span>
+            <span style="color:var(--text3);font-size:11px">\${a.target>0?'Target: '+fmt(a.target):''}</span>
+          </div>\`).join('')}
+      </div>\`:''}
+
+      <!-- Progress bar -->
+      <div style="padding:16px 24px;display:flex;align-items:center;gap:16px">
+        <div style="font-size:11px;color:var(--text3);white-space:nowrap">Target attainment</div>
+        <div style="flex:1;height:6px;background:var(--surface3);border-radius:99px;overflow:hidden">
+          <div style="height:100%;border-radius:99px;background:\${rvtPct>=0?'linear-gradient(90deg,var(--green),var(--blue))':'linear-gradient(90deg,var(--red),var(--amber))'};width:\${Math.min(100,Math.max(0,b.target>0?b.reforecast/b.target*100:0)).toFixed(1)}%"></div>
+        </div>
+        <div style="font-size:12px;font-weight:600;color:\${rvtPct>=0?'var(--green)':'var(--red)'};\white-space:nowrap">\${b.target>0?(b.reforecast/b.target*100).toFixed(1)+'%':'—'}</div>
+      </div>
+    </div>\`;
+  }).join('');
+}
+
 function showPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
-  const map={overview:'Overview',brands:'Brand',customers:'Customer',single:'Single'};
+  const map={overview:'Overview',brands:'Brand Performance',customers:'Customer',single:'Single',brandcards:'Brand Top'};
   document.querySelectorAll('.nav-item').forEach(n=>{if(n.textContent.includes(map[id]))n.classList.add('active')});
   if(id==='brands')renderBrandCharts();
+  if(id==='brandcards'){renderBrandCards();filterBrandCards();}
 }
 
 function renderAll(){renderOverview();renderBrandsTable();renderCust();}

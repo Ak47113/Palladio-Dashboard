@@ -64,7 +64,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-
 .chart-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px}
 .chart-sub{font-size:11px;color:var(--text3);margin-bottom:16px}
 .metric-table-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;margin-bottom:16px}
-.metric-table-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.metric-table-header{padding:16px 20px;border-bottom:1px solid var(--border)}
 .metric-table-title{font-size:13px;font-weight:600;color:var(--text)}
 .metric-table-sub{font-size:11px;color:var(--text3)}
 .table-wrap{overflow-x:auto}
@@ -98,7 +98,7 @@ tr:hover td{background:var(--surface2)}
 .load-bar{height:100%;background:linear-gradient(90deg,var(--green),var(--blue));border-radius:99px;width:0%;transition:width .3s}
 .load-txt{font-size:13px;color:var(--text3)}
 .err-banner{background:var(--red-lt);border:1px solid var(--red);border-radius:var(--r);padding:12px 16px;margin-bottom:20px;font-size:13px;line-height:1.6;color:var(--red-tx)}
-.brand-sel{padding:10px 14px;font-size:14px;border:1px solid var(--border2);border-radius:var(--r);background:var(--surface);color:var(--text);font-family:'Inter',sans-serif;margin-bottom:24px;min-width:260px}
+.brand-sel{padding:10px 14px;font-size:14px;border:1px solid var(--border2);border-radius:var(--r);background:var(--surface);color:var(--text);font-family:'Inter',sans-serif;min-width:260px}
 .progress-wrap{display:flex;align-items:center;gap:8px}
 .progress-bar{flex:1;height:5px;background:var(--surface3);border-radius:99px;overflow:hidden;min-width:60px}
 .progress-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--green),var(--blue))}
@@ -117,10 +117,11 @@ tr:hover td{background:var(--surface2)}
 .bc-row:last-child{border-bottom:none}
 .bc-label{font-size:12px;color:var(--text2)}
 .bc-value{font-size:13px;font-weight:600;color:var(--text)}
+.bc-value.up{color:var(--green-tx)}.bc-value.dn{color:var(--red-tx)}
 .bc-footer{padding:14px 24px;display:flex;align-items:center;gap:16px}
 .bc-accs{padding:14px 24px;border-bottom:1px solid var(--border)}
 .bc-acc-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--text3);margin-bottom:10px}
-.bc-acc-row{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.03);font-size:12px;gap:12px}
+.bc-acc-row{display:flex;align-items:center;gap:12px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.03);font-size:12px}
 .bc-acc-row:last-child{border-bottom:none}
 </style>
 </head>
@@ -144,11 +145,11 @@ tr:hover td{background:var(--surface2)}
     </div>
     <div class="nav-section">
       <div class="nav-group-label">Reports</div>
-      <div class="nav-item active" onclick="showPage('overview')"><span class="nav-icon">◈</span> Business Overview</div>
-      <div class="nav-item" onclick="showPage('brandcards')"><span class="nav-icon">▦</span> Brand Top Sheets</div>
+      <div class="nav-item active" onclick="showPage('brandcards')"><span class="nav-icon">▦</span> Brands Data Analysis</div>
       <div class="nav-item" onclick="showPage('brands')"><span class="nav-icon">◧</span> Brand Performance Table</div>
       <div class="nav-item" onclick="showPage('customers')"><span class="nav-icon">◎</span> Customer Analysis</div>
       <div class="nav-item" onclick="showPage('single')"><span class="nav-icon">⊕</span> Single Brand Detail</div>
+      <div class="nav-item" onclick="showPage('overview')"><span class="nav-icon">◈</span> Business Overview</div>
     </div>
     <div class="sidebar-footer">
       <div class="status-pill"><div class="dot on" id="sdot"></div><span id="slabel">Connected</span></div>
@@ -160,8 +161,133 @@ tr:hover td{background:var(--surface2)}
   <div class="main">
     <div id="error-area"></div>
 
-    <!-- OVERVIEW -->
-    <div class="page active" id="page-overview">
+    <!-- BRANDS DATA ANALYSIS — loads first -->
+    <div class="page active" id="page-brandcards">
+      <div class="page-header">
+        <div class="page-title">Brands Data Analysis</div>
+        <div class="page-sub">Full performance summary for every brand — SS27 season metrics, one card per brand</div>
+      </div>
+      <div style="margin-bottom:20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <input class="search-input" id="bc-search" placeholder="Filter brands..." oninput="filterBrandCards()" style="width:200px"/>
+        <select class="filter-sel" id="bc-sort" onchange="filterBrandCards()">
+          <option value="reforecast">Sort: Reforecast High to Low</option>
+          <option value="target">Sort: Target High to Low</option>
+          <option value="rfVsTarget">Sort: vs Target %</option>
+          <option value="rfVsSS26">Sort: vs SS26 Forecast %</option>
+          <option value="activeCount">Sort: Active Accounts</option>
+          <option value="name">Sort: Alphabetical</option>
+        </select>
+      </div>
+      <div id="brand-cards-container"></div>
+    </div>
+
+    <!-- BRAND PERFORMANCE TABLE -->
+    <div class="page" id="page-brands">
+      <div class="page-header">
+        <div class="page-title">Brand Performance Table</div>
+        <div class="page-sub">All brands side by side — click any column header to sort</div>
+      </div>
+      <div class="metric-table-card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th onclick="sortB('name')">Brand Name</th>
+              <th onclick="sortB('target')" class="td-right">SS27 Target</th>
+              <th onclick="sortB('reforecast')" class="td-right">SS27 Reforecast</th>
+              <th onclick="sortB('actual')" class="td-right">SS27 Actual</th>
+              <th onclick="sortB('rfVsTarget')">Reforecast vs Target</th>
+              <th onclick="sortB('rfVsSS26')">Reforecast vs SS26 Forecast</th>
+              <th onclick="sortB('reforecastGBP')" class="td-right">GBP Reforecast</th>
+              <th onclick="sortB('reforecastEUR')" class="td-right">EUR Reforecast</th>
+              <th onclick="sortB('activeCount')" class="td-right">Active Accounts</th>
+              <th onclick="sortB('conversionRate')" class="td-right">Account Activation Rate</th>
+            </tr></thead>
+            <tbody id="brands-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="chart-grid" style="margin-top:16px">
+        <div class="chart-card">
+          <div class="chart-title">GBP Reforecast by Brand</div>
+          <div class="chart-sub">Top brands by GBP reforecast</div>
+          <div style="position:relative;height:260px"><canvas id="ch-gbp-brand"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">EUR Reforecast by Brand</div>
+          <div class="chart-sub">Top brands by EUR reforecast</div>
+          <div style="position:relative;height:260px"><canvas id="ch-eur-brand"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CUSTOMER ANALYSIS -->
+    <div class="page" id="page-customers">
+      <div class="page-header">
+        <div class="page-title">Customer Analysis</div>
+        <div class="page-sub">Cross-brand view — top spenders, multi-brand buyers, and cross-sell opportunities</div>
+      </div>
+      <div class="kpi-grid" id="cust-kpis"></div>
+      <div class="metric-table-card">
+        <div class="toolbar">
+          <input class="search-input" id="cs-search" placeholder="Search customer name..." oninput="renderCust()" style="width:220px"/>
+          <select class="filter-sel" id="cs-country" onchange="renderCust()"><option value="">All Countries</option></select>
+          <select class="filter-sel" id="cs-brand" onchange="renderCust()"><option value="">All Brands</option></select>
+          <select class="filter-sel" id="cs-multi" onchange="renderCust()">
+            <option value="">All Customers</option>
+            <option value="multi">Multi-Brand Buyers Only</option>
+            <option value="single">Single Brand Only</option>
+          </select>
+          <select class="filter-sel" id="cs-status" onchange="renderCust()">
+            <option value="">All Statuses</option>
+            <option value="active">Active Only</option>
+            <option value="inactive">Inactive / At Risk</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Customer Name</th>
+              <th>Country</th>
+              <th class="td-right">SS27 Reforecast</th>
+              <th class="td-right">SS27 Actual</th>
+              <th class="td-right">SS26 Actuals</th>
+              <th>Reforecast vs SS26 Forecast</th>
+              <th>Brands Purchased</th>
+              <th class="td-right">Number of Brands</th>
+            </tr></thead>
+            <tbody id="cust-tbody"></tbody>
+          </table>
+        </div>
+        <div style="padding:10px 16px;font-size:11px;color:var(--text3);border-top:1px solid var(--border)" id="cust-count"></div>
+      </div>
+    </div>
+
+    <!-- SINGLE BRAND DETAIL -->
+    <div class="page" id="page-single">
+      <div class="page-header">
+        <div class="page-title">Single Brand Detail</div>
+        <div class="page-sub">Full account-level breakdown for one brand</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;flex-wrap:wrap">
+        <select class="brand-sel" id="sb-select" onchange="renderSingle()"><option value="">— Select a brand to view —</option></select>
+        <input class="search-input" id="sb-search" placeholder="Search accounts within brand..." oninput="filterSingleAccounts()" style="width:260px"/>
+        <select class="filter-sel" id="sb-status" onchange="filterSingleAccounts()">
+          <option value="">All Account Statuses</option>
+          <option value="active">Active Only</option>
+          <option value="inactive">Inactive Only</option>
+        </select>
+        <select class="filter-sel" id="sb-currency" onchange="filterSingleAccounts()">
+          <option value="">All Currencies</option>
+          <option value="GBP">GBP Only</option>
+          <option value="EUR">EUR Only</option>
+        </select>
+      </div>
+      <div id="sb-kpis"></div>
+      <div id="sb-content"></div>
+    </div>
+
+    <!-- BUSINESS OVERVIEW -->
+    <div class="page" id="page-overview">
       <div class="page-header">
         <div class="page-title">Business Overview</div>
         <div class="page-sub">All 28 brands combined — Spring/Summer 2027 season performance</div>
@@ -170,10 +296,8 @@ tr:hover td{background:var(--surface2)}
       <div class="bts-row">
         <div class="metric-table-card" style="margin-bottom:0">
           <div class="metric-table-header">
-            <div>
-              <div class="metric-table-title">Business Top Sheet</div>
-              <div class="metric-table-sub">Full SS27 performance summary — all currencies</div>
-            </div>
+            <div class="metric-table-title">Business Top Sheet</div>
+            <div class="metric-table-sub">Full SS27 performance summary — all currencies</div>
           </div>
           <div class="table-wrap"><table class="bts-table" id="bts-table"></table></div>
         </div>
@@ -198,113 +322,9 @@ tr:hover td{background:var(--surface2)}
       </div>
       <div class="chart-card full" style="margin-bottom:16px">
         <div class="chart-title">Reforecast vs Target — Performance Gap by Brand</div>
-        <div class="chart-sub">Percentage above or below SS27 target. Green = on or above target. Red = below target.</div>
+        <div class="chart-sub">Percentage above or below SS27 target. Green = on/above target. Red = below target.</div>
         <div id="ch-gap-wrap" style="position:relative"><canvas id="ch-gap"></canvas></div>
       </div>
-    </div>
-
-    <!-- BRAND TOP SHEETS -->
-    <div class="page" id="page-brandcards">
-      <div class="page-header">
-        <div class="page-title">Brand Top Sheets</div>
-        <div class="page-sub">Full performance summary for every brand — all the metrics your client tracks, one card per brand</div>
-      </div>
-      <div style="margin-bottom:20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-        <input class="search-input" id="bc-search" placeholder="Filter brands..." oninput="filterBrandCards()" style="width:200px"/>
-        <select class="filter-sel" id="bc-sort" onchange="filterBrandCards()">
-          <option value="reforecast">Sort: Reforecast High to Low</option>
-          <option value="target">Sort: Target High to Low</option>
-          <option value="rfVsTarget">Sort: vs Target %</option>
-          <option value="rfVsSS26">Sort: vs SS26 Forecast %</option>
-          <option value="name">Sort: Alphabetical</option>
-        </select>
-      </div>
-      <div id="brand-cards-container"></div>
-    </div>
-
-    <!-- BRAND TABLE -->
-    <div class="page" id="page-brands">
-      <div class="page-header">
-        <div class="page-title">Brand Performance Table</div>
-        <div class="page-sub">SS27 metrics for all brands — click any column header to sort</div>
-      </div>
-      <div class="metric-table-card">
-        <div class="table-wrap">
-          <table>
-            <thead><tr>
-              <th onclick="sortB('name')">Brand Name</th>
-              <th onclick="sortB('target')" class="td-right">SS27 Target</th>
-              <th onclick="sortB('reforecast')" class="td-right">SS27 Reforecast</th>
-              <th onclick="sortB('actual')" class="td-right">SS27 Actual</th>
-              <th onclick="sortB('rfVsTarget')">Reforecast vs Target</th>
-              <th onclick="sortB('rfVsSS26')">Reforecast vs SS26 Forecast</th>
-              <th onclick="sortB('reforecastGBP')" class="td-right">GBP Reforecast</th>
-              <th onclick="sortB('reforecastEUR')" class="td-right">EUR Reforecast</th>
-              <th onclick="sortB('activeCount')" class="td-right">Active Accounts</th>
-              <th onclick="sortB('totalCount')" class="td-right">Total Accounts</th>
-            </tr></thead>
-            <tbody id="brands-tbody"></tbody>
-          </table>
-        </div>
-      </div>
-      <div class="chart-grid" style="margin-top:16px">
-        <div class="chart-card">
-          <div class="chart-title">GBP Reforecast by Brand</div>
-          <div class="chart-sub">Top brands by GBP reforecast</div>
-          <div style="position:relative;height:260px"><canvas id="ch-gbp-brand"></canvas></div>
-        </div>
-        <div class="chart-card">
-          <div class="chart-title">EUR Reforecast by Brand</div>
-          <div class="chart-sub">Top brands by EUR reforecast</div>
-          <div style="position:relative;height:260px"><canvas id="ch-eur-brand"></canvas></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- CUSTOMERS -->
-    <div class="page" id="page-customers">
-      <div class="page-header">
-        <div class="page-title">Customer Analysis</div>
-        <div class="page-sub">Cross-brand view — identify top spenders, multi-brand buyers and cross-sell opportunities</div>
-      </div>
-      <div class="kpi-grid" id="cust-kpis"></div>
-      <div class="metric-table-card">
-        <div class="toolbar">
-          <input class="search-input" id="cs-search" placeholder="Search customer name..." oninput="renderCust()" style="width:220px"/>
-          <select class="filter-sel" id="cs-country" onchange="renderCust()"><option value="">All Countries</option></select>
-          <select class="filter-sel" id="cs-brand" onchange="renderCust()"><option value="">All Brands</option></select>
-          <select class="filter-sel" id="cs-multi" onchange="renderCust()">
-            <option value="">All Customers</option>
-            <option value="multi">Multi-Brand Buyers Only</option>
-            <option value="single">Single Brand Only</option>
-          </select>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr>
-              <th>Customer Name</th><th>Country</th>
-              <th class="td-right">SS27 Reforecast</th>
-              <th class="td-right">SS27 Actual</th>
-              <th class="td-right">SS26 Actuals</th>
-              <th>Reforecast vs SS26 Forecast</th>
-              <th>Brands Purchased</th>
-              <th class="td-right">Number of Brands</th>
-            </tr></thead>
-            <tbody id="cust-tbody"></tbody>
-          </table>
-        </div>
-        <div style="padding:10px 16px;font-size:11px;color:var(--text3);border-top:1px solid var(--border)" id="cust-count"></div>
-      </div>
-    </div>
-
-    <!-- SINGLE BRAND -->
-    <div class="page" id="page-single">
-      <div class="page-header">
-        <div class="page-title">Single Brand Detail</div>
-        <div class="page-sub">Full account-level breakdown for one brand</div>
-      </div>
-      <select class="brand-sel" id="sb-select" onchange="renderSingle()"><option value="">— Select a brand to view —</option></select>
-      <div id="sb-content"></div>
     </div>
   </div>
 </div>
@@ -341,35 +361,57 @@ const BRANDS=[
   {name:'Vilagallo',id:'1RKTAUDvoNEItpxc7AsEracSdmlWkh_mPCXgfTqwQvBY'}
 ];
 
-const ACTIVE=['active','new aw26','new ss26','reactivated'];
+const ACTIVE_STATUSES=['active','new aw26','new ss26','reactivated'];
+
+// All known column names — detection by name, handles hidden/extra columns safely
+const COL_NAMES={
+  ACCOUNT:'account name',
+  LOCATION:'location',
+  CITY:'major city',
+  COUNTRY:'country',
+  FX:'fx',
+  STATUS:'status',
+  SS26:'ss26 actuals',
+  SS26_2:'ss26 2 actuals',
+  TARGET:'ss27 targets',
+  REFORECAST:'ss27 reforecast',
+  ACTUAL:'ss27 actuals',
+  TARGET2:'ss27 2 targets',
+  REFORECAST2:'ss27 2 reforecast',
+  ACTUAL2:'ss27 2 actuals',
+  AW26:'aw26 actuals',
+  AW26_2:'aw26 2 actuals'
+};
+
 let allRows=[],brandSums=[],custData=[],charts={};
 let bSort={col:'reforecast',dir:-1};
+let currentBrandRows=[];
 
 Chart.defaults.color='#8b93a8';
 Chart.defaults.borderColor='rgba(255,255,255,0.06)';
 Chart.defaults.font.family='Inter';
 
-const fmt=n=>{if(n===null||n===undefined||isNaN(n)||n===0)return'—';if(Math.abs(n)>=1e6)return(n/1e6).toFixed(2)+'M';if(Math.abs(n)>=1000)return(n/1000).toFixed(1)+'K';return Math.round(n).toLocaleString()};
-const fmtZ=n=>{if(n===null||n===undefined||isNaN(n))return'—';if(Math.abs(n)>=1e6)return(n/1e6).toFixed(2)+'M';if(Math.abs(n)>=1000)return(n/1000).toFixed(1)+'K';return Math.round(n).toLocaleString()};
-const fmtFull=n=>{if(!n&&n!==0)return'—';return Math.round(n).toLocaleString()};
-const fmtPct=v=>{if(v===null||v===undefined||isNaN(v))return'—';return(v>=0?'+':'')+parseFloat(v).toFixed(1)+'%'};
-const fmtDiff=v=>{if(v===null||isNaN(v))return'—';return(v>=0?'+':'')+fmtZ(v)};
-const pct=(v,t)=>{if(!t||isNaN(t)||isNaN(v))return null;return(v-t)/Math.abs(t)*100};
-const sum=(arr,key)=>arr.reduce((a,r)=>a+(r[key]||0),0);
-const dc=v=>v===null||isNaN(v)?'neu':v>=0?'up':'dn';
-
-const badgePct=(v,t)=>{
-  const p=pct(v,t);
-  if(p===null)return '<span class="badge badge-amber">No data</span>';
-  return '<span class="badge '+(p>=0?'badge-green':'badge-red')+'">'+(p>=0?'▲':'▼')+' '+Math.abs(p).toFixed(1)+'%</span>';
+const fmtZ=function(n){
+  if(n===null||n===undefined||isNaN(n))return'—';
+  if(n===0)return'0';
+  if(Math.abs(n)>=1e6)return(n/1e6).toFixed(2)+'M';
+  if(Math.abs(n)>=1000)return(n/1000).toFixed(1)+'K';
+  return Math.round(n).toLocaleString();
+};
+const fmtFull=function(n){if(n===null||n===undefined||isNaN(n))return'—';return Math.round(n).toLocaleString();};
+const fmtPct=function(v){if(v===null||v===undefined||isNaN(v))return'—';return(v>=0?'+':'')+parseFloat(v).toFixed(1)+'%';};
+const fmtDiff=function(v){if(v===null||isNaN(v))return'—';return(v>=0?'+':'')+fmtZ(v);};
+const pct=function(v,t){if(!t||isNaN(t)||isNaN(v))return null;return(v-t)/Math.abs(t)*100;};
+const sum=function(arr,key){return arr.reduce(function(a,r){return a+(r[key]||0);},0);};
+const dc=function(v){return(v===null||isNaN(v))?'neu':v>=0?'up':'dn';};
+const badgePct=function(v,t){
+  var p=pct(v,t);
+  if(p===null)return'<span class="badge badge-amber">No data</span>';
+  return'<span class="badge '+(p>=0?'badge-green':'badge-red')+'">'+(p>=0?'▲':'▼')+' '+Math.abs(p).toFixed(1)+'%</span>';
 };
 
-function csvURL(id){
-  return 'https://docs.google.com/spreadsheets/d/'+id+'/gviz/tq?tqx=out:csv&sheet=2025%2B';
-}
-
 function parseCSV(text){
-  const lines=text.split(/\r?\n/);
+  var lines=text.split(/\r?\n/);
   return lines.map(function(line){
     var cells=[],cur='',inQ=false;
     for(var i=0;i<line.length;i++){
@@ -383,8 +425,22 @@ function parseCSV(text){
   }).filter(function(r){return r.length>1||r[0];});
 }
 
+// Detect column indices BY NAME — safe against hidden/extra columns
+function buildColMap(headerRow){
+  var map={};
+  var h=headerRow.map(function(x){return(x||'').replace(/"/g,'').toLowerCase().trim();});
+  Object.keys(COL_NAMES).forEach(function(key){
+    var target=COL_NAMES[key];
+    var idx=h.indexOf(target);
+    // fallback: partial match
+    if(idx<0){idx=h.findIndex(function(x){return x.includes(target);});}
+    map[key]=idx;
+  });
+  return map;
+}
+
 function toNum(row,idx){
-  if(idx<0||idx>=row.length)return 0;
+  if(idx===undefined||idx<0||idx>=row.length)return 0;
   var raw=(row[idx]||'').toString().replace(/[£€$,"\s]/g,'').trim();
   if(!raw||raw==='-'||raw.toLowerCase()==='n/a'||raw.toLowerCase()==='tbc')return 0;
   var v=parseFloat(raw);
@@ -393,45 +449,64 @@ function toNum(row,idx){
 
 function parseRows(rows,brandName){
   if(!rows||rows.length<2)return[];
+  // Find header row: must have 'account name' in it AND at least one SS27 column
   var hr=-1;
-  for(var i=0;i<Math.min(15,rows.length);i++){
-    var cell=(rows[i][0]||'').replace(/"/g,'').toLowerCase().trim();
-    if(cell==='account name'||cell==='account'){hr=i;break;}
+  for(var i=0;i<Math.min(20,rows.length);i++){
+    var h=rows[i].map(function(x){return(x||'').replace(/"/g,'').toLowerCase().trim();});
+    var hasAccount=h.some(function(x){return x==='account name'||x==='account';});
+    var hasSS27=h.some(function(x){return x.includes('ss27')||x==='fx'||x.includes('target');});
+    if(hasAccount&&hasSS27){hr=i;break;}
   }
-  if(hr<0)hr=4;
-  // Fixed column positions across all 28 brand sheets:
-  // 0=Account Name,3=Country,2=Major City,7=Status,6=FX
-  // 17=SS26 Actuals,25=SS27 Targets,26=SS27 Reforecast,27=SS27 Actuals
-  // 29=SS27 2 Targets,30=SS27 2 Reforecast,31=SS27 2 Actuals
+  if(hr<0)return[];
+
+  var colMap=buildColMap(rows[hr]);
+  if(colMap.ACCOUNT<0)return[];
+
   var result=[];
   for(var i=hr+1;i<rows.length;i++){
     var row=rows[i];
-    var acc=(row[0]||'').replace(/"/g,'').trim();
+    var acc=(row[colMap.ACCOUNT]||'').replace(/"/g,'').trim();
     if(!acc||/^(total|subtotal|grand|summary)/i.test(acc))continue;
-    var status=(row[7]||'').replace(/"/g,'').toLowerCase().trim();
-    var isActive=ACTIVE.some(function(s){return status.includes(s);});
-    var fxRaw=(row[6]||'').replace(/"/g,'').trim().toUpperCase();
+
+    var status=colMap.STATUS>=0?(row[colMap.STATUS]||'').replace(/"/g,'').toLowerCase().trim():'';
+    var isActive=ACTIVE_STATUSES.some(function(s){return status.includes(s);});
+
+    var fxRaw=colMap.FX>=0?(row[colMap.FX]||'').replace(/"/g,'').trim().toUpperCase():'';
     var currency=fxRaw==='EUR'?'EUR':'GBP';
+
+    // Combine SS27 + SS27 2 (some brands split season into two order windows)
+    var target=toNum(row,colMap.TARGET)+toNum(row,colMap.TARGET2);
+    var reforecast=toNum(row,colMap.REFORECAST)+toNum(row,colMap.REFORECAST2);
+    var actual=toNum(row,colMap.ACTUAL)+toNum(row,colMap.ACTUAL2);
+    // SS26: combine SS26 Actuals + SS26 2 Actuals for full prior year
+    var ss26=toNum(row,colMap.SS26)+toNum(row,colMap.SS26_2);
+    // AW26 for seasonal context
+    var aw26=toNum(row,colMap.AW26)+toNum(row,colMap.AW26_2);
+
     result.push({
       brand:brandName,
       account:acc,
-      country:(row[3]||'').replace(/"/g,'').trim(),
-      city:(row[2]||'').replace(/"/g,'').trim(),
-      status:status,isActive:isActive,currency:currency,
-      ss26:toNum(row,17),
-      target:toNum(row,25)+toNum(row,29),
-      reforecast:toNum(row,26)+toNum(row,30),
-      actual:toNum(row,27)+toNum(row,31)
+      country:colMap.COUNTRY>=0?(row[colMap.COUNTRY]||'').replace(/"/g,'').trim():'',
+      city:colMap.CITY>=0?(row[colMap.CITY]||'').replace(/"/g,'').trim():'',
+      status:status,
+      isActive:isActive,
+      currency:currency,
+      ss26:ss26,
+      aw26:aw26,
+      target:target,
+      reforecast:reforecast,
+      actual:actual
     });
   }
   return result;
 }
 
 async function fetchBrand(brand){
-  var r=await fetch(csvURL(brand.id));
+  var url='https://docs.google.com/spreadsheets/d/'+brand.id+'/gviz/tq?tqx=out:csv&sheet=2025%2B';
+  var r=await fetch(url);
   if(!r.ok)throw new Error('HTTP '+r.status);
   var text=await r.text();
-  if(text.includes('Sign in')||text.includes('accounts.google.com'))throw new Error('Sheet not public');
+  if(text.includes('Sign in')||text.includes('accounts.google.com'))throw new Error('Sheet not shared publicly');
   return parseCSV(text);
 }
 
@@ -448,17 +523,23 @@ async function loadAll(){
       allRows=allRows.concat(parsed);
       var gbp=parsed.filter(function(r){return r.currency==='GBP';});
       var eur=parsed.filter(function(r){return r.currency==='EUR';});
+      var activeRows=parsed.filter(function(r){return r.isActive;});
+      var gbpActive=parsed.filter(function(r){return r.isActive&&r.currency==='GBP';});
       var bs={
         name:brand.name,rows:parsed,
         target:sum(parsed,'target'),reforecast:sum(parsed,'reforecast'),
         actual:sum(parsed,'actual'),ss26:sum(parsed,'ss26'),
+        aw26:sum(parsed,'aw26'),
         targetGBP:sum(gbp,'target'),reforecastGBP:sum(gbp,'reforecast'),actualGBP:sum(gbp,'actual'),
         targetEUR:sum(eur,'target'),reforecastEUR:sum(eur,'reforecast'),actualEUR:sum(eur,'actual'),
-        activeCount:parsed.filter(function(r){return r.isActive;}).length,
-        totalCount:parsed.length
+        activeCount:activeRows.length,
+        totalCount:parsed.length,
+        gbpActiveCount:gbpActive.length
       };
       bs.rfVsTarget=pct(bs.reforecast,bs.target);
       bs.rfVsSS26=pct(bs.reforecast,bs.ss26);
+      bs.aov=bs.gbpActiveCount>0?bs.reforecastGBP/bs.gbpActiveCount:0;
+      bs.conversionRate=bs.totalCount>0?bs.activeCount/bs.totalCount*100:0;
       brandSums.push(bs);
     }catch(e){errors.push(brand.name+': '+e.message);}
     loaded++;
@@ -470,11 +551,11 @@ async function loadAll(){
   document.getElementById('loading-overlay').style.display='none';
   document.getElementById('app').style.display='block';
   document.getElementById('last-upd').textContent='Updated: '+new Date().toLocaleTimeString();
-  document.getElementById('slabel').textContent=BRANDS.length-errors.length+' / '+BRANDS.length+' brands';
+  document.getElementById('slabel').textContent=(BRANDS.length-errors.length)+' / '+BRANDS.length+' brands';
 
   if(errors.length){
     document.getElementById('error-area').innerHTML=
-      '<div class="err-banner"><strong>'+errors.length+' sheet(s) failed:</strong> '+errors.join(' · ')+'</div>';
+      '<div class="err-banner"><strong>'+errors.length+' sheet(s) failed to load:</strong> '+errors.join(' · ')+'<br><small>Ensure each sheet is shared as "Anyone with the link can view".</small></div>';
   }
   populateSelects();
   renderAll();
@@ -495,10 +576,13 @@ function buildCustData(){
     var r=allRows[i];
     if(!r.account)continue;
     var key=r.account.toLowerCase().trim();
-    if(!map[key])map[key]={account:r.account,country:r.country||'',brands:new Set(),reforecast:0,actual:0,ss26:0,target:0};
+    if(!map[key])map[key]={account:r.account,country:r.country||'',brands:new Set(),reforecast:0,actual:0,ss26:0,target:0,isActive:false};
     map[key].brands.add(r.brand);
-    map[key].reforecast+=r.reforecast;map[key].actual+=r.actual;
-    map[key].ss26+=r.ss26;map[key].target+=r.target;
+    map[key].reforecast+=r.reforecast;
+    map[key].actual+=r.actual;
+    map[key].ss26+=r.ss26;
+    map[key].target+=r.target;
+    if(r.isActive)map[key].isActive=true;
     if(r.country)map[key].country=r.country;
   }
   custData=Object.values(map).sort(function(a,b){return b.reforecast-a.reforecast;});
@@ -507,35 +591,332 @@ function buildCustData(){
 function populateSelects(){
   var bAlpha=[...brandSums].sort(function(a,b){return a.name.localeCompare(b.name);});
   document.getElementById('sb-select').innerHTML='<option value="">— Select a brand to view —</option>'+
-    bAlpha.map(function(b){return '<option value="'+b.name+'">'+b.name+'</option>';}).join('');
+    bAlpha.map(function(b){return'<option value="'+b.name+'">'+b.name+'</option>';}).join('');
   var countries=[...new Set(custData.map(function(c){return c.country;}).filter(Boolean))].sort();
   document.getElementById('cs-country').innerHTML='<option value="">All Countries</option>'+
-    countries.map(function(c){return '<option>'+c+'</option>';}).join('');
+    countries.map(function(c){return'<option>'+c+'</option>';}).join('');
   document.getElementById('cs-brand').innerHTML='<option value="">All Brands</option>'+
-    bAlpha.map(function(b){return '<option>'+b.name+'</option>';}).join('');
+    bAlpha.map(function(b){return'<option>'+b.name+'</option>';}).join('');
 }
 
 function showPage(id){
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
   document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
   document.getElementById('page-'+id).classList.add('active');
-  var labels={overview:'Business Overview',brandcards:'Brand Top',brands:'Brand Performance',customers:'Customer',single:'Single'};
+  var labels={brandcards:'Brands Data',brands:'Brand Performance',customers:'Customer',single:'Single',overview:'Business Overview'};
   document.querySelectorAll('.nav-item').forEach(function(n){
     if(n.textContent.trim().includes(labels[id]))n.classList.add('active');
   });
   if(id==='brands')renderBrandCharts();
   if(id==='brandcards')filterBrandCards();
+  if(id==='overview')renderOverview();
 }
 
-function renderAll(){renderOverview();renderBrandsTable();renderCust();}
+function renderAll(){
+  filterBrandCards();
+  renderBrandsTable();
+  renderCust();
+}
 
 function mkChart(id,cfg){
-  var el=document.getElementById(id);
-  if(!el)return;
+  var el=document.getElementById(id);if(!el)return;
   if(charts[id])charts[id].destroy();
   charts[id]=new Chart(el,cfg);
 }
 
+// ─── BRANDS DATA ANALYSIS ────────────────────────────────────────────────────
+function filterBrandCards(){
+  var search=(document.getElementById('bc-search').value||'').toLowerCase();
+  var sortKey=document.getElementById('bc-sort').value;
+  var filtered=[...brandSums].filter(function(b){return b.name.toLowerCase().includes(search);});
+  if(sortKey==='name')filtered.sort(function(a,b){return a.name.localeCompare(b.name);});
+  else filtered.sort(function(a,b){
+    var av=a[sortKey]!==null&&a[sortKey]!==undefined?a[sortKey]:-Infinity;
+    var bv=b[sortKey]!==null&&b[sortKey]!==undefined?b[sortKey]:-Infinity;
+    return bv-av;
+  });
+  renderBrandCards(filtered);
+}
+
+function renderBrandCards(brands){
+  var container=document.getElementById('brand-cards-container');
+  if(!container)return;
+  var html='';
+  for(var bi=0;bi<brands.length;bi++){
+    var b=brands[bi];
+    var rvtVal=b.reforecast-b.target;
+    var rvsVal=b.reforecast-b.ss26;
+    var rvtPct=b.rfVsTarget;
+    var rvsPct=b.rfVsSS26;
+    var gbpActiveCount=b.rows.filter(function(r){return r.isActive&&r.currency==='GBP';}).length;
+    var eurActiveCount=b.rows.filter(function(r){return r.isActive&&r.currency==='EUR';}).length;
+    var gbpTotalCount=b.rows.filter(function(r){return r.currency==='GBP';}).length;
+    var eurTotalCount=b.rows.filter(function(r){return r.currency==='EUR';}).length;
+    var attainPct=b.target>0?Math.min(100,Math.max(0,b.reforecast/b.target*100)):0;
+    var barColor=rvtPct===null||rvtPct>=0?'linear-gradient(90deg,var(--green),var(--blue))':'linear-gradient(90deg,var(--red),var(--amber))';
+    var perfColor=rvtPct===null?'var(--text3)':rvtPct>=0?'var(--green)':'var(--red)';
+    var topAccs=b.rows.filter(function(r){return r.isActive;}).sort(function(a,c){return c.reforecast-a.reforecast;}).slice(0,5);
+
+    var pBadge=function(v){
+      if(v===null||isNaN(v))return'<span class="badge badge-amber">No target data</span>';
+      return'<span class="badge '+(v>=0?'badge-green':'badge-red')+'">'+(v>=0?'▲':'▼')+' '+Math.abs(v).toFixed(1)+'%</span>';
+    };
+
+    var accsHtml='';
+    for(var ai=0;ai<topAccs.length;ai++){
+      var a=topAccs[ai];
+      accsHtml+='<div class="bc-acc-row">'+
+        '<span style="font-weight:500;color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+a.account+'</span>'+
+        '<span style="color:var(--text3);min-width:80px;text-align:center">'+(a.country||'—')+'</span>'+
+        '<span class="badge '+(a.currency==='GBP'?'badge-green':'badge-blue')+'" style="font-size:10px">'+a.currency+'</span>'+
+        '<span style="font-weight:600;min-width:60px;text-align:right">'+fmtZ(a.reforecast)+'</span>'+
+        '<span style="color:var(--text3);font-size:11px;min-width:90px;text-align:right">'+(a.target>0?'Tgt: '+fmtZ(a.target):'')+'</span>'+
+        '</div>';
+    }
+
+    html+='<div class="brand-card">'+
+      '<div class="bc-header">'+
+        '<div>'+
+          '<div class="bc-name">'+b.name+'</div>'+
+          '<div style="font-size:11px;color:var(--text3);margin-top:3px">Spring / Summer 2027 &nbsp;·&nbsp; '+b.totalCount+' accounts total</div>'+
+        '</div>'+
+        '<div class="bc-badges">'+
+          pBadge(rvtPct)+
+          '<span class="badge badge-blue">'+b.activeCount+' active</span>'+
+          (b.reforecastGBP>0?'<span class="badge badge-green">GBP</span>':'')+
+          (b.reforecastEUR>0?'<span class="badge badge-blue">EUR</span>':'')+
+        '</div>'+
+      '</div>'+
+
+      '<div class="bc-body">'+
+        // All Currencies
+        '<div class="bc-section">'+
+          '<div class="bc-section-title">All Currencies</div>'+
+          '<div class="bc-row"><span class="bc-label">SS27 Target</span><span class="bc-value">'+fmtZ(b.target)+'</span></div>'+
+          '<div class="bc-row"><span class="bc-label">SS27 Reforecast</span><span class="bc-value">'+fmtZ(b.reforecast)+'</span></div>'+
+          '<div class="bc-row"><span class="bc-label">SS27 Actual</span><span class="bc-value">'+fmtZ(b.actual)+'</span></div>'+
+          '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">'+
+            '<div class="bc-row"><span class="bc-label">Reforecast vs Target (value)</span><span class="bc-value '+dc(rvtVal)+'">'+fmtDiff(rvtVal)+'</span></div>'+
+            '<div class="bc-row"><span class="bc-label">Reforecast vs Target (%)</span><span class="bc-value '+dc(rvtPct)+'">'+fmtPct(rvtPct)+'</span></div>'+
+            '<div class="bc-row"><span class="bc-label">Reforecast vs SS26 Forecast (value)</span><span class="bc-value '+dc(rvsVal)+'">'+fmtDiff(rvsVal)+'</span></div>'+
+            '<div class="bc-row"><span class="bc-label">Reforecast vs SS26 Forecast (%)</span><span class="bc-value '+dc(rvsPct)+'">'+fmtPct(rvsPct)+'</span></div>'+
+          '</div>'+
+        '</div>'+
+        // GBP
+        '<div class="bc-section">'+
+          '<div class="bc-section-title" style="color:var(--green-tx)">GBP Accounts</div>'+
+          '<div class="bc-row"><span class="bc-label">SS27 Target</span><span class="bc-value">'+fmtZ(b.targetGBP)+'</span></div>'+
+          '<div class="bc-row"><span class="bc-label">SS27 Reforecast</span><span class="bc-value">'+fmtZ(b.reforecastGBP)+'</span></div>'+
+          '<div class="bc-row"><span class="bc-label">SS27 Actual</span><span class="bc-value">'+fmtZ(b.actualGBP)+'</span></div>'+
+          '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">'+
+            '<div class="bc-row"><span class="bc-label">Average Order Value (GBP)</span><span class="bc-value">'+fmtZ(b.aov)+'</span></div>'+
+            '<div class="bc-row"><span class="bc-label">Active GBP Accounts</span><span class="bc-value">'+gbpActiveCount+'</span></div>'+
+            '<div class="bc-row"><span class="bc-label">Total GBP Accounts</span><span class="bc-value">'+gbpTotalCount+'</span></div>'+
+          '</div>'+
+        '</div>'+
+        // EUR
+        '<div class="bc-section">'+
+          '<div class="bc-section-title" style="color:var(--blue-tx)">EUR Accounts</div>'+
+          '<div class="bc-row"><span class="bc-label">SS27 Target</span><span class="bc-value">'+fmtZ(b.targetEUR)+'</span></div>'+
+          '<div class="bc-row"><span class="bc-label">SS27 Reforecast</span><span class="bc-value">'+fmtZ(b.reforecastEUR)+'</span></div>'+
+          '<div class="bc-row"><span class="bc-label">SS27 Actual</span><span class="bc-value">'+fmtZ(b.actualEUR)+'</span></div>'+
+          '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">'+
+            '<div class="bc-row"><span class="bc-label">Active EUR Accounts</span><span class="bc-value">'+eurActiveCount+'</span></div>'+
+            '<div class="bc-row"><span class="bc-label">Total EUR Accounts</span><span class="bc-value">'+eurTotalCount+'</span></div>'+
+            '<div class="bc-row"><span class="bc-label">Total Active Accounts</span><span class="bc-value">'+b.activeCount+'</span></div>'+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+
+      (topAccs.length>0?
+        '<div class="bc-accs">'+
+          '<div class="bc-acc-title">Top Active Accounts by Reforecast Value</div>'+
+          accsHtml+
+        '</div>':'')+
+
+      '<div class="bc-footer">'+
+        '<div style="font-size:11px;color:var(--text3);white-space:nowrap;min-width:120px">Target attainment</div>'+
+        '<div style="flex:1;height:6px;background:var(--surface3);border-radius:99px;overflow:hidden">'+
+          '<div style="height:100%;border-radius:99px;background:'+barColor+';width:'+attainPct.toFixed(1)+'%"></div>'+
+        '</div>'+
+        '<div style="font-size:13px;font-weight:700;color:'+perfColor+';white-space:nowrap;min-width:50px;text-align:right">'+
+          (b.target>0?(b.reforecast/b.target*100).toFixed(1)+'%':'No target')+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  }
+  container.innerHTML=html;
+}
+
+// ─── BRAND PERFORMANCE TABLE ─────────────────────────────────────────────────
+function renderBrandsTable(){
+  var s=bSort;
+  var sorted=[...brandSums].sort(function(a,b){
+    var av=a[s.col]!==null&&a[s.col]!==undefined?a[s.col]:-Infinity;
+    var bv=b[s.col]!==null&&b[s.col]!==undefined?b[s.col]:-Infinity;
+    return typeof av==='string'?av.localeCompare(bv)*s.dir:(av-bv)*s.dir;
+  });
+  var maxRf=Math.max.apply(null,sorted.map(function(b){return b.reforecast||0;}));
+  if(!maxRf)maxRf=1;
+  document.getElementById('brands-tbody').innerHTML=sorted.map(function(b){
+    var fillPct=Math.round((b.reforecast||0)/maxRf*100);
+    var isRed=b.rfVsTarget!==null&&b.rfVsTarget<0;
+    return'<tr>'+
+      '<td class="td-bold">'+b.name+'</td>'+
+      '<td class="td-right">'+fmtZ(b.target)+'</td>'+
+      '<td><div class="progress-wrap">'+
+        '<div class="progress-bar"><div class="progress-fill'+(isRed?' red':'')+'" style="width:'+fillPct+'%"></div></div>'+
+        '<span style="font-weight:600;min-width:50px;text-align:right;padding-left:8px">'+fmtZ(b.reforecast)+'</span>'+
+      '</div></td>'+
+      '<td class="td-right">'+fmtZ(b.actual)+'</td>'+
+      '<td>'+badgePct(b.reforecast,b.target)+'</td>'+
+      '<td>'+badgePct(b.reforecast,b.ss26)+'</td>'+
+      '<td class="td-right">'+fmtZ(b.reforecastGBP)+'</td>'+
+      '<td class="td-right">'+fmtZ(b.reforecastEUR)+'</td>'+
+      '<td class="td-right"><span class="badge badge-blue">'+b.activeCount+'</span></td>'+
+      '<td class="td-right">'+b.conversionRate.toFixed(0)+'%</td>'+
+    '</tr>';
+  }).join('');
+}
+
+function sortB(col){if(bSort.col===col)bSort.dir*=-1;else{bSort.col=col;bSort.dir=-1;}renderBrandsTable();}
+
+function renderBrandCharts(){
+  var topGBP=[...brandSums].sort(function(a,b){return b.reforecastGBP-a.reforecastGBP;}).slice(0,10);
+  var topEUR=[...brandSums].sort(function(a,b){return b.reforecastEUR-a.reforecastEUR;}).slice(0,10);
+  mkChart('ch-gbp-brand',{type:'bar',data:{labels:topGBP.map(function(b){return b.name;}),datasets:[{label:'GBP Reforecast',data:topGBP.map(function(b){return b.reforecastGBP;}),backgroundColor:'rgba(0,212,161,0.8)',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:function(v){return fmtZ(v);}},grid:{color:'rgba(255,255,255,0.05)'}},x:{grid:{display:false},ticks:{font:{size:10},maxRotation:35,color:'#8b93a8'}}}}});
+  mkChart('ch-eur-brand',{type:'bar',data:{labels:topEUR.map(function(b){return b.name;}),datasets:[{label:'EUR Reforecast',data:topEUR.map(function(b){return b.reforecastEUR;}),backgroundColor:'rgba(77,159,255,0.8)',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:function(v){return fmtZ(v);}},grid:{color:'rgba(255,255,255,0.05)'}},x:{grid:{display:false},ticks:{font:{size:10},maxRotation:35,color:'#8b93a8'}}}}});
+}
+
+// ─── CUSTOMER ANALYSIS ───────────────────────────────────────────────────────
+function renderCust(){
+  var search=document.getElementById('cs-search').value.toLowerCase();
+  var country=document.getElementById('cs-country').value;
+  var brand=document.getElementById('cs-brand').value;
+  var multi=document.getElementById('cs-multi').value;
+  var statusF=document.getElementById('cs-status').value;
+
+  var filtered=custData.filter(function(c){
+    if(search&&!c.account.toLowerCase().includes(search))return false;
+    if(country&&c.country!==country)return false;
+    if(brand&&!c.brands.has(brand))return false;
+    if(multi==='multi'&&c.brands.size<2)return false;
+    if(multi==='single'&&c.brands.size!==1)return false;
+    if(statusF==='active'&&!c.isActive)return false;
+    if(statusF==='inactive'&&c.isActive)return false;
+    return true;
+  });
+
+  var multiBuyers=filtered.filter(function(c){return c.brands.size>1;}).length;
+  var topSpend=filtered[0]?filtered[0].reforecast:0;
+  var totalRf=filtered.reduce(function(a,c){return a+c.reforecast;},0);
+
+  document.getElementById('cust-kpis').innerHTML=
+    '<div class="kpi green"><div class="kpi-label">Customers Shown</div><div class="kpi-value">'+filtered.length.toLocaleString()+'</div><div class="kpi-sub neu">matching current filters</div></div>'+
+    '<div class="kpi purple"><div class="kpi-label">Multi-Brand Buyers</div><div class="kpi-value">'+multiBuyers.toLocaleString()+'</div><div class="kpi-sub neu">buying 2 or more brands</div></div>'+
+    '<div class="kpi amber"><div class="kpi-label">Top Customer Reforecast</div><div class="kpi-value">'+fmtZ(topSpend)+'</div><div class="kpi-sub neu">'+(filtered[0]?filtered[0].account:'—')+'</div></div>'+
+    '<div class="kpi blue"><div class="kpi-label">Total Reforecast (Filtered)</div><div class="kpi-value">'+fmtZ(totalRf)+'</div><div class="kpi-sub neu">sum of filtered customers</div></div>';
+
+  document.getElementById('cust-count').textContent='Showing '+Math.min(filtered.length,300).toLocaleString()+' of '+filtered.length.toLocaleString()+' customers';
+  document.getElementById('cust-tbody').innerHTML=filtered.slice(0,300).map(function(c){
+    var rvs=pct(c.reforecast,c.ss26);
+    var bc=c.brands.size;
+    var rvsBadge=rvs!==null?'<span class="badge '+(rvs>=0?'badge-green':'badge-red')+'">'+(rvs>=0?'▲':'▼')+' '+Math.abs(rvs).toFixed(1)+'%</span>':'<span class="badge badge-amber">—</span>';
+    return'<tr>'+
+      '<td class="td-bold">'+c.account+'</td>'+
+      '<td>'+(c.country||'—')+'</td>'+
+      '<td class="td-right td-bold">'+fmtZ(c.reforecast)+'</td>'+
+      '<td class="td-right">'+fmtZ(c.actual)+'</td>'+
+      '<td class="td-right">'+fmtZ(c.ss26)+'</td>'+
+      '<td>'+rvsBadge+'</td>'+
+      '<td style="font-size:12px;color:var(--text2);max-width:240px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+[...c.brands].join(', ')+'</td>'+
+      '<td class="td-right"><span class="badge '+(bc>2?'badge-green':bc>1?'badge-purple':'badge-amber')+'">'+bc+'</span></td>'+
+    '</tr>';
+  }).join('');
+}
+
+// ─── SINGLE BRAND DETAIL ────────────────────────────────────────────────────
+function renderSingle(){
+  var name=document.getElementById('sb-select').value;
+  var kpiEl=document.getElementById('sb-kpis');
+  var el=document.getElementById('sb-content');
+  if(!name){
+    kpiEl.innerHTML='';
+    el.innerHTML='<div style="color:var(--text3);font-size:14px;padding:40px 0;text-align:center">Select a brand from the dropdown above.</div>';
+    return;
+  }
+  var b=brandSums.find(function(x){return x.name===name;});
+  if(!b)return;
+  currentBrandRows=b.rows;
+
+  kpiEl.innerHTML=
+    '<div class="kpi-grid">'+
+      '<div class="kpi '+(b.rfVsTarget>=0?'green':'red')+'"><div class="kpi-label">SS27 Target</div><div class="kpi-value">'+fmtZ(b.target)+'</div></div>'+
+      '<div class="kpi '+(b.rfVsTarget>=0?'green':'red')+'"><div class="kpi-label">SS27 Reforecast</div><div class="kpi-value">'+fmtZ(b.reforecast)+'</div><div class="kpi-sub '+dc(b.rfVsTarget)+'">'+fmtPct(b.rfVsTarget)+' vs target</div></div>'+
+      '<div class="kpi blue"><div class="kpi-label">SS27 Actual</div><div class="kpi-value">'+fmtZ(b.actual)+'</div></div>'+
+      '<div class="kpi '+(b.rfVsSS26>=0?'green':'amber')+'"><div class="kpi-label">Reforecast vs SS26 Forecast</div><div class="kpi-value">'+fmtPct(b.rfVsSS26)+'</div><div class="kpi-sub '+dc(b.rfVsSS26)+'">year on year</div></div>'+
+      '<div class="kpi green"><div class="kpi-label">GBP Reforecast</div><div class="kpi-value">'+fmtZ(b.reforecastGBP)+'</div><div class="kpi-sub neu">Target: '+fmtZ(b.targetGBP)+'</div></div>'+
+      '<div class="kpi blue"><div class="kpi-label">EUR Reforecast</div><div class="kpi-value">'+fmtZ(b.reforecastEUR)+'</div><div class="kpi-sub neu">Target: '+fmtZ(b.targetEUR)+'</div></div>'+
+      '<div class="kpi purple"><div class="kpi-label">Active Accounts</div><div class="kpi-value">'+b.activeCount+'</div><div class="kpi-sub neu">of '+b.totalCount+' total accounts</div></div>'+
+      '<div class="kpi amber"><div class="kpi-label">Average Order Value (GBP)</div><div class="kpi-value">'+fmtZ(b.aov)+'</div><div class="kpi-sub neu">GBP accounts only</div></div>'+
+    '</div>';
+
+  filterSingleAccounts();
+}
+
+function filterSingleAccounts(){
+  var el=document.getElementById('sb-content');
+  if(!currentBrandRows.length)return;
+  var search=(document.getElementById('sb-search').value||'').toLowerCase();
+  var statusF=document.getElementById('sb-status').value;
+  var currencyF=document.getElementById('sb-currency').value;
+  var name=document.getElementById('sb-select').value;
+  var b=brandSums.find(function(x){return x.name===name;});
+  if(!b)return;
+
+  var filtered=currentBrandRows.filter(function(r){
+    if(search&&!r.account.toLowerCase().includes(search))return false;
+    if(statusF==='active'&&!r.isActive)return false;
+    if(statusF==='inactive'&&r.isActive)return false;
+    if(currencyF&&r.currency!==currencyF)return false;
+    return true;
+  });
+
+  el.innerHTML=
+    '<div class="metric-table-card">'+
+      '<div class="metric-table-header">'+
+        '<div class="metric-table-title">Accounts — '+b.name+'</div>'+
+        '<div class="metric-table-sub">'+filtered.length+' accounts shown of '+b.totalCount+' total · '+b.activeCount+' active</div>'+
+      '</div>'+
+      '<div class="table-wrap"><table>'+
+        '<thead><tr>'+
+          '<th>Account Name</th><th>Country</th><th>Status</th><th>Currency</th>'+
+          '<th class="td-right">SS26 Actuals</th>'+
+          '<th class="td-right">SS27 Target</th>'+
+          '<th class="td-right">SS27 Reforecast</th>'+
+          '<th class="td-right">SS27 Actual</th>'+
+          '<th>Reforecast vs Target</th>'+
+          '<th>Reforecast vs SS26</th>'+
+        '</tr></thead>'+
+        '<tbody>'+filtered.map(function(r){
+          return'<tr>'+
+            '<td class="td-bold">'+r.account+'</td>'+
+            '<td>'+(r.country||'—')+'</td>'+
+            '<td><span class="badge '+(r.isActive?'badge-green':'badge-amber')+'" style="font-size:10px">'+r.status+'</span></td>'+
+            '<td><span class="badge '+(r.currency==='GBP'?'badge-green':'badge-blue')+'" style="font-size:10px">'+r.currency+'</span></td>'+
+            '<td class="td-right">'+fmtZ(r.ss26)+'</td>'+
+            '<td class="td-right">'+fmtZ(r.target)+'</td>'+
+            '<td class="td-right td-bold">'+fmtZ(r.reforecast)+'</td>'+
+            '<td class="td-right">'+fmtZ(r.actual)+'</td>'+
+            '<td>'+badgePct(r.reforecast,r.target)+'</td>'+
+            '<td>'+badgePct(r.reforecast,r.ss26)+'</td>'+
+          '</tr>';
+        }).join('')+
+        '</tbody></table></div>'+
+    '</div>';
+}
+
+// ─── BUSINESS OVERVIEW ───────────────────────────────────────────────────────
 function renderOverview(){
   var tT=sum(brandSums,'target'),tR=sum(brandSums,'reforecast'),tA=sum(brandSums,'actual'),tS=sum(brandSums,'ss26');
   var tAc=brandSums.reduce(function(a,b){return a+b.activeCount;},0);
@@ -543,8 +924,8 @@ function renderOverview(){
   var tGBP=sum(brandSums,'reforecastGBP'),tEUR=sum(brandSums,'reforecastEUR');
   var tTgbp=sum(brandSums,'targetGBP'),tTeur=sum(brandSums,'targetEUR');
   var tAgbp=sum(brandSums,'actualGBP'),tAeur=sum(brandSums,'actualEUR');
-  var activeGBP=allRows.filter(function(r){return r.isActive&&r.currency==='GBP';}).length;
-  var aov=activeGBP>0?tGBP/activeGBP:0;
+  var totalGBPActive=allRows.filter(function(r){return r.isActive&&r.currency==='GBP';}).length;
+  var aov=totalGBPActive>0?tGBP/totalGBPActive:0;
   var rvtPct=pct(tR,tT),rvsPct=pct(tR,tS);
   var rvtVal=tR-tT,rvsVal=tR-tS;
 
@@ -588,7 +969,7 @@ function renderOverview(){
   mkChart('ch-tvr',{type:'bar',data:{
     labels:['SS27 Target','SS27 Reforecast','SS27 Actual'],
     datasets:[{data:[tT,tR,tA],backgroundColor:['rgba(77,159,255,0.7)','rgba(0,212,161,0.85)','rgba(167,139,250,0.7)'],borderRadius:6,borderSkipped:false}]
-  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:function(v){return fmt(v);}},grid:{color:'rgba(255,255,255,0.05)'}},x:{grid:{display:false}}}}});
+  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:function(v){return fmtZ(v);}},grid:{color:'rgba(255,255,255,0.05)'}},x:{grid:{display:false}}}}});
 
   mkChart('ch-cur',{type:'doughnut',data:{
     labels:['GBP Reforecast','EUR Reforecast'],
@@ -603,7 +984,7 @@ function renderOverview(){
       {label:'SS27 Target',data:sortedBrands.map(function(b){return b.target;}),backgroundColor:'rgba(77,159,255,0.35)',borderRadius:3},
       {label:'SS27 Reforecast',data:sortedBrands.map(function(b){return b.reforecast;}),backgroundColor:'rgba(0,212,161,0.8)',borderRadius:3}
     ]
-  },options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{padding:20,color:'#8b93a8',font:{size:12}}}},scales:{x:{ticks:{callback:function(v){return fmt(v);}},grid:{color:'rgba(255,255,255,0.05)'}},y:{grid:{display:false},ticks:{font:{size:11},color:'#8b93a8'}}}}});
+  },options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{padding:20,color:'#8b93a8',font:{size:12}}}},scales:{x:{ticks:{callback:function(v){return fmtZ(v);}},grid:{color:'rgba(255,255,255,0.05)'}},y:{grid:{display:false},ticks:{font:{size:11},color:'#8b93a8'}}}}});
 
   var gapSorted=[...brandSums].filter(function(b){return b.rfVsTarget!==null;}).sort(function(a,b){return b.rfVsTarget-a.rfVsTarget;});
   document.getElementById('ch-gap-wrap').style.height=Math.max(400,gapSorted.length*36+60)+'px';
@@ -611,249 +992,6 @@ function renderOverview(){
     labels:gapSorted.map(function(b){return b.name;}),
     datasets:[{label:'Reforecast vs Target (%)',data:gapSorted.map(function(b){return b.rfVsTarget;}),backgroundColor:gapSorted.map(function(b){return b.rfVsTarget>=0?'rgba(0,212,161,0.8)':'rgba(255,92,114,0.8)';}),borderRadius:3}]
   },options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{callback:function(v){return v+'%';}},grid:{color:'rgba(255,255,255,0.05)'}},y:{grid:{display:false},ticks:{font:{size:11},color:'#8b93a8'}}}}});
-}
-
-function filterBrandCards(){
-  var search=(document.getElementById('bc-search').value||'').toLowerCase();
-  var sortKey=document.getElementById('bc-sort').value;
-  var filtered=[...brandSums].filter(function(b){return b.name.toLowerCase().includes(search);});
-  if(sortKey==='name')filtered.sort(function(a,b){return a.name.localeCompare(b.name);});
-  else filtered.sort(function(a,b){return (b[sortKey]!==null?b[sortKey]:-Infinity)-(a[sortKey]!==null?a[sortKey]:-Infinity);});
-  renderBrandCards(filtered);
-}
-
-function renderBrandCards(brands){
-  var container=document.getElementById('brand-cards-container');
-  if(!container)return;
-  var rows=brands||[...brandSums].sort(function(a,b){return b.reforecast-a.reforecast;});
-  var html='';
-  for(var bi=0;bi<rows.length;bi++){
-    var b=rows[bi];
-    var rvtVal=b.reforecast-b.target;
-    var rvsVal=b.reforecast-b.ss26;
-    var rvtPct=b.rfVsTarget;
-    var rvsPct=b.rfVsSS26;
-    var gbpActiveAccs=b.rows.filter(function(r){return r.isActive&&r.currency==='GBP';}).length;
-    var eurActiveAccs=b.rows.filter(function(r){return r.isActive&&r.currency==='EUR';}).length;
-    var gbpTotalAccs=b.rows.filter(function(r){return r.currency==='GBP';}).length;
-    var eurTotalAccs=b.rows.filter(function(r){return r.currency==='EUR';}).length;
-    var aovGBP=gbpActiveAccs>0?b.reforecastGBP/gbpActiveAccs:0;
-    var attainPct=b.target>0?Math.min(100,Math.max(0,b.reforecast/b.target*100)):0;
-    var topAccs=b.rows.filter(function(r){return r.isActive;}).sort(function(a,c){return c.reforecast-a.reforecast;}).slice(0,5);
-    var perfColor=rvtPct===null?'var(--text3)':rvtPct>=0?'var(--green)':'var(--red)';
-    var barColor=rvtPct===null||rvtPct>=0?'linear-gradient(90deg,var(--green),var(--blue))':'linear-gradient(90deg,var(--red),var(--amber))';
-
-    var pctBadge=function(v){
-      if(v===null||isNaN(v))return '<span class="badge badge-amber">No target data</span>';
-      return '<span class="badge '+(v>=0?'badge-green':'badge-red')+'">'+(v>=0?'▲':'▼')+' '+Math.abs(v).toFixed(1)+'%</span>';
-    };
-
-    var accsHtml='';
-    for(var ai=0;ai<topAccs.length;ai++){
-      var a=topAccs[ai];
-      accsHtml+='<div class="bc-acc-row">'+
-        '<span style="font-weight:500;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+a.account+'</span>'+
-        '<span style="color:var(--text3);min-width:80px">'+( a.country||'—')+'</span>'+
-        '<span class="badge '+(a.currency==='GBP'?'badge-green':'badge-blue')+'" style="font-size:10px;margin:0 8px">'+a.currency+'</span>'+
-        '<span style="font-weight:600;min-width:60px;text-align:right">'+fmtZ(a.reforecast)+'</span>'+
-        '<span style="color:var(--text3);font-size:11px;min-width:90px;text-align:right">'+(a.target>0?'Target: '+fmtZ(a.target):'')+'</span>'+
-        '</div>';
-    }
-
-    html+='<div class="brand-card">'+
-      '<div class="bc-header">'+
-        '<div>'+
-          '<div class="bc-name">'+b.name+'</div>'+
-          '<div style="font-size:11px;color:var(--text3);margin-top:3px">Spring/Summer 2027 Season</div>'+
-        '</div>'+
-        '<div class="bc-badges">'+
-          pctBadge(rvtPct)+
-          '<span class="badge badge-blue">'+b.activeCount+' active accounts</span>'+
-          (b.reforecastGBP>0?'<span class="badge badge-green">GBP</span>':'')+
-          (b.reforecastEUR>0?'<span class="badge badge-blue">EUR</span>':'')+
-        '</div>'+
-      '</div>'+
-
-      '<div class="bc-body">'+
-        '<div class="bc-section">'+
-          '<div class="bc-section-title">All Currencies</div>'+
-          '<div class="bc-row"><span class="bc-label">SS27 Target</span><span class="bc-value">'+fmtZ(b.target)+'</span></div>'+
-          '<div class="bc-row"><span class="bc-label">SS27 Reforecast</span><span class="bc-value">'+fmtZ(b.reforecast)+'</span></div>'+
-          '<div class="bc-row"><span class="bc-label">SS27 Actual</span><span class="bc-value">'+fmtZ(b.actual)+'</span></div>'+
-          '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">'+
-          '<div class="bc-row"><span class="bc-label">Reforecast vs Target (value)</span><span class="bc-value '+(rvtVal>=0?'up':'dn')+'">'+fmtDiff(rvtVal)+'</span></div>'+
-          '<div class="bc-row"><span class="bc-label">Reforecast vs Target (%)</span><span class="bc-value '+(rvtPct>=0?'up':'dn')+'">'+fmtPct(rvtPct)+'</span></div>'+
-          '<div class="bc-row"><span class="bc-label">Reforecast vs SS26 Forecast (value)</span><span class="bc-value '+(rvsVal>=0?'up':'dn')+'">'+fmtDiff(rvsVal)+'</span></div>'+
-          '<div class="bc-row"><span class="bc-label">Reforecast vs SS26 Forecast (%)</span><span class="bc-value '+(rvsPct>=0?'up':'dn')+'">'+fmtPct(rvsPct)+'</span></div>'+
-          '</div>'+
-        '</div>'+
-
-        '<div class="bc-section">'+
-          '<div class="bc-section-title" style="color:var(--green-tx)">GBP Accounts</div>'+
-          '<div class="bc-row"><span class="bc-label">SS27 Target</span><span class="bc-value">'+fmtZ(b.targetGBP)+'</span></div>'+
-          '<div class="bc-row"><span class="bc-label">SS27 Reforecast</span><span class="bc-value">'+fmtZ(b.reforecastGBP)+'</span></div>'+
-          '<div class="bc-row"><span class="bc-label">SS27 Actual</span><span class="bc-value">'+fmtZ(b.actualGBP)+'</span></div>'+
-          '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">'+
-          '<div class="bc-row"><span class="bc-label">Average Order Value (GBP)</span><span class="bc-value">'+fmtZ(aovGBP)+'</span></div>'+
-          '<div class="bc-row"><span class="bc-label">Active GBP Accounts</span><span class="bc-value">'+gbpActiveAccs+'</span></div>'+
-          '<div class="bc-row"><span class="bc-label">Total GBP Accounts</span><span class="bc-value">'+gbpTotalAccs+'</span></div>'+
-          '</div>'+
-        '</div>'+
-
-        '<div class="bc-section">'+
-          '<div class="bc-section-title" style="color:var(--blue-tx)">EUR Accounts</div>'+
-          '<div class="bc-row"><span class="bc-label">SS27 Target</span><span class="bc-value">'+fmtZ(b.targetEUR)+'</span></div>'+
-          '<div class="bc-row"><span class="bc-label">SS27 Reforecast</span><span class="bc-value">'+fmtZ(b.reforecastEUR)+'</span></div>'+
-          '<div class="bc-row"><span class="bc-label">SS27 Actual</span><span class="bc-value">'+fmtZ(b.actualEUR)+'</span></div>'+
-          '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">'+
-          '<div class="bc-row"><span class="bc-label">Active EUR Accounts</span><span class="bc-value">'+eurActiveAccs+'</span></div>'+
-          '<div class="bc-row"><span class="bc-label">Total EUR Accounts</span><span class="bc-value">'+eurTotalAccs+'</span></div>'+
-          '<div class="bc-row"><span class="bc-label">Total Active Accounts</span><span class="bc-value">'+b.activeCount+'</span></div>'+
-          '</div>'+
-        '</div>'+
-      '</div>'+
-
-      (topAccs.length>0?
-        '<div class="bc-accs">'+
-          '<div class="bc-acc-title">Top Active Accounts by Reforecast Value</div>'+
-          accsHtml+
-        '</div>':'')+
-
-      '<div class="bc-footer">'+
-        '<div style="font-size:11px;color:var(--text3);white-space:nowrap">Target attainment</div>'+
-        '<div style="flex:1;height:6px;background:var(--surface3);border-radius:99px;overflow:hidden">'+
-          '<div style="height:100%;border-radius:99px;background:'+barColor+';width:'+attainPct.toFixed(1)+'%"></div>'+
-        '</div>'+
-        '<div style="font-size:13px;font-weight:700;color:'+perfColor+';white-space:nowrap">'+
-          (b.target>0?(b.reforecast/b.target*100).toFixed(1)+'%':'No target')+'</div>'+
-      '</div>'+
-    '</div>';
-  }
-  container.innerHTML=html;
-}
-
-function renderBrandsTable(){
-  var s=bSort;
-  var sorted=[...brandSums].sort(function(a,b){
-    var av=a[s.col]!==null&&a[s.col]!==undefined?a[s.col]:-Infinity;
-    var bv=b[s.col]!==null&&b[s.col]!==undefined?b[s.col]:-Infinity;
-    return typeof av==='string'?av.localeCompare(bv)*s.dir:(av-bv)*s.dir;
-  });
-  var maxRf=Math.max.apply(null,sorted.map(function(b){return b.reforecast;}));
-  maxRf=maxRf||1;
-  document.getElementById('brands-tbody').innerHTML=sorted.map(function(b){
-    var fillPct=Math.round(b.reforecast/maxRf*100);
-    var isRed=b.rfVsTarget!==null&&b.rfVsTarget<0;
-    return '<tr>'+
-      '<td class="td-bold">'+b.name+'</td>'+
-      '<td class="td-right">'+fmtZ(b.target)+'</td>'+
-      '<td><div class="progress-wrap"><div class="progress-bar"><div class="progress-fill'+(isRed?' red':'')+'" style="width:'+fillPct+'%"></div></div><span style="font-weight:600;min-width:50px;text-align:right;padding-left:8px">'+fmtZ(b.reforecast)+'</span></div></td>'+
-      '<td class="td-right">'+fmtZ(b.actual)+'</td>'+
-      '<td>'+badgePct(b.reforecast,b.target)+'</td>'+
-      '<td>'+badgePct(b.reforecast,b.ss26)+'</td>'+
-      '<td class="td-right">'+fmtZ(b.reforecastGBP)+'</td>'+
-      '<td class="td-right">'+fmtZ(b.reforecastEUR)+'</td>'+
-      '<td class="td-right"><span class="badge badge-blue">'+b.activeCount+'</span></td>'+
-      '<td class="td-right" style="color:var(--text3)">'+b.totalCount+'</td>'+
-    '</tr>';
-  }).join('');
-}
-
-function sortB(col){if(bSort.col===col)bSort.dir*=-1;else{bSort.col=col;bSort.dir=-1;}renderBrandsTable();}
-
-function renderBrandCharts(){
-  var topGBP=[...brandSums].sort(function(a,b){return b.reforecastGBP-a.reforecastGBP;}).slice(0,10);
-  var topEUR=[...brandSums].sort(function(a,b){return b.reforecastEUR-a.reforecastEUR;}).slice(0,10);
-  mkChart('ch-gbp-brand',{type:'bar',data:{labels:topGBP.map(function(b){return b.name;}),datasets:[{label:'GBP Reforecast',data:topGBP.map(function(b){return b.reforecastGBP;}),backgroundColor:'rgba(0,212,161,0.8)',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:function(v){return fmt(v);}},grid:{color:'rgba(255,255,255,0.05)'}},x:{grid:{display:false},ticks:{font:{size:10},maxRotation:35,color:'#8b93a8'}}}}});
-  mkChart('ch-eur-brand',{type:'bar',data:{labels:topEUR.map(function(b){return b.name;}),datasets:[{label:'EUR Reforecast',data:topEUR.map(function(b){return b.reforecastEUR;}),backgroundColor:'rgba(77,159,255,0.8)',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:function(v){return fmt(v);}},grid:{color:'rgba(255,255,255,0.05)'}},x:{grid:{display:false},ticks:{font:{size:10},maxRotation:35,color:'#8b93a8'}}}}});
-}
-
-function renderCust(){
-  var search=document.getElementById('cs-search').value.toLowerCase();
-  var country=document.getElementById('cs-country').value;
-  var brand=document.getElementById('cs-brand').value;
-  var multi=document.getElementById('cs-multi').value;
-  var filtered=custData.filter(function(c){
-    if(search&&!c.account.toLowerCase().includes(search))return false;
-    if(country&&c.country!==country)return false;
-    if(brand&&!c.brands.has(brand))return false;
-    if(multi==='multi'&&c.brands.size<2)return false;
-    if(multi==='single'&&c.brands.size!==1)return false;
-    return true;
-  });
-  var multiBuyers=filtered.filter(function(c){return c.brands.size>1;}).length;
-  var topSpend=filtered[0]?filtered[0].reforecast:0;
-  document.getElementById('cust-kpis').innerHTML=
-    '<div class="kpi green"><div class="kpi-label">Customers Shown</div><div class="kpi-value">'+filtered.length.toLocaleString()+'</div><div class="kpi-sub neu">matching filters</div></div>'+
-    '<div class="kpi purple"><div class="kpi-label">Multi-Brand Buyers</div><div class="kpi-value">'+multiBuyers.toLocaleString()+'</div><div class="kpi-sub neu">buying 2 or more brands</div></div>'+
-    '<div class="kpi amber"><div class="kpi-label">Top Customer Reforecast</div><div class="kpi-value">'+fmtZ(topSpend)+'</div><div class="kpi-sub neu">'+(filtered[0]?filtered[0].account:'—')+'</div></div>'+
-    '<div class="kpi blue"><div class="kpi-label">Total Reforecast (Filtered)</div><div class="kpi-value">'+fmtZ(filtered.reduce(function(a,c){return a+c.reforecast;},0))+'</div><div class="kpi-sub neu">sum of filtered customers</div></div>';
-
-  document.getElementById('cust-count').textContent='Showing '+Math.min(filtered.length,300).toLocaleString()+' of '+filtered.length.toLocaleString()+' customers';
-  document.getElementById('cust-tbody').innerHTML=filtered.slice(0,300).map(function(c){
-    var rvs=pct(c.reforecast,c.ss26);
-    var bc=c.brands.size;
-    var rvsBadge=rvs!==null?'<span class="badge '+(rvs>=0?'badge-green':'badge-red')+'">'+(rvs>=0?'▲':'▼')+' '+Math.abs(rvs).toFixed(1)+'%</span>':'<span class="badge badge-amber">—</span>';
-    return '<tr>'+
-      '<td class="td-bold">'+c.account+'</td>'+
-      '<td>'+( c.country||'—')+'</td>'+
-      '<td class="td-right td-bold">'+fmtZ(c.reforecast)+'</td>'+
-      '<td class="td-right">'+fmtZ(c.actual)+'</td>'+
-      '<td class="td-right">'+fmtZ(c.ss26)+'</td>'+
-      '<td>'+rvsBadge+'</td>'+
-      '<td style="font-size:12px;color:var(--text2);max-width:240px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+ [...c.brands].join(', ')+'</td>'+
-      '<td class="td-right"><span class="badge '+(bc>2?'badge-green':bc>1?'badge-purple':'badge-amber')+'">'+bc+'</span></td>'+
-    '</tr>';
-  }).join('');
-}
-
-function renderSingle(){
-  var name=document.getElementById('sb-select').value;
-  var el=document.getElementById('sb-content');
-  if(!name){el.innerHTML='<div style="color:var(--text3);font-size:14px;padding:40px 0;text-align:center">Select a brand from the dropdown above.</div>';return;}
-  var b=brandSums.find(function(x){return x.name===name;});
-  if(!b)return;
-  var rvtP=b.rfVsTarget,rvsP=b.rfVsSS26;
-  var gbpActive=b.rows.filter(function(r){return r.isActive&&r.currency==='GBP';}).length;
-  var aov=gbpActive>0?b.reforecastGBP/gbpActive:0;
-  el.innerHTML=
-    '<div class="kpi-grid">'+
-      '<div class="kpi '+(rvtP>=0?'green':'red')+'"><div class="kpi-label">SS27 Target</div><div class="kpi-value">'+fmtZ(b.target)+'</div></div>'+
-      '<div class="kpi '+(rvtP>=0?'green':'red')+'"><div class="kpi-label">SS27 Reforecast</div><div class="kpi-value">'+fmtZ(b.reforecast)+'</div><div class="kpi-sub '+dc(rvtP)+'">'+fmtPct(rvtP)+' vs target</div></div>'+
-      '<div class="kpi blue"><div class="kpi-label">SS27 Actual</div><div class="kpi-value">'+fmtZ(b.actual)+'</div></div>'+
-      '<div class="kpi '+(rvsP>=0?'green':'amber')+'"><div class="kpi-label">Reforecast vs SS26 Forecast</div><div class="kpi-value">'+fmtPct(rvsP)+'</div><div class="kpi-sub '+dc(rvsP)+'">year on year</div></div>'+
-      '<div class="kpi green"><div class="kpi-label">GBP Reforecast</div><div class="kpi-value">'+fmtZ(b.reforecastGBP)+'</div><div class="kpi-sub neu">Target: '+fmtZ(b.targetGBP)+'</div></div>'+
-      '<div class="kpi blue"><div class="kpi-label">EUR Reforecast</div><div class="kpi-value">'+fmtZ(b.reforecastEUR)+'</div><div class="kpi-sub neu">Target: '+fmtZ(b.targetEUR)+'</div></div>'+
-      '<div class="kpi purple"><div class="kpi-label">Active Accounts</div><div class="kpi-value">'+b.activeCount+'</div><div class="kpi-sub neu">of '+b.totalCount+' total</div></div>'+
-      '<div class="kpi amber"><div class="kpi-label">Average Order Value (GBP)</div><div class="kpi-value">'+fmtZ(aov)+'</div><div class="kpi-sub neu">GBP accounts only</div></div>'+
-    '</div>'+
-    '<div class="metric-table-card">'+
-      '<div class="metric-table-header"><div>'+
-        '<div class="metric-table-title">All Accounts — '+b.name+'</div>'+
-        '<div class="metric-table-sub">'+b.totalCount+' accounts · '+b.activeCount+' active</div>'+
-      '</div></div>'+
-      '<div class="table-wrap"><table>'+
-        '<thead><tr>'+
-          '<th>Account Name</th><th>Country</th><th>Account Status</th><th>Currency</th>'+
-          '<th class="td-right">SS26 Actuals</th><th class="td-right">SS27 Target</th>'+
-          '<th class="td-right">SS27 Reforecast</th><th class="td-right">SS27 Actual</th>'+
-          '<th>Reforecast vs Target</th>'+
-        '</tr></thead>'+
-        '<tbody>'+b.rows.map(function(r){
-          return '<tr>'+
-            '<td class="td-bold">'+r.account+'</td>'+
-            '<td>'+(r.country||'—')+'</td>'+
-            '<td><span class="badge '+(r.isActive?'badge-green':'badge-amber')+'" style="font-size:10px">'+r.status+'</span></td>'+
-            '<td><span class="badge '+(r.currency==='GBP'?'badge-green':'badge-blue')+'" style="font-size:10px">'+r.currency+'</span></td>'+
-            '<td class="td-right">'+fmtZ(r.ss26)+'</td>'+
-            '<td class="td-right">'+fmtZ(r.target)+'</td>'+
-            '<td class="td-right td-bold">'+fmtZ(r.reforecast)+'</td>'+
-            '<td class="td-right">'+fmtZ(r.actual)+'</td>'+
-            '<td>'+badgePct(r.reforecast,r.target)+'</td>'+
-          '</tr>';
-        }).join('')+
-        '</tbody></table></div>'+
-    '</div>';
 }
 
 window.addEventListener('load',loadAll);

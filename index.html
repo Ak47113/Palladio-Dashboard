@@ -449,17 +449,38 @@ function toNum(row,idx){
 
 function parseRows(rows,brandName){
   if(!rows||rows.length<2)return[];
-  // Find header row: must have 'account name' in it AND at least one SS27 column
+  // Find header row: look for row with 'account name' in ANY column
   var hr=-1;
   for(var i=0;i<Math.min(20,rows.length);i++){
     var h=rows[i].map(function(x){return(x||'').replace(/"/g,'').toLowerCase().trim();});
     var hasAccount=h.some(function(x){return x==='account name'||x==='account';});
-    var hasSS27=h.some(function(x){return x.includes('ss27')||x==='fx'||x.includes('target');});
-    if(hasAccount&&hasSS27){hr=i;break;}
+    if(hasAccount){hr=i;break;}
   }
   if(hr<0)return[];
 
   var colMap=buildColMap(rows[hr]);
+
+  // FALLBACK: if key columns not found by name (merged cells issue),
+  // use known fixed positions from the standard sheet layout
+  if(colMap.TARGET<0){
+    console.warn(brandName+': column names not found, using fixed positions');
+    colMap.ACCOUNT=colMap.ACCOUNT>=0?colMap.ACCOUNT:0;
+    colMap.COUNTRY=colMap.COUNTRY>=0?colMap.COUNTRY:3;
+    colMap.CITY=colMap.CITY>=0?colMap.CITY:2;
+    colMap.STATUS=colMap.STATUS>=0?colMap.STATUS:7;
+    colMap.FX=colMap.FX>=0?colMap.FX:6;
+    colMap.SS26=colMap.SS26>=0?colMap.SS26:17;
+    colMap.SS26_2=colMap.SS26_2>=0?colMap.SS26_2:19;
+    colMap.TARGET=25;
+    colMap.REFORECAST=26;
+    colMap.ACTUAL=27;
+    colMap.TARGET2=29;
+    colMap.REFORECAST2=30;
+    colMap.ACTUAL2=31;
+    colMap.AW26=colMap.AW26>=0?colMap.AW26:21;
+    colMap.AW26_2=colMap.AW26_2>=0?colMap.AW26_2:23;
+  }
+
   if(colMap.ACCOUNT<0)return[];
 
   var result=[];
@@ -502,11 +523,12 @@ function parseRows(rows,brandName){
 }
 
 async function fetchBrand(brand){
-  var url='https://docs.google.com/spreadsheets/d/'+brand.id+'/gviz/tq?tqx=out:csv&sheet=2025%2B';
+  // /export includes ALL columns including hidden ones — gviz/tq skips hidden columns
+  var url='https://docs.google.com/spreadsheets/d/'+brand.id+'/export?format=csv&sheet=2025%2B';
   var r=await fetch(url);
   if(!r.ok)throw new Error('HTTP '+r.status);
   var text=await r.text();
-  if(text.includes('Sign in')||text.includes('accounts.google.com'))throw new Error('Sheet not shared publicly');
+  if(text.includes('Sign in')||text.includes('accounts.google.com')||text.includes('ServiceLogin'))throw new Error('Sheet not shared publicly');
   return parseCSV(text);
 }
 

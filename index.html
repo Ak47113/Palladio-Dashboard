@@ -558,6 +558,10 @@ function parseCSV(text){
 }
 
 // ── Column map: exact match first, then fallback with warning ─────────────────
+// SS27 2 columns (TARGET2, REFORECAST2, ACTUAL2) are optional.
+// If not found, they stay -1 and values default to 0. No fallback, no warning.
+var OPTIONAL_COLS=['TARGET2','REFORECAST2','ACTUAL2'];
+
 function buildColMap(headerRow,brandName){
   var h=headerRow.map(function(x){return(x||'').replace(/"/g,'').toLowerCase().trim();});
   var map={};
@@ -571,11 +575,16 @@ function buildColMap(headerRow,brandName){
       idx=h.indexOf(aliases[a]);
       if(idx>=0)break;
     }
+    // Optional columns: if not found, leave as -1. No fallback, no warning.
+    if(idx<0&&OPTIONAL_COLS.indexOf(key)>=0){
+      map[key]=-1;
+      return;
+    }
+    // Required columns: use fallback position if not found by name, and warn
     if(idx<0&&COL_FALLBACK[key]!==undefined){
       idx=COL_FALLBACK[key];
-      // Only warn for financial columns
-      var financialKeys=['TARGET','TARGET2','REFORECAST','REFORECAST2','ACTUAL','ACTUAL2','SS26','SS26_2'];
-      if(financialKeys.indexOf(key)>=0){
+      var requiredFinancial=['TARGET','REFORECAST','ACTUAL','SS26','SS26_2'];
+      if(requiredFinancial.indexOf(key)>=0){
         usedFallback.push(key+'(col '+idx+')');
       }
     }
@@ -583,7 +592,7 @@ function buildColMap(headerRow,brandName){
   });
 
   if(usedFallback.length>0){
-    var msg=brandName+': columns not found by name, using fallback positions for: '+usedFallback.join(', ');
+    var msg=brandName+': required columns not found by name, using fallback positions for: '+usedFallback.join(', ');
     globalWarnings.push(msg);
     console.warn(msg);
   }
@@ -598,37 +607,55 @@ function toNum(row,idx){
   return isNaN(v)?0:v;
 }
 
-// ── Parse sheet rows ──────────────────────────────────────────────────────────
-function parseRows(rows,brandName){
-  if(!rows||rows.length<2)return[];
-  var hr=-1;
-  for(var i=0;i<Math.min(20,rows.length);i++){
-    var h=rows[i].map(function(x){return(x||'').replace(/"/g,'').toLowerCase().trim();});
-    if(h.some(function(x){return x==='account name'||x==='account';})){hr=i;break;}
-  }
-  if(hr<0)return[];
+// ── Parse sheet rows ──────────────────────────────────────────────────────────────────────────────
+// Row 10 (index 9) is always the header row. Rows 1-9 are notes/logos/formatting.
+// Data rows start from row 11 (index 10).
+var HEADER_ROW_INDEX=9;
+var DATA_START_INDEX=10;
 
-  var cm=buildColMap(rows[hr],brandName);
+function parseRows(rows,brandName){
+  if(!rows||rows.length<=HEADER_ROW_INDEX)return[];
+
+  // Use fixed row 10 as header
+  var headerRow=rows[HEADER_ROW_INDEX];
+  var headerCheck=headerRow.map(function(x){return(x||'').replace(/"/g,'').toLowerCase().trim();});
+  var fixedHeaderValid=headerCheck.some(function(x){return x==='account name'||x==='account';});
+  var dataStartIdx=DATA_START_INDEX;
+
+  if(!fixedHeaderValid){
+    // Fallback: scan rows 0-14 for header
+    var scanned=-1;
+    for(var i=0;i<Math.min(15,rows.length);i++){
+      var h=rows[i].map(function(x){return(x||'').replace(/"/g,'').toLowerCase().trim();});
+      if(h.some(function(x){return x==='account name'||x==='account';})){scanned=i;break;}
+    }
+    if(scanned<0)return[];
+    globalWarnings.push(brandName+': header not found at row 10 — found at row '+(scanned+1)+'. Sheet structure may have changed.');
+    headerRow=rows[scanned];
+    dataStartIdx=scanned+1;
+  }
+
+  var cm=buildColMap(headerRow,brandName);
   if(cm.ACCOUNT<0)return[];
 
+  // Low-priority notice if SS27 2 columns absent — normal for single-window brands
+  var hasSS27_2=(cm.TARGET2>=0||cm.REFORECAST2>=0||cm.ACTUAL2>=0);
+  if(!hasSS27_2){
+    console.info(brandName+': SS27 2 columns not present — SS27 2 values will be 0. Normal for single order window brands.');
+  }
+
+  var dataRows=rows.slice(dataStartIdx);
   var result=[];
   var unknownCurrencyCount=0;
 
-  for(var i=hr+1;i<rows.length;i++){
-    var row=rows[i];
+  for(var i=0;i<dataRows.length;i++){
+    var row=dataRows[i];
     var acc=(row[cm.ACCOUNT]||'').replace(/"/g,'').trim();
     if(!acc||/^(total|subtotal|grand|summary)/i.test(acc))continue;
 
     var status=(cm.STATUS>=0?(row[cm.STATUS]||''):'').replace(/"/g,'').toLowerCase().trim();
     var isActive=ACTIVE_STATUSES.some(function(s){return status===s;});
 
-    var fxRaw=(cm.FX>=0?(row[cm.FX]||''):'').replace(/"/g,'').trim().toUpperCase();
-    var currency;
-    if(fxRaw==='GBP'||fxRaw==='\u00A3')currency='GBP';
-    else if(fxRaw==='EUR'||fxRaw==='\u20AC')currency='EUR';
-    else{currency='UNKNOWN';unknownCurrencyCount++;}
-
-    // Each column stored individually — no combining here
     var target     =toNum(row,cm.TARGET);
     var target2    =toNum(row,cm.TARGET2);
     var reforecast =toNum(row,cm.REFORECAST);
@@ -640,18 +667,28 @@ function parseRows(rows,brandName){
     var aw26       =toNum(row,cm.AW26);
     var aw26_2     =toNum(row,cm.AW26_2);
 
+    var fxRaw=(cm.FX>=0?(row[cm.FX]||''):'').replace(/"/g,'').trim().toUpperCase();
+    var currency;
+    if(fxRaw==='GBP'||fxRaw==='\u00A3')currency='GBP';
+    else if(fxRaw==='EUR'||fxRaw==='\u20AC')currency='EUR';
+    else{
+      // Only flag unknown currency if the row has real sales data
+      var hasSalesData=(target>0||target2>0||reforecast>0||reforecast2>0||actual>0||actual2>0||ss26>0||ss26_2>0);
+      if(!hasSalesData)continue; // skip empty/template rows silently
+      currency='UNKNOWN';
+      unknownCurrencyCount++;
+    }
+
     result.push({
       brand:brandName,account:acc,
       country:(cm.COUNTRY>=0?(row[cm.COUNTRY]||''):'').replace(/"/g,'').trim(),
       city:(cm.CITY>=0?(row[cm.CITY]||''):'').replace(/"/g,'').trim(),
       status:status,isActive:isActive,currency:currency,
-      // Individual columns
       target:target,target2:target2,
       reforecast:reforecast,reforecast2:reforecast2,
       actual:actual,actual2:actual2,
       ss26:ss26,ss26_2:ss26_2,
       aw26:aw26,aw26_2:aw26_2,
-      // Totals (clearly labelled)
       targetTotal:target+target2,
       reforecastTotal:reforecast+reforecast2,
       actualTotal:actual+actual2,
@@ -661,13 +698,12 @@ function parseRows(rows,brandName){
   }
 
   if(unknownCurrencyCount>0){
-    var wmsg=brandName+': '+unknownCurrencyCount+' row(s) have missing or unknown currency — excluded from GBP/EUR totals';
+    var wmsg=brandName+': '+unknownCurrencyCount+' row(s) have account name and sales data but unknown currency — excluded from GBP/EUR totals';
     globalWarnings.push(wmsg);
     console.warn(wmsg);
   }
   return result;
 }
-
 // ── Fetch brand sheet ─────────────────────────────────────────────────────────
 async function fetchBrand(brand){
   // /export includes hidden columns; gviz/tq skips them
@@ -1369,7 +1405,7 @@ function renderAtRisk(){
     if(currF&&r.currency!==currF)return false;
     return true;
   }).sort(function(a,b){
-    return(a.reforecastTotal-a.ss26)-(b.reforecastTotal-b.ss26);
+    return(a.reforecastTotal-a.ss26Total)-(b.reforecastTotal-b.ss26Total);
   });
 
   var totalAtRisk=atRisk.reduce(function(a,r){return a+(r.ss26Total-r.reforecastTotal);},0);

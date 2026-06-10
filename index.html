@@ -646,9 +646,10 @@ function parseRows(rows,brandName){
 
   var dataRows=rows.slice(dataStartIdx);
   var result=[];
-  var unknownCurrencyCount=0;
+  var unknownCurrencyRows=[];
 
   for(var i=0;i<dataRows.length;i++){
+    var sheetRowNumber=dataStartIdx+i+1;
     var row=dataRows[i];
     var acc=(row[cm.ACCOUNT]||'').replace(/"/g,'').trim();
     if(!acc||/^(total|subtotal|grand|summary)/i.test(acc))continue;
@@ -676,7 +677,7 @@ function parseRows(rows,brandName){
       var hasSalesData=(target>0||target2>0||reforecast>0||reforecast2>0||actual>0||actual2>0||ss26>0||ss26_2>0);
       if(!hasSalesData)continue; // skip empty/template rows silently
       currency='UNKNOWN';
-      unknownCurrencyCount++;
+      unknownCurrencyRows.push({row:sheetRowNumber,account:acc,fx:fxRaw||'blank'});
     }
 
     result.push({
@@ -697,8 +698,11 @@ function parseRows(rows,brandName){
     });
   }
 
-  if(unknownCurrencyCount>0){
-    var wmsg=brandName+': '+unknownCurrencyCount+' row(s) have account name and sales data but unknown currency — excluded from GBP/EUR totals';
+  if(unknownCurrencyRows.length>0){
+    var detail=unknownCurrencyRows.slice(0,10).map(function(x){
+      return'row '+x.row+' ('+x.account+', FX: '+x.fx+')';
+    }).join('; ');
+    var wmsg=brandName+': '+unknownCurrencyRows.length+' row(s) have account name and sales data but unknown currency — excluded from GBP/EUR totals. Check: '+detail;
     globalWarnings.push(wmsg);
     console.warn(wmsg);
   }

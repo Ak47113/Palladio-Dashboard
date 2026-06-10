@@ -46,8 +46,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-
 .page-title{font-size:22px;font-weight:700;color:var(--text);letter-spacing:-.4px}
 .page-sub{font-size:13px;color:var(--text2);margin-top:4px}
 .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:24px}
-.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:18px 20px;position:relative;overflow:hidden;transition:border-color .2s}
-.kpi:hover{border-color:var(--border2)}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:18px 20px;position:relative;overflow:hidden}
 .kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
 .kpi.green::before{background:linear-gradient(90deg,var(--green),var(--blue))}
 .kpi.blue::before{background:linear-gradient(90deg,var(--blue),var(--purple))}
@@ -59,70 +58,96 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-
 .kpi-sub{font-size:11px;margin-top:6px}
 .kpi-sub.up{color:var(--green-tx)}.kpi-sub.dn{color:var(--red-tx)}.kpi-sub.neu{color:var(--text3)}
 .chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
-.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:20px}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:20px;margin-bottom:16px}
 .chart-card.full{grid-column:1/-1}
 .chart-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px}
 .chart-sub{font-size:11px;color:var(--text3);margin-bottom:16px}
-.metric-table-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;margin-bottom:16px}
-.metric-table-header{padding:16px 20px;border-bottom:1px solid var(--border)}
-.metric-table-title{font-size:13px;font-weight:600;color:var(--text)}
-.metric-table-sub{font-size:11px;color:var(--text3)}
+.mtable{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;margin-bottom:16px}
+.mtable-hdr{padding:16px 20px;border-bottom:1px solid var(--border)}
+.mtable-title{font-size:13px;font-weight:600;color:var(--text)}
+.mtable-sub{font-size:11px;color:var(--text3);margin-top:2px}
 .table-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse}
 th{text-align:left;padding:10px 16px;border-bottom:1px solid var(--border);font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;cursor:pointer;white-space:nowrap;background:var(--bg2)}
 th:hover{color:var(--text)}
-td{padding:11px 16px;border-bottom:1px solid var(--border);color:var(--text);font-size:13px}
+td{padding:10px 16px;border-bottom:1px solid var(--border);color:var(--text);font-size:13px}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:var(--surface2)}
-.td-right{text-align:right}.td-bold{font-weight:600}
+.td-r{text-align:right}.td-b{font-weight:600}
+.sec-row td{background:var(--surface2);font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;padding:5px 16px}
 .badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:600}
-.badge-green{background:var(--green-lt);color:var(--green-tx)}
-.badge-red{background:var(--red-lt);color:var(--red-tx)}
-.badge-amber{background:var(--amber-lt);color:var(--amber-tx)}
-.badge-blue{background:var(--blue-lt);color:var(--blue-tx)}
-.badge-purple{background:var(--purple-lt);color:var(--purple)}
+.bg{background:var(--green-lt);color:var(--green-tx)}
+.br{background:var(--red-lt);color:var(--red-tx)}
+.ba{background:var(--amber-lt);color:var(--amber-tx)}
+.bb{background:var(--blue-lt);color:var(--blue-tx)}
+.bp{background:var(--purple-lt);color:var(--purple)}
 .toolbar{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--bg2)}
-.search-input{padding:7px 12px;font-size:13px;border:1px solid var(--border2);border-radius:var(--r);background:var(--surface);color:var(--text);font-family:'Inter',sans-serif;transition:border-color .15s}
-.search-input:focus{outline:none;border-color:var(--green)}
-.filter-sel{padding:7px 12px;font-size:13px;border:1px solid var(--border2);border-radius:var(--r);background:var(--surface);color:var(--text);font-family:'Inter',sans-serif}
-.filter-sel:focus{outline:none;border-color:var(--green)}
+.si{padding:7px 12px;font-size:13px;border:1px solid var(--border2);border-radius:var(--r);background:var(--surface);color:var(--text);font-family:'Inter',sans-serif}
+.si:focus{outline:none;border-color:var(--green)}
 .bts-row{display:grid;grid-template-columns:3fr 2fr;gap:16px;margin-bottom:24px}
-.bts-section-row{background:var(--surface2);padding:6px 16px;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px}
-.bts-table td:first-child{color:var(--text2);font-size:13px}
-.bts-table td:last-child{text-align:right;font-weight:600;font-size:14px;white-space:nowrap}
+/* Loading */
 #loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999}
-.load-logo{font-size:32px;font-weight:700;color:var(--text);letter-spacing:-.5px;margin-bottom:6px}
+.load-logo{font-size:32px;font-weight:700;letter-spacing:-.5px;margin-bottom:6px}
 .load-logo span{background:linear-gradient(90deg,var(--green),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .load-sub{font-size:14px;color:var(--text2);margin-bottom:40px}
 .load-bar-wrap{width:360px;background:var(--surface);border-radius:99px;height:4px;overflow:hidden;margin-bottom:14px}
 .load-bar{height:100%;background:linear-gradient(90deg,var(--green),var(--blue));border-radius:99px;width:0%;transition:width .3s}
 .load-txt{font-size:13px;color:var(--text3)}
-.err-banner{background:var(--red-lt);border:1px solid var(--red);border-radius:var(--r);padding:12px 16px;margin-bottom:20px;font-size:13px;line-height:1.6;color:var(--red-tx)}
-.brand-sel{padding:10px 14px;font-size:14px;border:1px solid var(--border2);border-radius:var(--r);background:var(--surface);color:var(--text);font-family:'Inter',sans-serif;min-width:260px}
-.progress-wrap{display:flex;align-items:center;gap:8px}
-.progress-bar{flex:1;height:5px;background:var(--surface3);border-radius:99px;overflow:hidden;min-width:60px}
-.progress-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--green),var(--blue))}
-.progress-fill.red{background:linear-gradient(90deg,var(--red),var(--amber))}
-/* Brand Cards */
-.brand-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rxl);overflow:hidden;margin-bottom:20px;transition:border-color .2s}
-.brand-card:hover{border-color:var(--border2)}
-.bc-header{padding:18px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:var(--bg2)}
-.bc-name{font-size:18px;font-weight:700;color:var(--text);letter-spacing:-.3px}
+.err-banner{background:var(--red-lt);border:1px solid var(--red);border-radius:var(--r);padding:12px 16px;margin-bottom:16px;font-size:13px;line-height:1.8;color:var(--red-tx)}
+.warn-banner{background:var(--amber-lt);border:1px solid var(--amber);border-radius:var(--r);padding:10px 16px;margin-bottom:12px;font-size:12px;line-height:1.7;color:var(--amber-tx)}
+/* Brand cards */
+.bc{background:var(--surface);border:1px solid var(--border);border-radius:var(--rxl);overflow:hidden;margin-bottom:20px}
+.bc-hdr{padding:18px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:var(--bg2)}
+.bc-name{font-size:18px;font-weight:700;letter-spacing:-.3px}
 .bc-badges{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .bc-body{display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid var(--border)}
-.bc-section{padding:20px 24px;border-right:1px solid var(--border)}
-.bc-section:last-child{border-right:none}
-.bc-section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
-.bc-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.03)}
+.bc-sec{padding:20px 24px;border-right:1px solid var(--border)}
+.bc-sec:last-child{border-right:none}
+.bc-sec-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.bc-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.03)}
 .bc-row:last-child{border-bottom:none}
-.bc-label{font-size:12px;color:var(--text2)}
-.bc-value{font-size:13px;font-weight:600;color:var(--text)}
-.bc-value.up{color:var(--green-tx)}.bc-value.dn{color:var(--red-tx)}
+.bc-lbl{font-size:12px;color:var(--text2)}
+.bc-val{font-size:13px;font-weight:600;color:var(--text)}
+.bc-val.up{color:var(--green-tx)}.bc-val.dn{color:var(--red-tx)}
+.bc-total-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;background:rgba(0,212,161,0.05);border-radius:4px;padding-left:6px;padding-right:6px;margin-top:2px}
+.bc-total-lbl{font-size:12px;font-weight:600;color:var(--green-tx)}
+.bc-total-val{font-size:13px;font-weight:700;color:var(--green-tx)}
+.bc-sep{height:1px;background:var(--border);margin:10px 0}
 .bc-footer{padding:14px 24px;display:flex;align-items:center;gap:16px}
 .bc-accs{padding:14px 24px;border-bottom:1px solid var(--border)}
 .bc-acc-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--text3);margin-bottom:10px}
-.bc-acc-row{display:flex;align-items:center;gap:12px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.03);font-size:12px}
+.bc-acc-row{display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.03);font-size:12px}
 .bc-acc-row:last-child{border-bottom:none}
+.prog-wrap{display:flex;align-items:center;gap:8px}
+.prog{flex:1;height:5px;background:var(--surface3);border-radius:99px;overflow:hidden;min-width:60px}
+.prog-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--green),var(--blue))}
+.prog-fill.red{background:linear-gradient(90deg,var(--red),var(--amber))}
+/* Insight cards */
+.ins-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.ins-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden}
+.ins-card-hdr{padding:14px 18px;border-bottom:1px solid var(--border);background:var(--bg2);display:flex;align-items:center;justify-content:space-between}
+.ins-card-title{font-size:13px;font-weight:600;color:var(--text)}
+.ins-card-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.ins-row{display:flex;align-items:center;justify-content:space-between;padding:9px 18px;border-bottom:1px solid var(--border);font-size:13px}
+.ins-row:last-child{border-bottom:none}
+.ins-row:hover{background:var(--surface2)}
+.ins-rank{font-size:11px;font-weight:700;color:var(--text3);min-width:24px}
+.ins-name{flex:1;font-weight:500;padding:0 10px}
+.ins-val{font-weight:700;min-width:60px;text-align:right}
+/* Health panel */
+.health-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:20px}
+.health-stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:16px 20px;display:flex;align-items:center;gap:14px}
+.health-icon{font-size:22px;width:36px;text-align:center}
+.health-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px}
+.health-value{font-size:20px;font-weight:700;color:var(--text)}
+.sheet-row{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;border-bottom:1px solid var(--border);font-size:13px}
+.sheet-row:last-child{border-bottom:none}
+/* Concentration chart */
+.conc-bar-wrap{margin:8px 0}
+.conc-bar-label{display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:4px}
+.conc-bar-outer{height:8px;background:var(--surface3);border-radius:99px;overflow:hidden}
+.conc-bar-inner{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--green),var(--blue))}
+.brand-sel{padding:10px 14px;font-size:14px;border:1px solid var(--border2);border-radius:var(--r);background:var(--surface);color:var(--text);font-family:'Inter',sans-serif;min-width:260px}
 </style>
 </head>
 <body>
@@ -150,6 +175,11 @@ tr:hover td{background:var(--surface2)}
       <div class="nav-item" onclick="showPage('customers')"><span class="nav-icon">◎</span> Customer Analysis</div>
       <div class="nav-item" onclick="showPage('single')"><span class="nav-icon">⊕</span> Single Brand Detail</div>
       <div class="nav-item" onclick="showPage('overview')"><span class="nav-icon">◈</span> Business Overview</div>
+      <div class="nav-group-label">Intelligence</div>
+      <div class="nav-item" onclick="showPage('insights')"><span class="nav-icon">◉</span> Sales Insights</div>
+      <div class="nav-item" onclick="showPage('atRisk')"><span class="nav-icon">⚠</span> At Risk Accounts</div>
+      <div class="nav-item" onclick="showPage('crossSell')"><span class="nav-icon">⊞</span> Cross-Sell Opportunities</div>
+      <div class="nav-item" onclick="showPage('health')"><span class="nav-icon">✦</span> Dashboard Health</div>
     </div>
     <div class="sidebar-footer">
       <div class="status-pill"><div class="dot on" id="sdot"></div><span id="slabel">Connected</span></div>
@@ -160,20 +190,20 @@ tr:hover td{background:var(--surface2)}
 
   <div class="main">
     <div id="error-area"></div>
+    <div id="warn-area"></div>
 
-    <!-- BRANDS DATA ANALYSIS — loads first -->
+    <!-- BRANDS DATA ANALYSIS -->
     <div class="page active" id="page-brandcards">
       <div class="page-header">
         <div class="page-title">Brands Data Analysis</div>
-        <div class="page-sub">Full performance summary for every brand — SS27 season metrics, one card per brand</div>
+        <div class="page-sub">Full SS27 performance summary per brand — each column treated separately with totals shown additionally</div>
       </div>
       <div style="margin-bottom:20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-        <input class="search-input" id="bc-search" placeholder="Filter brands..." oninput="filterBrandCards()" style="width:200px"/>
-        <select class="filter-sel" id="bc-sort" onchange="filterBrandCards()">
-          <option value="reforecast">Sort: Reforecast High to Low</option>
-          <option value="target">Sort: Target High to Low</option>
-          <option value="rfVsTarget">Sort: vs Target %</option>
-          <option value="rfVsSS26">Sort: vs SS26 Forecast %</option>
+        <input class="si" id="bc-search" placeholder="Filter brands..." oninput="filterBrandCards()" style="width:200px"/>
+        <select class="si" id="bc-sort" onchange="filterBrandCards()">
+          <option value="reforecastTotal">Sort: Total Reforecast High → Low</option>
+          <option value="targetTotal">Sort: Total Target High → Low</option>
+          <option value="rfTotalVsTargetTotal">Sort: Total Reforecast vs Total Target %</option>
           <option value="activeCount">Sort: Active Accounts</option>
           <option value="name">Sort: Alphabetical</option>
         </select>
@@ -185,36 +215,36 @@ tr:hover td{background:var(--surface2)}
     <div class="page" id="page-brands">
       <div class="page-header">
         <div class="page-title">Brand Performance Table</div>
-        <div class="page-sub">All brands side by side — click any column header to sort</div>
+        <div class="page-sub">All brands — click any column header to sort</div>
       </div>
-      <div class="metric-table-card">
+      <div class="mtable">
         <div class="table-wrap">
           <table>
             <thead><tr>
               <th onclick="sortB('name')">Brand Name</th>
-              <th onclick="sortB('target')" class="td-right">SS27 Target</th>
-              <th onclick="sortB('reforecast')" class="td-right">SS27 Reforecast</th>
-              <th onclick="sortB('actual')" class="td-right">SS27 Actual</th>
-              <th onclick="sortB('rfVsTarget')">Reforecast vs Target</th>
-              <th onclick="sortB('rfVsSS26')">Reforecast vs SS26 Forecast</th>
-              <th onclick="sortB('reforecastGBP')" class="td-right">GBP Reforecast</th>
-              <th onclick="sortB('reforecastEUR')" class="td-right">EUR Reforecast</th>
-              <th onclick="sortB('activeCount')" class="td-right">Active Accounts</th>
-              <th onclick="sortB('conversionRate')" class="td-right">Account Activation Rate</th>
+              <th onclick="sortB('targetTotal')" class="td-r">Total SS27 Target</th>
+              <th onclick="sortB('reforecastTotal')" class="td-r">Total SS27 Reforecast</th>
+              <th onclick="sortB('actualTotal')" class="td-r">Total SS27 Actual</th>
+              <th onclick="sortB('rfTotalVsTargetTotal')">Total Reforecast vs Total Target</th>
+              <th onclick="sortB('rfTotalVsSS26Total')">Total Reforecast vs Total SS26 Actuals</th>
+              <th onclick="sortB('reforecastGBPTotal')" class="td-r">GBP Total Reforecast</th>
+              <th onclick="sortB('reforecastEURTotal')" class="td-r">EUR Total Reforecast</th>
+              <th onclick="sortB('activeCount')" class="td-r">Active Accounts</th>
+              <th onclick="sortB('conversionRate')" class="td-r">Activation Rate</th>
             </tr></thead>
             <tbody id="brands-tbody"></tbody>
           </table>
         </div>
       </div>
-      <div class="chart-grid" style="margin-top:16px">
+      <div class="chart-grid">
         <div class="chart-card">
-          <div class="chart-title">GBP Reforecast by Brand</div>
-          <div class="chart-sub">Top brands by GBP reforecast</div>
+          <div class="chart-title">Total GBP Reforecast by Brand</div>
+          <div class="chart-sub">Top brands by GBP total reforecast (SS27 + SS27 2)</div>
           <div style="position:relative;height:260px"><canvas id="ch-gbp-brand"></canvas></div>
         </div>
         <div class="chart-card">
-          <div class="chart-title">EUR Reforecast by Brand</div>
-          <div class="chart-sub">Top brands by EUR reforecast</div>
+          <div class="chart-title">Total EUR Reforecast by Brand</div>
+          <div class="chart-sub">Top brands by EUR total reforecast (SS27 + SS27 2)</div>
           <div style="position:relative;height:260px"><canvas id="ch-eur-brand"></canvas></div>
         </div>
       </div>
@@ -227,33 +257,29 @@ tr:hover td{background:var(--surface2)}
         <div class="page-sub">Cross-brand view — top spenders, multi-brand buyers, and cross-sell opportunities</div>
       </div>
       <div class="kpi-grid" id="cust-kpis"></div>
-      <div class="metric-table-card">
+      <div class="mtable">
         <div class="toolbar">
-          <input class="search-input" id="cs-search" placeholder="Search customer name..." oninput="renderCust()" style="width:220px"/>
-          <select class="filter-sel" id="cs-country" onchange="renderCust()"><option value="">All Countries</option></select>
-          <select class="filter-sel" id="cs-brand" onchange="renderCust()"><option value="">All Brands</option></select>
-          <select class="filter-sel" id="cs-multi" onchange="renderCust()">
+          <input class="si" id="cs-search" placeholder="Search customer name..." oninput="renderCust()" style="width:220px"/>
+          <select class="si" id="cs-country" onchange="renderCust()"><option value="">All Countries</option></select>
+          <select class="si" id="cs-brand" onchange="renderCust()"><option value="">All Brands</option></select>
+          <select class="si" id="cs-multi" onchange="renderCust()">
             <option value="">All Customers</option>
             <option value="multi">Multi-Brand Buyers Only</option>
             <option value="single">Single Brand Only</option>
-          </select>
-          <select class="filter-sel" id="cs-status" onchange="renderCust()">
-            <option value="">All Statuses</option>
-            <option value="active">Active Only</option>
-            <option value="inactive">Inactive / At Risk</option>
           </select>
         </div>
         <div class="table-wrap">
           <table>
             <thead><tr>
-              <th>Customer Name</th>
-              <th>Country</th>
-              <th class="td-right">SS27 Reforecast</th>
-              <th class="td-right">SS27 Actual</th>
-              <th class="td-right">SS26 Actuals</th>
-              <th>Reforecast vs SS26 Forecast</th>
+              <th>Customer Name</th><th>Country</th>
+              <th class="td-r">SS27 Reforecast</th>
+              <th class="td-r">SS27 2 Reforecast</th>
+              <th class="td-r">Total SS27 Reforecast</th>
+              <th class="td-r">Total SS27 Actual</th>
+              <th class="td-r">Total SS26 Actuals</th>
+              <th>Total Reforecast vs Total SS26 Actuals</th>
               <th>Brands Purchased</th>
-              <th class="td-right">Number of Brands</th>
+              <th class="td-r">Brand Count</th>
             </tr></thead>
             <tbody id="cust-tbody"></tbody>
           </table>
@@ -268,15 +294,15 @@ tr:hover td{background:var(--surface2)}
         <div class="page-title">Single Brand Detail</div>
         <div class="page-sub">Full account-level breakdown for one brand</div>
       </div>
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap">
         <select class="brand-sel" id="sb-select" onchange="renderSingle()"><option value="">— Select a brand to view —</option></select>
-        <input class="search-input" id="sb-search" placeholder="Search accounts within brand..." oninput="filterSingleAccounts()" style="width:260px"/>
-        <select class="filter-sel" id="sb-status" onchange="filterSingleAccounts()">
-          <option value="">All Account Statuses</option>
+        <input class="si" id="sb-search" placeholder="Search accounts..." oninput="filterSingle()" style="width:220px"/>
+        <select class="si" id="sb-status" onchange="filterSingle()">
+          <option value="">All Statuses</option>
           <option value="active">Active Only</option>
           <option value="inactive">Inactive Only</option>
         </select>
-        <select class="filter-sel" id="sb-currency" onchange="filterSingleAccounts()">
+        <select class="si" id="sb-currency" onchange="filterSingle()">
           <option value="">All Currencies</option>
           <option value="GBP">GBP Only</option>
           <option value="EUR">EUR Only</option>
@@ -292,38 +318,136 @@ tr:hover td{background:var(--surface2)}
         <div class="page-title">Business Overview</div>
         <div class="page-sub">All 28 brands combined — Spring/Summer 2027 season performance</div>
       </div>
-      <div class="kpi-grid" id="kpi-row1"></div>
+      <div class="kpi-grid" id="ov-kpis"></div>
       <div class="bts-row">
-        <div class="metric-table-card" style="margin-bottom:0">
-          <div class="metric-table-header">
-            <div class="metric-table-title">Business Top Sheet</div>
-            <div class="metric-table-sub">Full SS27 performance summary — all currencies</div>
+        <div class="mtable" style="margin-bottom:0">
+          <div class="mtable-hdr">
+            <div class="mtable-title">Business Top Sheet — All Currencies</div>
+            <div class="mtable-sub">Every column shown separately with totals clearly labelled</div>
           </div>
-          <div class="table-wrap"><table class="bts-table" id="bts-table"></table></div>
+          <div class="table-wrap"><table id="bts-table"></table></div>
         </div>
-        <div style="display:flex;flex-direction:column;gap:12px" id="kpi-col2"></div>
+        <div style="display:flex;flex-direction:column;gap:12px" id="ov-kpis2"></div>
       </div>
       <div class="chart-grid">
         <div class="chart-card">
-          <div class="chart-title">SS27 Target vs Reforecast vs Actual</div>
-          <div class="chart-sub">Combined all currencies</div>
+          <div class="chart-title">Total SS27 Target vs Total SS27 Reforecast vs Total SS27 Actual</div>
+          <div class="chart-sub">All currencies combined — SS27 + SS27 2 windows</div>
           <div style="position:relative;height:200px"><canvas id="ch-tvr"></canvas></div>
         </div>
         <div class="chart-card">
-          <div class="chart-title">GBP vs EUR — Reforecast Split</div>
+          <div class="chart-title">GBP vs EUR — Total Reforecast Split</div>
           <div class="chart-sub">Currency breakdown of total reforecast</div>
           <div style="position:relative;height:200px"><canvas id="ch-cur"></canvas></div>
         </div>
       </div>
-      <div class="chart-card full" style="margin-bottom:16px">
-        <div class="chart-title">Reforecast by Brand — Ranked Highest to Lowest</div>
-        <div class="chart-sub">SS27 Reforecast vs Target, all brands</div>
+      <div class="chart-card full">
+        <div class="chart-title">Total Reforecast by Brand — Ranked Highest to Lowest</div>
+        <div class="chart-sub">Total SS27 Reforecast (SS27 + SS27 2) vs Total SS27 Target — all brands</div>
         <div id="ch-brands-wrap" style="position:relative"><canvas id="ch-brands"></canvas></div>
       </div>
-      <div class="chart-card full" style="margin-bottom:16px">
-        <div class="chart-title">Reforecast vs Target — Performance Gap by Brand</div>
-        <div class="chart-sub">Percentage above or below SS27 target. Green = on/above target. Red = below target.</div>
+      <div class="chart-card full">
+        <div class="chart-title">Total Reforecast vs Total Target — Performance Gap by Brand</div>
+        <div class="chart-sub">Percentage above or below total SS27 target. Green = on/above. Red = below.</div>
         <div id="ch-gap-wrap" style="position:relative"><canvas id="ch-gap"></canvas></div>
+      </div>
+    </div>
+  <!-- SALES INSIGHTS -->
+    <div class="page" id="page-insights">
+      <div class="page-header">
+        <div class="page-title">Sales Insights</div>
+        <div class="page-sub">Brand rankings, growth leaders, decline alerts, revenue concentration, and new account tracking</div>
+      </div>
+      <div class="ins-grid" id="ins-top-bottom"></div>
+      <div class="ins-grid" id="ins-growth-decline"></div>
+      <div class="ins-grid" id="ins-concentration-newaccs"></div>
+      <div id="ins-brand-dependency"></div>
+    </div>
+
+    <!-- AT RISK ACCOUNTS -->
+    <div class="page" id="page-atRisk">
+      <div class="page-header">
+        <div class="page-title">At Risk Accounts</div>
+        <div class="page-sub">Customers whose SS27 total reforecast is significantly below their SS26 actuals — these accounts need a call</div>
+      </div>
+      <div class="kpi-grid" id="risk-kpis"></div>
+      <div class="mtable">
+        <div class="toolbar">
+          <input class="si" id="ar-search" placeholder="Search account..." oninput="renderAtRisk()" style="width:220px"/>
+          <select class="si" id="ar-brand" onchange="renderAtRisk()"><option value="">All Brands</option></select>
+          <select class="si" id="ar-currency" onchange="renderAtRisk()">
+            <option value="">All Currencies</option>
+            <option value="GBP">GBP Only</option>
+            <option value="EUR">EUR Only</option>
+          </select>
+          <select class="si" id="ar-threshold" onchange="renderAtRisk()">
+            <option value="20">Drop > 20%</option>
+            <option value="10">Drop > 10%</option>
+            <option value="30">Drop > 30%</option>
+            <option value="50">Drop > 50%</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Account Name</th><th>Brand</th><th>Country</th><th>Currency</th><th>Status</th>
+              <th class="td-r">Total SS26 Actuals</th>
+              <th class="td-r">SS27 Reforecast</th>
+              <th class="td-r">Total Reforecast</th>
+              <th>Reforecast vs SS26</th>
+              <th class="td-r">Revenue at Risk</th>
+            </tr></thead>
+            <tbody id="ar-tbody"></tbody>
+          </table>
+        </div>
+        <div style="padding:10px 16px;font-size:11px;color:var(--text3);border-top:1px solid var(--border)" id="ar-count"></div>
+      </div>
+    </div>
+
+    <!-- CROSS-SELL OPPORTUNITIES -->
+    <div class="page" id="page-crossSell">
+      <div class="page-header">
+        <div class="page-title">Cross-Sell Opportunities</div>
+        <div class="page-sub">Customers already buying from Palladio brands but not yet buying from others — ranked by potential value</div>
+      </div>
+      <div class="kpi-grid" id="cs-opp-kpis"></div>
+      <div class="mtable">
+        <div class="toolbar">
+          <select class="si" id="xb-brand" onchange="renderCrossSell()"><option value="">Select a brand to find potential buyers...</option></select>
+          <input class="si" id="xb-search" placeholder="Search customer..." oninput="renderCrossSell()" style="width:200px"/>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Customer Name</th><th>Country</th>
+              <th>Currently Buying</th>
+              <th>Not Yet Buying</th>
+              <th class="td-r">Current Spend (Existing Brands)</th>
+              <th class="td-r">Number of Brands</th>
+            </tr></thead>
+            <tbody id="xb-tbody"></tbody>
+          </table>
+        </div>
+        <div style="padding:10px 16px;font-size:11px;color:var(--text3);border-top:1px solid var(--border)" id="xb-count"></div>
+      </div>
+    </div>
+
+    <!-- DASHBOARD HEALTH -->
+    <div class="page" id="page-health">
+      <div class="page-header">
+        <div class="page-title">Dashboard Health</div>
+        <div class="page-sub">Data quality monitoring — every sheet, every column, every warning. If a number looks wrong, start here.</div>
+      </div>
+      <div class="health-grid" id="health-stats"></div>
+      <div class="ins-grid">
+        <div class="mtable" style="margin-bottom:0">
+          <div class="mtable-hdr"><div class="mtable-title">Sheet Load Status</div><div class="mtable-sub">One row per brand sheet</div></div>
+          <div id="health-sheets"></div>
+        </div>
+        <div class="mtable" style="margin-bottom:0">
+          <div class="mtable-hdr"><div class="mtable-title">Data Quality Warnings</div><div class="mtable-sub">Missing columns, unknown currencies, fallback positions used</div></div>
+          <div id="health-warnings"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -363,56 +487,64 @@ const BRANDS=[
 
 const ACTIVE_STATUSES=['active','new aw26','new ss26','reactivated'];
 
-// All known column names — detection by name, handles hidden/extra columns safely
-const COL_NAMES={
-  ACCOUNT:'account name',
-  LOCATION:'location',
-  CITY:'major city',
-  COUNTRY:'country',
-  FX:'fx',
-  STATUS:'status',
-  SS26:'ss26 actuals',
-  SS26_2:'ss26 2 actuals',
-  TARGET:'ss27 targets',
-  REFORECAST:'ss27 reforecast',
-  ACTUAL:'ss27 actuals',
-  TARGET2:'ss27 2 targets',
-  REFORECAST2:'ss27 2 reforecast',
-  ACTUAL2:'ss27 2 actuals',
-  AW26:'aw26 actuals',
-  AW26_2:'aw26 2 actuals'
+// Exact column aliases — no partial matching for financial columns
+const COL_ALIASES={
+  ACCOUNT:   ['account name','account'],
+  COUNTRY:   ['country'],
+  CITY:      ['major city','city'],
+  STATUS:    ['status'],
+  FX:        ['fx'],
+  SS26:      ['ss26 actuals'],
+  SS26_2:    ['ss26 2 actuals'],
+  AW26:      ['aw26 actuals'],
+  AW26_2:    ['aw26 2 actuals'],
+  TARGET:    ['ss27 targets'],
+  TARGET2:   ['ss27 2 targets'],
+  REFORECAST:['ss27 reforecast'],
+  REFORECAST2:['ss27 2 reforecast'],
+  ACTUAL:    ['ss27 actuals'],
+  ACTUAL2:   ['ss27 2 actuals']
+};
+
+// Fallback fixed positions (verified against standard sheet layout)
+const COL_FALLBACK={
+  ACCOUNT:0,COUNTRY:3,CITY:2,STATUS:7,FX:6,
+  SS26:17,SS26_2:19,AW26:21,AW26_2:23,
+  TARGET:25,REFORECAST:26,ACTUAL:27,
+  TARGET2:29,REFORECAST2:30,ACTUAL2:31
 };
 
 let allRows=[],brandSums=[],custData=[],charts={};
-let bSort={col:'reforecast',dir:-1};
+let bSort={col:'reforecastTotal',dir:-1};
 let currentBrandRows=[];
+let globalWarnings=[];
 
 Chart.defaults.color='#8b93a8';
 Chart.defaults.borderColor='rgba(255,255,255,0.06)';
 Chart.defaults.font.family='Inter';
 
-const fmtZ=function(n){
+// ── Formatting ────────────────────────────────────────────────────────────────
+function fmtN(n){
   if(n===null||n===undefined||isNaN(n))return'—';
-  if(n===0)return'0';
   if(Math.abs(n)>=1e6)return(n/1e6).toFixed(2)+'M';
   if(Math.abs(n)>=1000)return(n/1000).toFixed(1)+'K';
   return Math.round(n).toLocaleString();
-};
-const fmtFull=function(n){if(n===null||n===undefined||isNaN(n))return'—';return Math.round(n).toLocaleString();};
-const fmtPct=function(v){if(v===null||v===undefined||isNaN(v))return'—';return(v>=0?'+':'')+parseFloat(v).toFixed(1)+'%';};
-const fmtDiff=function(v){if(v===null||isNaN(v))return'—';return(v>=0?'+':'')+fmtZ(v);};
-const pct=function(v,t){if(!t||isNaN(t)||isNaN(v))return null;return(v-t)/Math.abs(t)*100;};
-const sum=function(arr,key){return arr.reduce(function(a,r){return a+(r[key]||0);},0);};
-const dc=function(v){return(v===null||isNaN(v))?'neu':v>=0?'up':'dn';};
-const badgePct=function(v,t){
+}
+function fmtFull(n){if(n===null||n===undefined||isNaN(n))return'—';return Math.round(n).toLocaleString();}
+function fmtPct(v){if(v===null||v===undefined||isNaN(v))return'—';return(v>=0?'+':'')+parseFloat(v).toFixed(1)+'%';}
+function fmtDiff(v){if(v===null||isNaN(v))return'—';return(v>=0?'+':'')+fmtN(v);}
+function pct(v,t){if(!t||isNaN(t)||isNaN(v))return null;return(v-t)/Math.abs(t)*100;}
+function sumF(arr,key){return arr.reduce(function(a,r){return a+(r[key]||0);},0);}
+function dc(v){return(v===null||isNaN(v))?'neu':v>=0?'up':'dn';}
+function bpct(v,t){
   var p=pct(v,t);
-  if(p===null)return'<span class="badge badge-amber">No data</span>';
-  return'<span class="badge '+(p>=0?'badge-green':'badge-red')+'">'+(p>=0?'▲':'▼')+' '+Math.abs(p).toFixed(1)+'%</span>';
-};
+  if(p===null)return'<span class="badge ba">No data</span>';
+  return'<span class="badge '+(p>=0?'bg':'br')+'">'+(p>=0?'▲':'▼')+' '+Math.abs(p).toFixed(1)+'%</span>';
+}
 
+// ── CSV parsing ────────────────────────────────────────────────────────────────
 function parseCSV(text){
-  var lines=text.split(/\r?\n/);
-  return lines.map(function(line){
+  return text.split(/\r?\n/).map(function(line){
     var cells=[],cur='',inQ=false;
     for(var i=0;i<line.length;i++){
       var c=line[i];
@@ -425,17 +557,36 @@ function parseCSV(text){
   }).filter(function(r){return r.length>1||r[0];});
 }
 
-// Detect column indices BY NAME — safe against hidden/extra columns
-function buildColMap(headerRow){
-  var map={};
+// ── Column map: exact match first, then fallback with warning ─────────────────
+function buildColMap(headerRow,brandName){
   var h=headerRow.map(function(x){return(x||'').replace(/"/g,'').toLowerCase().trim();});
-  Object.keys(COL_NAMES).forEach(function(key){
-    var target=COL_NAMES[key];
-    var idx=h.indexOf(target);
-    // fallback: partial match
-    if(idx<0){idx=h.findIndex(function(x){return x.includes(target);});}
+  var map={};
+  var usedFallback=[];
+
+  Object.keys(COL_ALIASES).forEach(function(key){
+    var aliases=COL_ALIASES[key];
+    var idx=-1;
+    // Exact match only
+    for(var a=0;a<aliases.length;a++){
+      idx=h.indexOf(aliases[a]);
+      if(idx>=0)break;
+    }
+    if(idx<0&&COL_FALLBACK[key]!==undefined){
+      idx=COL_FALLBACK[key];
+      // Only warn for financial columns
+      var financialKeys=['TARGET','TARGET2','REFORECAST','REFORECAST2','ACTUAL','ACTUAL2','SS26','SS26_2'];
+      if(financialKeys.indexOf(key)>=0){
+        usedFallback.push(key+'(col '+idx+')');
+      }
+    }
     map[key]=idx;
   });
+
+  if(usedFallback.length>0){
+    var msg=brandName+': columns not found by name, using fallback positions for: '+usedFallback.join(', ');
+    globalWarnings.push(msg);
+    console.warn(msg);
+  }
   return map;
 }
 
@@ -447,93 +598,90 @@ function toNum(row,idx){
   return isNaN(v)?0:v;
 }
 
+// ── Parse sheet rows ──────────────────────────────────────────────────────────
 function parseRows(rows,brandName){
   if(!rows||rows.length<2)return[];
-  // Find header row: look for row with 'account name' in ANY column
   var hr=-1;
   for(var i=0;i<Math.min(20,rows.length);i++){
     var h=rows[i].map(function(x){return(x||'').replace(/"/g,'').toLowerCase().trim();});
-    var hasAccount=h.some(function(x){return x==='account name'||x==='account';});
-    if(hasAccount){hr=i;break;}
+    if(h.some(function(x){return x==='account name'||x==='account';})){hr=i;break;}
   }
   if(hr<0)return[];
 
-  var colMap=buildColMap(rows[hr]);
-
-  // FALLBACK: if key columns not found by name (merged cells issue),
-  // use known fixed positions from the standard sheet layout
-  if(colMap.TARGET<0){
-    console.warn(brandName+': column names not found, using fixed positions');
-    colMap.ACCOUNT=colMap.ACCOUNT>=0?colMap.ACCOUNT:0;
-    colMap.COUNTRY=colMap.COUNTRY>=0?colMap.COUNTRY:3;
-    colMap.CITY=colMap.CITY>=0?colMap.CITY:2;
-    colMap.STATUS=colMap.STATUS>=0?colMap.STATUS:7;
-    colMap.FX=colMap.FX>=0?colMap.FX:6;
-    colMap.SS26=colMap.SS26>=0?colMap.SS26:17;
-    colMap.SS26_2=colMap.SS26_2>=0?colMap.SS26_2:19;
-    colMap.TARGET=25;
-    colMap.REFORECAST=26;
-    colMap.ACTUAL=27;
-    colMap.TARGET2=29;
-    colMap.REFORECAST2=30;
-    colMap.ACTUAL2=31;
-    colMap.AW26=colMap.AW26>=0?colMap.AW26:21;
-    colMap.AW26_2=colMap.AW26_2>=0?colMap.AW26_2:23;
-  }
-
-  if(colMap.ACCOUNT<0)return[];
+  var cm=buildColMap(rows[hr],brandName);
+  if(cm.ACCOUNT<0)return[];
 
   var result=[];
+  var unknownCurrencyCount=0;
+
   for(var i=hr+1;i<rows.length;i++){
     var row=rows[i];
-    var acc=(row[colMap.ACCOUNT]||'').replace(/"/g,'').trim();
+    var acc=(row[cm.ACCOUNT]||'').replace(/"/g,'').trim();
     if(!acc||/^(total|subtotal|grand|summary)/i.test(acc))continue;
 
-    var status=colMap.STATUS>=0?(row[colMap.STATUS]||'').replace(/"/g,'').toLowerCase().trim():'';
-    var isActive=ACTIVE_STATUSES.some(function(s){return status.includes(s);});
+    var status=(cm.STATUS>=0?(row[cm.STATUS]||''):'').replace(/"/g,'').toLowerCase().trim();
+    var isActive=ACTIVE_STATUSES.some(function(s){return status===s;});
 
-    var fxRaw=colMap.FX>=0?(row[colMap.FX]||'').replace(/"/g,'').trim().toUpperCase():'';
-    var currency=fxRaw==='EUR'?'EUR':'GBP';
+    var fxRaw=(cm.FX>=0?(row[cm.FX]||''):'').replace(/"/g,'').trim().toUpperCase();
+    var currency;
+    if(fxRaw==='GBP'||fxRaw==='\u00A3')currency='GBP';
+    else if(fxRaw==='EUR'||fxRaw==='\u20AC')currency='EUR';
+    else{currency='UNKNOWN';unknownCurrencyCount++;}
 
-    // Combine SS27 + SS27 2 (some brands split season into two order windows)
-    var target=toNum(row,colMap.TARGET)+toNum(row,colMap.TARGET2);
-    var reforecast=toNum(row,colMap.REFORECAST)+toNum(row,colMap.REFORECAST2);
-    var actual=toNum(row,colMap.ACTUAL)+toNum(row,colMap.ACTUAL2);
-    // SS26: combine SS26 Actuals + SS26 2 Actuals for full prior year
-    var ss26=toNum(row,colMap.SS26)+toNum(row,colMap.SS26_2);
-    // AW26 for seasonal context
-    var aw26=toNum(row,colMap.AW26)+toNum(row,colMap.AW26_2);
+    // Each column stored individually — no combining here
+    var target     =toNum(row,cm.TARGET);
+    var target2    =toNum(row,cm.TARGET2);
+    var reforecast =toNum(row,cm.REFORECAST);
+    var reforecast2=toNum(row,cm.REFORECAST2);
+    var actual     =toNum(row,cm.ACTUAL);
+    var actual2    =toNum(row,cm.ACTUAL2);
+    var ss26       =toNum(row,cm.SS26);
+    var ss26_2     =toNum(row,cm.SS26_2);
+    var aw26       =toNum(row,cm.AW26);
+    var aw26_2     =toNum(row,cm.AW26_2);
 
     result.push({
-      brand:brandName,
-      account:acc,
-      country:colMap.COUNTRY>=0?(row[colMap.COUNTRY]||'').replace(/"/g,'').trim():'',
-      city:colMap.CITY>=0?(row[colMap.CITY]||'').replace(/"/g,'').trim():'',
-      status:status,
-      isActive:isActive,
-      currency:currency,
-      ss26:ss26,
-      aw26:aw26,
-      target:target,
-      reforecast:reforecast,
-      actual:actual
+      brand:brandName,account:acc,
+      country:(cm.COUNTRY>=0?(row[cm.COUNTRY]||''):'').replace(/"/g,'').trim(),
+      city:(cm.CITY>=0?(row[cm.CITY]||''):'').replace(/"/g,'').trim(),
+      status:status,isActive:isActive,currency:currency,
+      // Individual columns
+      target:target,target2:target2,
+      reforecast:reforecast,reforecast2:reforecast2,
+      actual:actual,actual2:actual2,
+      ss26:ss26,ss26_2:ss26_2,
+      aw26:aw26,aw26_2:aw26_2,
+      // Totals (clearly labelled)
+      targetTotal:target+target2,
+      reforecastTotal:reforecast+reforecast2,
+      actualTotal:actual+actual2,
+      ss26Total:ss26+ss26_2,
+      aw26Total:aw26+aw26_2
     });
+  }
+
+  if(unknownCurrencyCount>0){
+    var wmsg=brandName+': '+unknownCurrencyCount+' row(s) have missing or unknown currency — excluded from GBP/EUR totals';
+    globalWarnings.push(wmsg);
+    console.warn(wmsg);
   }
   return result;
 }
 
+// ── Fetch brand sheet ─────────────────────────────────────────────────────────
 async function fetchBrand(brand){
-  // /export includes ALL columns including hidden ones — gviz/tq skips hidden columns
+  // /export includes hidden columns; gviz/tq skips them
   var url='https://docs.google.com/spreadsheets/d/'+brand.id+'/export?format=csv&sheet=2025%2B';
   var r=await fetch(url);
   if(!r.ok)throw new Error('HTTP '+r.status);
   var text=await r.text();
-  if(text.includes('Sign in')||text.includes('accounts.google.com')||text.includes('ServiceLogin'))throw new Error('Sheet not shared publicly');
+  if(text.includes('Sign in')||text.includes('accounts.google.com'))throw new Error('Sheet not shared publicly');
   return parseCSV(text);
 }
 
+// ── Load all brands ───────────────────────────────────────────────────────────
 async function loadAll(){
-  allRows=[];brandSums=[];
+  allRows=[];brandSums=[];globalWarnings=[];
   var errors=[];var loaded=0;
   document.getElementById('load-bar').style.width='0%';
   document.getElementById('load-txt').textContent='Connecting to brand sheets...';
@@ -543,24 +691,46 @@ async function loadAll(){
       var rows=await fetchBrand(brand);
       var parsed=parseRows(rows,brand.name);
       allRows=allRows.concat(parsed);
+
       var gbp=parsed.filter(function(r){return r.currency==='GBP';});
       var eur=parsed.filter(function(r){return r.currency==='EUR';});
       var activeRows=parsed.filter(function(r){return r.isActive;});
       var gbpActive=parsed.filter(function(r){return r.isActive&&r.currency==='GBP';});
+
       var bs={
         name:brand.name,rows:parsed,
-        target:sum(parsed,'target'),reforecast:sum(parsed,'reforecast'),
-        actual:sum(parsed,'actual'),ss26:sum(parsed,'ss26'),
-        aw26:sum(parsed,'aw26'),
-        targetGBP:sum(gbp,'target'),reforecastGBP:sum(gbp,'reforecast'),actualGBP:sum(gbp,'actual'),
-        targetEUR:sum(eur,'target'),reforecastEUR:sum(eur,'reforecast'),actualEUR:sum(eur,'actual'),
-        activeCount:activeRows.length,
-        totalCount:parsed.length,
-        gbpActiveCount:gbpActive.length
+        // SS27 Window 1
+        target:sumF(parsed,'target'),reforecast:sumF(parsed,'reforecast'),actual:sumF(parsed,'actual'),
+        // SS27 Window 2
+        target2:sumF(parsed,'target2'),reforecast2:sumF(parsed,'reforecast2'),actual2:sumF(parsed,'actual2'),
+        // SS27 Totals
+        targetTotal:sumF(parsed,'targetTotal'),reforecastTotal:sumF(parsed,'reforecastTotal'),actualTotal:sumF(parsed,'actualTotal'),
+        // SS26
+        ss26:sumF(parsed,'ss26'),ss26_2:sumF(parsed,'ss26_2'),ss26Total:sumF(parsed,'ss26Total'),
+        // AW26
+        aw26:sumF(parsed,'aw26'),aw26_2:sumF(parsed,'aw26_2'),aw26Total:sumF(parsed,'aw26Total'),
+        // GBP — individual + totals
+        targetGBP:sumF(gbp,'target'),target2GBP:sumF(gbp,'target2'),targetGBPTotal:sumF(gbp,'targetTotal'),
+        reforecastGBP:sumF(gbp,'reforecast'),reforecast2GBP:sumF(gbp,'reforecast2'),reforecastGBPTotal:sumF(gbp,'reforecastTotal'),
+        actualGBP:sumF(gbp,'actual'),actual2GBP:sumF(gbp,'actual2'),actualGBPTotal:sumF(gbp,'actualTotal'),
+        // EUR — individual + totals
+        targetEUR:sumF(eur,'target'),target2EUR:sumF(eur,'target2'),targetEURTotal:sumF(eur,'targetTotal'),
+        reforecastEUR:sumF(eur,'reforecast'),reforecast2EUR:sumF(eur,'reforecast2'),reforecastEURTotal:sumF(eur,'reforecastTotal'),
+        actualEUR:sumF(eur,'actual'),actual2EUR:sumF(eur,'actual2'),actualEURTotal:sumF(eur,'actualTotal'),
+        // Aliases for table sorting
+        reforecastGBPTotal:sumF(gbp,'reforecastTotal'),
+        reforecastEURTotal:sumF(eur,'reforecastTotal'),
+        activeCount:activeRows.length,totalCount:parsed.length,gbpActiveCount:gbpActive.length
       };
-      bs.rfVsTarget=pct(bs.reforecast,bs.target);
-      bs.rfVsSS26=pct(bs.reforecast,bs.ss26);
-      bs.aov=bs.gbpActiveCount>0?bs.reforecastGBP/bs.gbpActiveCount:0;
+
+      // Separate comparison metrics — clearly named
+      bs.rfVsTarget       =pct(bs.reforecast,  bs.target);
+      bs.rf2VsTarget2     =pct(bs.reforecast2, bs.target2);
+      bs.rfTotalVsTargetTotal=pct(bs.reforecastTotal,bs.targetTotal);
+      bs.rfVsSS26         =pct(bs.reforecast,  bs.ss26);
+      bs.rf2VsSS26_2      =pct(bs.reforecast2, bs.ss26_2);
+      bs.rfTotalVsSS26Total=pct(bs.reforecastTotal,bs.ss26Total);
+      bs.aov=bs.gbpActiveCount>0?bs.reforecastGBPTotal/bs.gbpActiveCount:0;
       bs.conversionRate=bs.totalCount>0?bs.activeCount/bs.totalCount*100:0;
       brandSums.push(bs);
     }catch(e){errors.push(brand.name+': '+e.message);}
@@ -575,10 +745,12 @@ async function loadAll(){
   document.getElementById('last-upd').textContent='Updated: '+new Date().toLocaleTimeString();
   document.getElementById('slabel').textContent=(BRANDS.length-errors.length)+' / '+BRANDS.length+' brands';
 
-  if(errors.length){
-    document.getElementById('error-area').innerHTML=
-      '<div class="err-banner"><strong>'+errors.length+' sheet(s) failed to load:</strong> '+errors.join(' · ')+'<br><small>Ensure each sheet is shared as "Anyone with the link can view".</small></div>';
-  }
+  var errHtml='',warnHtml='';
+  if(errors.length)errHtml='<div class="err-banner"><strong>'+errors.length+' sheet(s) failed to load:</strong><br>'+errors.join('<br>')+'</div>';
+  if(globalWarnings.length)warnHtml='<div class="warn-banner"><strong>Data quality notices ('+globalWarnings.length+'):</strong><br>'+globalWarnings.join('<br>')+'</div>';
+  document.getElementById('error-area').innerHTML=errHtml;
+  document.getElementById('warn-area').innerHTML=warnHtml;
+
   populateSelects();
   renderAll();
 }
@@ -587,74 +759,81 @@ async function refreshAll(){
   document.getElementById('sdot').classList.remove('on');
   document.getElementById('slabel').textContent='Refreshing...';
   document.getElementById('error-area').innerHTML='';
+  document.getElementById('warn-area').innerHTML='';
   document.getElementById('loading-overlay').style.display='flex';
   await loadAll();
   document.getElementById('sdot').classList.add('on');
 }
 
+// ── Customer data ─────────────────────────────────────────────────────────────
 function buildCustData(){
   var map={};
-  for(var i=0;i<allRows.length;i++){
-    var r=allRows[i];
-    if(!r.account)continue;
+  allRows.forEach(function(r){
+    if(!r.account)return;
     var key=r.account.toLowerCase().trim();
-    if(!map[key])map[key]={account:r.account,country:r.country||'',brands:new Set(),reforecast:0,actual:0,ss26:0,target:0,isActive:false};
-    map[key].brands.add(r.brand);
-    map[key].reforecast+=r.reforecast;
-    map[key].actual+=r.actual;
-    map[key].ss26+=r.ss26;
-    map[key].target+=r.target;
-    if(r.isActive)map[key].isActive=true;
-    if(r.country)map[key].country=r.country;
-  }
-  custData=Object.values(map).sort(function(a,b){return b.reforecast-a.reforecast;});
+    if(!map[key])map[key]={
+      account:r.account,country:r.country||'',brands:new Set(),isActive:false,
+      reforecast:0,reforecast2:0,reforecastTotal:0,
+      actual:0,actual2:0,actualTotal:0,
+      ss26:0,ss26_2:0,ss26Total:0,
+      target:0,target2:0,targetTotal:0
+    };
+    var c=map[key];
+    c.brands.add(r.brand);
+    if(r.isActive)c.isActive=true;
+    if(r.country)c.country=r.country;
+    c.reforecast+=r.reforecast; c.reforecast2+=r.reforecast2; c.reforecastTotal+=r.reforecastTotal;
+    c.actual+=r.actual; c.actual2+=r.actual2; c.actualTotal+=r.actualTotal;
+    c.ss26+=r.ss26; c.ss26_2+=r.ss26_2; c.ss26Total+=r.ss26Total;
+    c.target+=r.target; c.target2+=r.target2; c.targetTotal+=r.targetTotal;
+  });
+  custData=Object.values(map).sort(function(a,b){return b.reforecastTotal-a.reforecastTotal;});
 }
 
 function populateSelects(){
   var bAlpha=[...brandSums].sort(function(a,b){return a.name.localeCompare(b.name);});
-  document.getElementById('sb-select').innerHTML='<option value="">— Select a brand to view —</option>'+
+  document.getElementById('sb-select').innerHTML='<option value="">— Select a brand —</option>'+
     bAlpha.map(function(b){return'<option value="'+b.name+'">'+b.name+'</option>';}).join('');
   var countries=[...new Set(custData.map(function(c){return c.country;}).filter(Boolean))].sort();
   document.getElementById('cs-country').innerHTML='<option value="">All Countries</option>'+
     countries.map(function(c){return'<option>'+c+'</option>';}).join('');
   document.getElementById('cs-brand').innerHTML='<option value="">All Brands</option>'+
     bAlpha.map(function(b){return'<option>'+b.name+'</option>';}).join('');
+  var arBrand=document.getElementById('ar-brand');
+  if(arBrand)arBrand.innerHTML='<option value="">All Brands</option>'+bAlpha.map(function(b){return'<option>'+b.name+'</option>';}).join('');
+  var xbBrand=document.getElementById('xb-brand');
+  if(xbBrand)xbBrand.innerHTML='<option value="">Select a brand to find potential buyers...</option>'+bAlpha.map(function(b){return'<option>'+b.name+'</option>';}).join('');
 }
 
 function showPage(id){
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
   document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
   document.getElementById('page-'+id).classList.add('active');
-  var labels={brandcards:'Brands Data',brands:'Brand Performance',customers:'Customer',single:'Single',overview:'Business Overview'};
+  var labels={brandcards:'Brands Data',brands:'Brand Performance',customers:'Customer',single:'Single',overview:'Business Overview',insights:'Sales Insights',atRisk:'At Risk',crossSell:'Cross-Sell',health:'Dashboard Health'};
   document.querySelectorAll('.nav-item').forEach(function(n){
     if(n.textContent.trim().includes(labels[id]))n.classList.add('active');
   });
   if(id==='brands')renderBrandCharts();
   if(id==='brandcards')filterBrandCards();
   if(id==='overview')renderOverview();
+  if(id==='insights')renderInsights();
+  if(id==='atRisk')renderAtRisk();
+  if(id==='crossSell')renderCrossSell();
+  if(id==='health')renderHealth();
 }
 
-function renderAll(){
-  filterBrandCards();
-  renderBrandsTable();
-  renderCust();
-}
+function renderAll(){filterBrandCards();renderBrandsTable();renderCust();}
+function mkChart(id,cfg){var el=document.getElementById(id);if(!el)return;if(charts[id])charts[id].destroy();charts[id]=new Chart(el,cfg);}
 
-function mkChart(id,cfg){
-  var el=document.getElementById(id);if(!el)return;
-  if(charts[id])charts[id].destroy();
-  charts[id]=new Chart(el,cfg);
-}
-
-// ─── BRANDS DATA ANALYSIS ────────────────────────────────────────────────────
+// ── BRANDS DATA ANALYSIS ──────────────────────────────────────────────────────
 function filterBrandCards(){
   var search=(document.getElementById('bc-search').value||'').toLowerCase();
-  var sortKey=document.getElementById('bc-sort').value;
+  var sk=document.getElementById('bc-sort').value;
   var filtered=[...brandSums].filter(function(b){return b.name.toLowerCase().includes(search);});
-  if(sortKey==='name')filtered.sort(function(a,b){return a.name.localeCompare(b.name);});
+  if(sk==='name')filtered.sort(function(a,b){return a.name.localeCompare(b.name);});
   else filtered.sort(function(a,b){
-    var av=a[sortKey]!==null&&a[sortKey]!==undefined?a[sortKey]:-Infinity;
-    var bv=b[sortKey]!==null&&b[sortKey]!==undefined?b[sortKey]:-Infinity;
+    var av=a[sk]!==null&&a[sk]!==undefined?a[sk]:-Infinity;
+    var bv=b[sk]!==null&&b[sk]!==undefined?b[sk]:-Infinity;
     return bv-av;
   });
   renderBrandCards(filtered);
@@ -664,113 +843,140 @@ function renderBrandCards(brands){
   var container=document.getElementById('brand-cards-container');
   if(!container)return;
   var html='';
-  for(var bi=0;bi<brands.length;bi++){
-    var b=brands[bi];
-    var rvtVal=b.reforecast-b.target;
-    var rvsVal=b.reforecast-b.ss26;
-    var rvtPct=b.rfVsTarget;
-    var rvsPct=b.rfVsSS26;
+  brands.forEach(function(b){
+    var attainPct=b.targetTotal>0?Math.min(100,Math.max(0,b.reforecastTotal/b.targetTotal*100)):0;
+    var barColor=b.rfTotalVsTargetTotal===null||b.rfTotalVsTargetTotal>=0?
+      'linear-gradient(90deg,var(--green),var(--blue))':
+      'linear-gradient(90deg,var(--red),var(--amber))';
+    var perfColor=b.rfTotalVsTargetTotal===null?'var(--text3)':b.rfTotalVsTargetTotal>=0?'var(--green)':'var(--red)';
     var gbpActiveCount=b.rows.filter(function(r){return r.isActive&&r.currency==='GBP';}).length;
     var eurActiveCount=b.rows.filter(function(r){return r.isActive&&r.currency==='EUR';}).length;
     var gbpTotalCount=b.rows.filter(function(r){return r.currency==='GBP';}).length;
     var eurTotalCount=b.rows.filter(function(r){return r.currency==='EUR';}).length;
-    var attainPct=b.target>0?Math.min(100,Math.max(0,b.reforecast/b.target*100)):0;
-    var barColor=rvtPct===null||rvtPct>=0?'linear-gradient(90deg,var(--green),var(--blue))':'linear-gradient(90deg,var(--red),var(--amber))';
-    var perfColor=rvtPct===null?'var(--text3)':rvtPct>=0?'var(--green)':'var(--red)';
-    var topAccs=b.rows.filter(function(r){return r.isActive;}).sort(function(a,c){return c.reforecast-a.reforecast;}).slice(0,5);
+    var unknownCount=b.rows.filter(function(r){return r.currency==='UNKNOWN';}).length;
+    var topAccs=b.rows.filter(function(r){return r.isActive;})
+      .sort(function(a,c){return c.reforecastTotal-a.reforecastTotal;}).slice(0,5);
 
-    var pBadge=function(v){
-      if(v===null||isNaN(v))return'<span class="badge badge-amber">No target data</span>';
-      return'<span class="badge '+(v>=0?'badge-green':'badge-red')+'">'+(v>=0?'▲':'▼')+' '+Math.abs(v).toFixed(1)+'%</span>';
-    };
-
-    var accsHtml='';
-    for(var ai=0;ai<topAccs.length;ai++){
-      var a=topAccs[ai];
-      accsHtml+='<div class="bc-acc-row">'+
-        '<span style="font-weight:500;color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+a.account+'</span>'+
-        '<span style="color:var(--text3);min-width:80px;text-align:center">'+(a.country||'—')+'</span>'+
-        '<span class="badge '+(a.currency==='GBP'?'badge-green':'badge-blue')+'" style="font-size:10px">'+a.currency+'</span>'+
-        '<span style="font-weight:600;min-width:60px;text-align:right">'+fmtZ(a.reforecast)+'</span>'+
-        '<span style="color:var(--text3);font-size:11px;min-width:90px;text-align:right">'+(a.target>0?'Tgt: '+fmtZ(a.target):'')+'</span>'+
-        '</div>';
+    function pBadge(v){
+      if(v===null||isNaN(v))return'<span class="badge ba">No target data</span>';
+      return'<span class="badge '+(v>=0?'bg':'br')+'">'+(v>=0?'▲':'▼')+' '+Math.abs(v).toFixed(1)+'%</span>';
     }
+    function row(lbl,val,cls){return'<div class="bc-row"><span class="bc-lbl">'+lbl+'</span><span class="bc-val'+(cls?' '+cls:'')+'">'+val+'</span></div>';}
+    function totalRow(lbl,val,cls){return'<div class="bc-total-row"><span class="bc-total-lbl">'+lbl+'</span><span class="bc-total-val'+(cls?' '+cls:'')+'">'+val+'</span></div>';}
+    function sep(){return'<div class="bc-sep"></div>';}
 
-    html+='<div class="brand-card">'+
-      '<div class="bc-header">'+
+    var accsHtml=topAccs.map(function(a){
+      return'<div class="bc-acc-row">'+
+        '<span style="font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+a.account+'</span>'+
+        '<span style="color:var(--text3);min-width:80px;text-align:center">'+(a.country||'—')+'</span>'+
+        '<span class="badge '+(a.currency==='GBP'?'bg':'bb')+'" style="font-size:10px">'+a.currency+'</span>'+
+        '<span style="font-weight:600;min-width:60px;text-align:right">'+fmtN(a.reforecastTotal)+'</span>'+
+        '<span style="color:var(--text3);font-size:11px;min-width:90px;text-align:right">'+(a.targetTotal>0?'Tgt: '+fmtN(a.targetTotal):'')+'</span>'+
+      '</div>';
+    }).join('');
+
+    // All currencies section
+    var allCurrHtml=
+      row('SS27 Target',fmtN(b.target))+
+      row('SS27 Reforecast',fmtN(b.reforecast))+
+      row('SS27 Actual',fmtN(b.actual))+
+      (b.target2>0||b.reforecast2>0?
+        sep()+
+        row('SS27 2 Target',fmtN(b.target2),'bb')+
+        row('SS27 2 Reforecast',fmtN(b.reforecast2),'bb')+
+        row('SS27 2 Actual',fmtN(b.actual2),'bb'):'')+
+      sep()+
+      totalRow('Total SS27 Target',fmtN(b.targetTotal))+
+      totalRow('Total SS27 Reforecast',fmtN(b.reforecastTotal))+
+      totalRow('Total SS27 Actual',fmtN(b.actualTotal))+
+      sep()+
+      row('SS26 Actuals',fmtN(b.ss26))+
+      (b.ss26_2>0?row('SS26 2 Actuals',fmtN(b.ss26_2),'bb'):'')+
+      totalRow('Total SS26 Actuals',fmtN(b.ss26Total))+
+      sep()+
+      row('Reforecast vs Target',fmtPct(b.rfVsTarget),dc(b.rfVsTarget))+
+      (b.target2>0?row('Reforecast 2 vs Target 2',fmtPct(b.rf2VsTarget2),dc(b.rf2VsTarget2)):'')+
+      totalRow('Total Reforecast vs Total Target',fmtPct(b.rfTotalVsTargetTotal),dc(b.rfTotalVsTargetTotal))+
+      sep()+
+      row('Reforecast vs SS26 Actuals',fmtPct(b.rfVsSS26),dc(b.rfVsSS26))+
+      (b.ss26_2>0?row('Reforecast 2 vs SS26 2 Actuals',fmtPct(b.rf2VsSS26_2),dc(b.rf2VsSS26_2)):'')+
+      totalRow('Total Reforecast vs Total SS26 Actuals',fmtPct(b.rfTotalVsSS26Total),dc(b.rfTotalVsSS26Total));
+
+    // GBP section
+    var gbpHtml=
+      row('SS27 Target',fmtN(b.targetGBP))+
+      row('SS27 Reforecast',fmtN(b.reforecastGBP))+
+      row('SS27 Actual',fmtN(b.actualGBP))+
+      (b.target2GBP>0||b.reforecast2GBP>0?
+        sep()+
+        row('SS27 2 Target',fmtN(b.target2GBP),'bb')+
+        row('SS27 2 Reforecast',fmtN(b.reforecast2GBP),'bb')+
+        row('SS27 2 Actual',fmtN(b.actual2GBP),'bb'):'')+
+      sep()+
+      totalRow('Total SS27 Target',fmtN(b.targetGBPTotal))+
+      totalRow('Total SS27 Reforecast',fmtN(b.reforecastGBPTotal))+
+      totalRow('Total SS27 Actual',fmtN(b.actualGBPTotal))+
+      sep()+
+      row('Average Order Value',fmtN(b.aov))+
+      row('Active GBP Accounts',gbpActiveCount)+
+      row('Total GBP Accounts',gbpTotalCount);
+
+    // EUR section
+    var eurHtml=
+      row('SS27 Target',fmtN(b.targetEUR))+
+      row('SS27 Reforecast',fmtN(b.reforecastEUR))+
+      row('SS27 Actual',fmtN(b.actualEUR))+
+      (b.target2EUR>0||b.reforecast2EUR>0?
+        sep()+
+        row('SS27 2 Target',fmtN(b.target2EUR),'bb')+
+        row('SS27 2 Reforecast',fmtN(b.reforecast2EUR),'bb')+
+        row('SS27 2 Actual',fmtN(b.actual2EUR),'bb'):'')+
+      sep()+
+      totalRow('Total SS27 Target',fmtN(b.targetEURTotal))+
+      totalRow('Total SS27 Reforecast',fmtN(b.reforecastEURTotal))+
+      totalRow('Total SS27 Actual',fmtN(b.actualEURTotal))+
+      sep()+
+      row('Active EUR Accounts',eurActiveCount)+
+      row('Total EUR Accounts',eurTotalCount)+
+      row('Total Active Accounts',b.activeCount)+
+      (unknownCount>0?'<div style="margin-top:6px;font-size:11px;color:var(--amber-tx)">⚠ '+unknownCount+' rows with unknown currency</div>':'');
+
+    html+='<div class="bc">'+
+      '<div class="bc-hdr">'+
         '<div>'+
           '<div class="bc-name">'+b.name+'</div>'+
           '<div style="font-size:11px;color:var(--text3);margin-top:3px">Spring / Summer 2027 &nbsp;·&nbsp; '+b.totalCount+' accounts total</div>'+
         '</div>'+
         '<div class="bc-badges">'+
-          pBadge(rvtPct)+
-          '<span class="badge badge-blue">'+b.activeCount+' active</span>'+
-          (b.reforecastGBP>0?'<span class="badge badge-green">GBP</span>':'')+
-          (b.reforecastEUR>0?'<span class="badge badge-blue">EUR</span>':'')+
+          pBadge(b.rfTotalVsTargetTotal)+
+          '<span class="badge bb">'+b.activeCount+' active</span>'+
+          (b.reforecastGBPTotal>0?'<span class="badge bg">GBP</span>':'')+
+          (b.reforecastEURTotal>0?'<span class="badge bb">EUR</span>':'')+
+          (unknownCount>0?'<span class="badge ba">⚠ '+unknownCount+' unknown FX</span>':'')+
         '</div>'+
       '</div>'+
-
       '<div class="bc-body">'+
-        // All Currencies
-        '<div class="bc-section">'+
-          '<div class="bc-section-title">All Currencies</div>'+
-          '<div class="bc-row"><span class="bc-label">SS27 Target</span><span class="bc-value">'+fmtZ(b.target)+'</span></div>'+
-          '<div class="bc-row"><span class="bc-label">SS27 Reforecast</span><span class="bc-value">'+fmtZ(b.reforecast)+'</span></div>'+
-          '<div class="bc-row"><span class="bc-label">SS27 Actual</span><span class="bc-value">'+fmtZ(b.actual)+'</span></div>'+
-          '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">'+
-            '<div class="bc-row"><span class="bc-label">Reforecast vs Target (value)</span><span class="bc-value '+dc(rvtVal)+'">'+fmtDiff(rvtVal)+'</span></div>'+
-            '<div class="bc-row"><span class="bc-label">Reforecast vs Target (%)</span><span class="bc-value '+dc(rvtPct)+'">'+fmtPct(rvtPct)+'</span></div>'+
-            '<div class="bc-row"><span class="bc-label">Reforecast vs SS26 Forecast (value)</span><span class="bc-value '+dc(rvsVal)+'">'+fmtDiff(rvsVal)+'</span></div>'+
-            '<div class="bc-row"><span class="bc-label">Reforecast vs SS26 Forecast (%)</span><span class="bc-value '+dc(rvsPct)+'">'+fmtPct(rvsPct)+'</span></div>'+
-          '</div>'+
-        '</div>'+
-        // GBP
-        '<div class="bc-section">'+
-          '<div class="bc-section-title" style="color:var(--green-tx)">GBP Accounts</div>'+
-          '<div class="bc-row"><span class="bc-label">SS27 Target</span><span class="bc-value">'+fmtZ(b.targetGBP)+'</span></div>'+
-          '<div class="bc-row"><span class="bc-label">SS27 Reforecast</span><span class="bc-value">'+fmtZ(b.reforecastGBP)+'</span></div>'+
-          '<div class="bc-row"><span class="bc-label">SS27 Actual</span><span class="bc-value">'+fmtZ(b.actualGBP)+'</span></div>'+
-          '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">'+
-            '<div class="bc-row"><span class="bc-label">Average Order Value (GBP)</span><span class="bc-value">'+fmtZ(b.aov)+'</span></div>'+
-            '<div class="bc-row"><span class="bc-label">Active GBP Accounts</span><span class="bc-value">'+gbpActiveCount+'</span></div>'+
-            '<div class="bc-row"><span class="bc-label">Total GBP Accounts</span><span class="bc-value">'+gbpTotalCount+'</span></div>'+
-          '</div>'+
-        '</div>'+
-        // EUR
-        '<div class="bc-section">'+
-          '<div class="bc-section-title" style="color:var(--blue-tx)">EUR Accounts</div>'+
-          '<div class="bc-row"><span class="bc-label">SS27 Target</span><span class="bc-value">'+fmtZ(b.targetEUR)+'</span></div>'+
-          '<div class="bc-row"><span class="bc-label">SS27 Reforecast</span><span class="bc-value">'+fmtZ(b.reforecastEUR)+'</span></div>'+
-          '<div class="bc-row"><span class="bc-label">SS27 Actual</span><span class="bc-value">'+fmtZ(b.actualEUR)+'</span></div>'+
-          '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">'+
-            '<div class="bc-row"><span class="bc-label">Active EUR Accounts</span><span class="bc-value">'+eurActiveCount+'</span></div>'+
-            '<div class="bc-row"><span class="bc-label">Total EUR Accounts</span><span class="bc-value">'+eurTotalCount+'</span></div>'+
-            '<div class="bc-row"><span class="bc-label">Total Active Accounts</span><span class="bc-value">'+b.activeCount+'</span></div>'+
-          '</div>'+
-        '</div>'+
+        '<div class="bc-sec"><div class="bc-sec-title">All Currencies <span style="font-size:9px;color:var(--text3);font-weight:400;text-transform:none">(GBP + EUR + unknown FX)</span></div>'+allCurrHtml+'</div>'+
+        '<div class="bc-sec"><div class="bc-sec-title" style="color:var(--green-tx)">GBP Accounts</div>'+gbpHtml+'</div>'+
+        '<div class="bc-sec"><div class="bc-sec-title" style="color:var(--blue-tx)">EUR Accounts</div>'+eurHtml+'</div>'+
       '</div>'+
-
       (topAccs.length>0?
-        '<div class="bc-accs">'+
-          '<div class="bc-acc-title">Top Active Accounts by Reforecast Value</div>'+
-          accsHtml+
-        '</div>':'')+
-
+        '<div class="bc-accs"><div class="bc-acc-title">Top Active Accounts by Total Reforecast</div>'+accsHtml+'</div>':'')+
       '<div class="bc-footer">'+
-        '<div style="font-size:11px;color:var(--text3);white-space:nowrap;min-width:120px">Target attainment</div>'+
+        '<div style="font-size:11px;color:var(--text3);white-space:nowrap;min-width:130px">Total target attainment</div>'+
         '<div style="flex:1;height:6px;background:var(--surface3);border-radius:99px;overflow:hidden">'+
           '<div style="height:100%;border-radius:99px;background:'+barColor+';width:'+attainPct.toFixed(1)+'%"></div>'+
         '</div>'+
         '<div style="font-size:13px;font-weight:700;color:'+perfColor+';white-space:nowrap;min-width:50px;text-align:right">'+
-          (b.target>0?(b.reforecast/b.target*100).toFixed(1)+'%':'No target')+
+          (b.targetTotal>0?(b.reforecastTotal/b.targetTotal*100).toFixed(1)+'%':'No target')+
         '</div>'+
       '</div>'+
     '</div>';
-  }
+  });
   container.innerHTML=html;
 }
 
-// ─── BRAND PERFORMANCE TABLE ─────────────────────────────────────────────────
+// ── BRAND PERFORMANCE TABLE ───────────────────────────────────────────────────
 function renderBrandsTable(){
   var s=bSort;
   var sorted=[...brandSums].sort(function(a,b){
@@ -778,124 +984,108 @@ function renderBrandsTable(){
     var bv=b[s.col]!==null&&b[s.col]!==undefined?b[s.col]:-Infinity;
     return typeof av==='string'?av.localeCompare(bv)*s.dir:(av-bv)*s.dir;
   });
-  var maxRf=Math.max.apply(null,sorted.map(function(b){return b.reforecast||0;}));
+  var maxRf=Math.max.apply(null,sorted.map(function(b){return b.reforecastTotal||0;}));
   if(!maxRf)maxRf=1;
   document.getElementById('brands-tbody').innerHTML=sorted.map(function(b){
-    var fillPct=Math.round((b.reforecast||0)/maxRf*100);
-    var isRed=b.rfVsTarget!==null&&b.rfVsTarget<0;
+    var fillPct=Math.round((b.reforecastTotal||0)/maxRf*100);
+    var isRed=b.rfTotalVsTargetTotal!==null&&b.rfTotalVsTargetTotal<0;
     return'<tr>'+
-      '<td class="td-bold">'+b.name+'</td>'+
-      '<td class="td-right">'+fmtZ(b.target)+'</td>'+
-      '<td><div class="progress-wrap">'+
-        '<div class="progress-bar"><div class="progress-fill'+(isRed?' red':'')+'" style="width:'+fillPct+'%"></div></div>'+
-        '<span style="font-weight:600;min-width:50px;text-align:right;padding-left:8px">'+fmtZ(b.reforecast)+'</span>'+
+      '<td class="td-b">'+b.name+'</td>'+
+      '<td class="td-r">'+fmtN(b.targetTotal)+'</td>'+
+      '<td><div class="prog-wrap">'+
+        '<div class="prog"><div class="prog-fill'+(isRed?' red':'')+'" style="width:'+fillPct+'%"></div></div>'+
+        '<span style="font-weight:600;min-width:50px;text-align:right;padding-left:8px">'+fmtN(b.reforecastTotal)+'</span>'+
       '</div></td>'+
-      '<td class="td-right">'+fmtZ(b.actual)+'</td>'+
-      '<td>'+badgePct(b.reforecast,b.target)+'</td>'+
-      '<td>'+badgePct(b.reforecast,b.ss26)+'</td>'+
-      '<td class="td-right">'+fmtZ(b.reforecastGBP)+'</td>'+
-      '<td class="td-right">'+fmtZ(b.reforecastEUR)+'</td>'+
-      '<td class="td-right"><span class="badge badge-blue">'+b.activeCount+'</span></td>'+
-      '<td class="td-right">'+b.conversionRate.toFixed(0)+'%</td>'+
+      '<td class="td-r">'+fmtN(b.actualTotal)+'</td>'+
+      '<td>'+bpct(b.reforecastTotal,b.targetTotal)+'</td>'+
+      '<td>'+bpct(b.reforecastTotal,b.ss26Total)+'</td>'+
+      '<td class="td-r">'+fmtN(b.reforecastGBPTotal)+'</td>'+
+      '<td class="td-r">'+fmtN(b.reforecastEURTotal)+'</td>'+
+      '<td class="td-r"><span class="badge bb">'+b.activeCount+'</span></td>'+
+      '<td class="td-r">'+b.conversionRate.toFixed(0)+'%</td>'+
     '</tr>';
   }).join('');
 }
-
 function sortB(col){if(bSort.col===col)bSort.dir*=-1;else{bSort.col=col;bSort.dir=-1;}renderBrandsTable();}
 
 function renderBrandCharts(){
-  var topGBP=[...brandSums].sort(function(a,b){return b.reforecastGBP-a.reforecastGBP;}).slice(0,10);
-  var topEUR=[...brandSums].sort(function(a,b){return b.reforecastEUR-a.reforecastEUR;}).slice(0,10);
-  mkChart('ch-gbp-brand',{type:'bar',data:{labels:topGBP.map(function(b){return b.name;}),datasets:[{label:'GBP Reforecast',data:topGBP.map(function(b){return b.reforecastGBP;}),backgroundColor:'rgba(0,212,161,0.8)',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:function(v){return fmtZ(v);}},grid:{color:'rgba(255,255,255,0.05)'}},x:{grid:{display:false},ticks:{font:{size:10},maxRotation:35,color:'#8b93a8'}}}}});
-  mkChart('ch-eur-brand',{type:'bar',data:{labels:topEUR.map(function(b){return b.name;}),datasets:[{label:'EUR Reforecast',data:topEUR.map(function(b){return b.reforecastEUR;}),backgroundColor:'rgba(77,159,255,0.8)',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:function(v){return fmtZ(v);}},grid:{color:'rgba(255,255,255,0.05)'}},x:{grid:{display:false},ticks:{font:{size:10},maxRotation:35,color:'#8b93a8'}}}}});
+  var tGBP=[...brandSums].sort(function(a,b){return b.reforecastGBPTotal-a.reforecastGBPTotal;}).slice(0,10);
+  var tEUR=[...brandSums].sort(function(a,b){return b.reforecastEURTotal-a.reforecastEURTotal;}).slice(0,10);
+  mkChart('ch-gbp-brand',{type:'bar',data:{labels:tGBP.map(function(b){return b.name;}),datasets:[{data:tGBP.map(function(b){return b.reforecastGBPTotal;}),backgroundColor:'rgba(0,212,161,0.8)',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:function(v){return fmtN(v);}},grid:{color:'rgba(255,255,255,0.05)'}},x:{grid:{display:false},ticks:{font:{size:10},maxRotation:35,color:'#8b93a8'}}}}});
+  mkChart('ch-eur-brand',{type:'bar',data:{labels:tEUR.map(function(b){return b.name;}),datasets:[{data:tEUR.map(function(b){return b.reforecastEURTotal;}),backgroundColor:'rgba(77,159,255,0.8)',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:function(v){return fmtN(v);}},grid:{color:'rgba(255,255,255,0.05)'}},x:{grid:{display:false},ticks:{font:{size:10},maxRotation:35,color:'#8b93a8'}}}}});
 }
 
-// ─── CUSTOMER ANALYSIS ───────────────────────────────────────────────────────
+// ── CUSTOMER ANALYSIS ─────────────────────────────────────────────────────────
 function renderCust(){
   var search=document.getElementById('cs-search').value.toLowerCase();
   var country=document.getElementById('cs-country').value;
   var brand=document.getElementById('cs-brand').value;
   var multi=document.getElementById('cs-multi').value;
-  var statusF=document.getElementById('cs-status').value;
-
   var filtered=custData.filter(function(c){
     if(search&&!c.account.toLowerCase().includes(search))return false;
     if(country&&c.country!==country)return false;
     if(brand&&!c.brands.has(brand))return false;
     if(multi==='multi'&&c.brands.size<2)return false;
     if(multi==='single'&&c.brands.size!==1)return false;
-    if(statusF==='active'&&!c.isActive)return false;
-    if(statusF==='inactive'&&c.isActive)return false;
     return true;
   });
-
   var multiBuyers=filtered.filter(function(c){return c.brands.size>1;}).length;
-  var topSpend=filtered[0]?filtered[0].reforecast:0;
-  var totalRf=filtered.reduce(function(a,c){return a+c.reforecast;},0);
-
   document.getElementById('cust-kpis').innerHTML=
-    '<div class="kpi green"><div class="kpi-label">Customers Shown</div><div class="kpi-value">'+filtered.length.toLocaleString()+'</div><div class="kpi-sub neu">matching current filters</div></div>'+
+    '<div class="kpi green"><div class="kpi-label">Customers Shown</div><div class="kpi-value">'+filtered.length.toLocaleString()+'</div><div class="kpi-sub neu">matching filters</div></div>'+
     '<div class="kpi purple"><div class="kpi-label">Multi-Brand Buyers</div><div class="kpi-value">'+multiBuyers.toLocaleString()+'</div><div class="kpi-sub neu">buying 2 or more brands</div></div>'+
-    '<div class="kpi amber"><div class="kpi-label">Top Customer Reforecast</div><div class="kpi-value">'+fmtZ(topSpend)+'</div><div class="kpi-sub neu">'+(filtered[0]?filtered[0].account:'—')+'</div></div>'+
-    '<div class="kpi blue"><div class="kpi-label">Total Reforecast (Filtered)</div><div class="kpi-value">'+fmtZ(totalRf)+'</div><div class="kpi-sub neu">sum of filtered customers</div></div>';
-
+    '<div class="kpi amber"><div class="kpi-label">Top Customer Total Reforecast</div><div class="kpi-value">'+fmtN(filtered[0]?filtered[0].reforecastTotal:0)+'</div><div class="kpi-sub neu">'+(filtered[0]?filtered[0].account:'—')+'</div></div>'+
+    '<div class="kpi blue"><div class="kpi-label">Total Reforecast (Filtered)</div><div class="kpi-value">'+fmtN(filtered.reduce(function(a,c){return a+c.reforecastTotal;},0))+'</div><div class="kpi-sub neu">sum of filtered customers</div></div>';
   document.getElementById('cust-count').textContent='Showing '+Math.min(filtered.length,300).toLocaleString()+' of '+filtered.length.toLocaleString()+' customers';
   document.getElementById('cust-tbody').innerHTML=filtered.slice(0,300).map(function(c){
-    var rvs=pct(c.reforecast,c.ss26);
+    var p=pct(c.reforecastTotal,c.ss26Total);
+    var pb=p!==null?'<span class="badge '+(p>=0?'bg':'br')+'">'+(p>=0?'▲':'▼')+' '+Math.abs(p).toFixed(1)+'%</span>':'<span class="badge ba">—</span>';
     var bc=c.brands.size;
-    var rvsBadge=rvs!==null?'<span class="badge '+(rvs>=0?'badge-green':'badge-red')+'">'+(rvs>=0?'▲':'▼')+' '+Math.abs(rvs).toFixed(1)+'%</span>':'<span class="badge badge-amber">—</span>';
     return'<tr>'+
-      '<td class="td-bold">'+c.account+'</td>'+
+      '<td class="td-b">'+c.account+'</td>'+
       '<td>'+(c.country||'—')+'</td>'+
-      '<td class="td-right td-bold">'+fmtZ(c.reforecast)+'</td>'+
-      '<td class="td-right">'+fmtZ(c.actual)+'</td>'+
-      '<td class="td-right">'+fmtZ(c.ss26)+'</td>'+
-      '<td>'+rvsBadge+'</td>'+
-      '<td style="font-size:12px;color:var(--text2);max-width:240px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+[...c.brands].join(', ')+'</td>'+
-      '<td class="td-right"><span class="badge '+(bc>2?'badge-green':bc>1?'badge-purple':'badge-amber')+'">'+bc+'</span></td>'+
+      '<td class="td-r">'+fmtN(c.reforecast)+'</td>'+
+      '<td class="td-r">'+fmtN(c.reforecast2)+'</td>'+
+      '<td class="td-r td-b">'+fmtN(c.reforecastTotal)+'</td>'+
+      '<td class="td-r">'+fmtN(c.actualTotal)+'</td>'+
+      '<td class="td-r">'+fmtN(c.ss26Total)+'</td>'+
+      '<td>'+pb+'</td>'+
+      '<td style="font-size:12px;color:var(--text2);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+ [...c.brands].join(', ')+'</td>'+
+      '<td class="td-r"><span class="badge '+(bc>2?'bg':bc>1?'bp':'ba')+'">'+bc+'</span></td>'+
     '</tr>';
   }).join('');
 }
 
-// ─── SINGLE BRAND DETAIL ────────────────────────────────────────────────────
+// ── SINGLE BRAND DETAIL ───────────────────────────────────────────────────────
 function renderSingle(){
   var name=document.getElementById('sb-select').value;
-  var kpiEl=document.getElementById('sb-kpis');
-  var el=document.getElementById('sb-content');
-  if(!name){
-    kpiEl.innerHTML='';
-    el.innerHTML='<div style="color:var(--text3);font-size:14px;padding:40px 0;text-align:center">Select a brand from the dropdown above.</div>';
-    return;
-  }
-  var b=brandSums.find(function(x){return x.name===name;});
-  if(!b)return;
+  document.getElementById('sb-kpis').innerHTML='';
+  document.getElementById('sb-content').innerHTML=!name?
+    '<div style="color:var(--text3);font-size:14px;padding:40px 0;text-align:center">Select a brand above.</div>':'';
+  if(!name)return;
+  var b=brandSums.find(function(x){return x.name===name;});if(!b)return;
   currentBrandRows=b.rows;
-
-  kpiEl.innerHTML=
+  document.getElementById('sb-kpis').innerHTML=
     '<div class="kpi-grid">'+
-      '<div class="kpi '+(b.rfVsTarget>=0?'green':'red')+'"><div class="kpi-label">SS27 Target</div><div class="kpi-value">'+fmtZ(b.target)+'</div></div>'+
-      '<div class="kpi '+(b.rfVsTarget>=0?'green':'red')+'"><div class="kpi-label">SS27 Reforecast</div><div class="kpi-value">'+fmtZ(b.reforecast)+'</div><div class="kpi-sub '+dc(b.rfVsTarget)+'">'+fmtPct(b.rfVsTarget)+' vs target</div></div>'+
-      '<div class="kpi blue"><div class="kpi-label">SS27 Actual</div><div class="kpi-value">'+fmtZ(b.actual)+'</div></div>'+
-      '<div class="kpi '+(b.rfVsSS26>=0?'green':'amber')+'"><div class="kpi-label">Reforecast vs SS26 Forecast</div><div class="kpi-value">'+fmtPct(b.rfVsSS26)+'</div><div class="kpi-sub '+dc(b.rfVsSS26)+'">year on year</div></div>'+
-      '<div class="kpi green"><div class="kpi-label">GBP Reforecast</div><div class="kpi-value">'+fmtZ(b.reforecastGBP)+'</div><div class="kpi-sub neu">Target: '+fmtZ(b.targetGBP)+'</div></div>'+
-      '<div class="kpi blue"><div class="kpi-label">EUR Reforecast</div><div class="kpi-value">'+fmtZ(b.reforecastEUR)+'</div><div class="kpi-sub neu">Target: '+fmtZ(b.targetEUR)+'</div></div>'+
-      '<div class="kpi purple"><div class="kpi-label">Active Accounts</div><div class="kpi-value">'+b.activeCount+'</div><div class="kpi-sub neu">of '+b.totalCount+' total accounts</div></div>'+
-      '<div class="kpi amber"><div class="kpi-label">Average Order Value (GBP)</div><div class="kpi-value">'+fmtZ(b.aov)+'</div><div class="kpi-sub neu">GBP accounts only</div></div>'+
+      '<div class="kpi '+(b.rfTotalVsTargetTotal>=0?'green':'red')+'"><div class="kpi-label">Total SS27 Target</div><div class="kpi-value">'+fmtN(b.targetTotal)+'</div><div class="kpi-sub neu">SS27: '+fmtN(b.target)+' &nbsp;+&nbsp; SS27 2: '+fmtN(b.target2)+'</div></div>'+
+      '<div class="kpi '+(b.rfTotalVsTargetTotal>=0?'green':'red')+'"><div class="kpi-label">Total SS27 Reforecast</div><div class="kpi-value">'+fmtN(b.reforecastTotal)+'</div><div class="kpi-sub '+dc(b.rfTotalVsTargetTotal)+'">'+fmtPct(b.rfTotalVsTargetTotal)+' vs total target</div></div>'+
+      '<div class="kpi blue"><div class="kpi-label">Total SS27 Actual</div><div class="kpi-value">'+fmtN(b.actualTotal)+'</div></div>'+
+      '<div class="kpi '+(b.rfTotalVsSS26Total>=0?'green':'amber')+'"><div class="kpi-label">Total Reforecast vs Total SS26 Actuals</div><div class="kpi-value">'+fmtPct(b.rfTotalVsSS26Total)+'</div><div class="kpi-sub '+dc(b.rfTotalVsSS26Total)+'">year on year</div></div>'+
+      '<div class="kpi green"><div class="kpi-label">GBP Total Reforecast</div><div class="kpi-value">'+fmtN(b.reforecastGBPTotal)+'</div><div class="kpi-sub neu">Target: '+fmtN(b.targetGBPTotal)+'</div></div>'+
+      '<div class="kpi blue"><div class="kpi-label">EUR Total Reforecast</div><div class="kpi-value">'+fmtN(b.reforecastEURTotal)+'</div><div class="kpi-sub neu">Target: '+fmtN(b.targetEURTotal)+'</div></div>'+
+      '<div class="kpi purple"><div class="kpi-label">Active Accounts</div><div class="kpi-value">'+b.activeCount+'</div><div class="kpi-sub neu">of '+b.totalCount+' total</div></div>'+
+      '<div class="kpi amber"><div class="kpi-label">Average Order Value (GBP)</div><div class="kpi-value">'+fmtN(b.aov)+'</div><div class="kpi-sub neu">GBP active accounts</div></div>'+
     '</div>';
-
-  filterSingleAccounts();
+  filterSingle();
 }
 
-function filterSingleAccounts(){
+function filterSingle(){
   var el=document.getElementById('sb-content');
   if(!currentBrandRows.length)return;
+  var name=document.getElementById('sb-select').value;
+  var b=brandSums.find(function(x){return x.name===name;});if(!b)return;
   var search=(document.getElementById('sb-search').value||'').toLowerCase();
   var statusF=document.getElementById('sb-status').value;
   var currencyF=document.getElementById('sb-currency').value;
-  var name=document.getElementById('sb-select').value;
-  var b=brandSums.find(function(x){return x.name===name;});
-  if(!b)return;
-
   var filtered=currentBrandRows.filter(function(r){
     if(search&&!r.account.toLowerCase().includes(search))return false;
     if(statusF==='active'&&!r.isActive)return false;
@@ -903,117 +1093,407 @@ function filterSingleAccounts(){
     if(currencyF&&r.currency!==currencyF)return false;
     return true;
   });
-
-  el.innerHTML=
-    '<div class="metric-table-card">'+
-      '<div class="metric-table-header">'+
-        '<div class="metric-table-title">Accounts — '+b.name+'</div>'+
-        '<div class="metric-table-sub">'+filtered.length+' accounts shown of '+b.totalCount+' total · '+b.activeCount+' active</div>'+
-      '</div>'+
-      '<div class="table-wrap"><table>'+
-        '<thead><tr>'+
-          '<th>Account Name</th><th>Country</th><th>Status</th><th>Currency</th>'+
-          '<th class="td-right">SS26 Actuals</th>'+
-          '<th class="td-right">SS27 Target</th>'+
-          '<th class="td-right">SS27 Reforecast</th>'+
-          '<th class="td-right">SS27 Actual</th>'+
-          '<th>Reforecast vs Target</th>'+
-          '<th>Reforecast vs SS26</th>'+
-        '</tr></thead>'+
-        '<tbody>'+filtered.map(function(r){
-          return'<tr>'+
-            '<td class="td-bold">'+r.account+'</td>'+
-            '<td>'+(r.country||'—')+'</td>'+
-            '<td><span class="badge '+(r.isActive?'badge-green':'badge-amber')+'" style="font-size:10px">'+r.status+'</span></td>'+
-            '<td><span class="badge '+(r.currency==='GBP'?'badge-green':'badge-blue')+'" style="font-size:10px">'+r.currency+'</span></td>'+
-            '<td class="td-right">'+fmtZ(r.ss26)+'</td>'+
-            '<td class="td-right">'+fmtZ(r.target)+'</td>'+
-            '<td class="td-right td-bold">'+fmtZ(r.reforecast)+'</td>'+
-            '<td class="td-right">'+fmtZ(r.actual)+'</td>'+
-            '<td>'+badgePct(r.reforecast,r.target)+'</td>'+
-            '<td>'+badgePct(r.reforecast,r.ss26)+'</td>'+
-          '</tr>';
-        }).join('')+
-        '</tbody></table></div>'+
-    '</div>';
+  el.innerHTML='<div class="mtable">'+
+    '<div class="mtable-hdr">'+
+      '<div class="mtable-title">All Accounts — '+b.name+'</div>'+
+      '<div class="mtable-sub">'+filtered.length+' shown of '+b.totalCount+' total · '+b.activeCount+' active</div>'+
+    '</div>'+
+    '<div class="table-wrap"><table>'+
+      '<thead><tr>'+
+        '<th>Account Name</th><th>Country</th><th>Status</th><th>Currency</th>'+
+        '<th class="td-r">SS26 Actuals</th><th class="td-r">SS26 2 Actuals</th><th class="td-r">Total SS26</th>'+
+        '<th class="td-r">SS27 Target</th><th class="td-r">SS27 2 Target</th><th class="td-r">Total Target</th>'+
+        '<th class="td-r">SS27 Reforecast</th><th class="td-r">SS27 2 Reforecast</th><th class="td-r">Total Reforecast</th>'+
+        '<th class="td-r">SS27 Actual</th><th class="td-r">SS27 2 Actual</th><th class="td-r">Total Actual</th>'+
+        '<th>Reforecast vs Target</th><th>Total Rf vs Total Target</th>'+
+      '</tr></thead>'+
+      '<tbody>'+filtered.map(function(r){
+        return'<tr>'+
+          '<td class="td-b">'+r.account+'</td>'+
+          '<td>'+(r.country||'—')+'</td>'+
+          '<td><span class="badge '+(r.isActive?'bg':'ba')+'" style="font-size:10px">'+r.status+'</span></td>'+
+          '<td><span class="badge '+(r.currency==='GBP'?'bg':r.currency==='EUR'?'bb':'ba')+'" style="font-size:10px">'+r.currency+'</span></td>'+
+          '<td class="td-r">'+fmtN(r.ss26)+'</td>'+
+          '<td class="td-r">'+fmtN(r.ss26_2)+'</td>'+
+          '<td class="td-r td-b">'+fmtN(r.ss26Total)+'</td>'+
+          '<td class="td-r">'+fmtN(r.target)+'</td>'+
+          '<td class="td-r">'+fmtN(r.target2)+'</td>'+
+          '<td class="td-r td-b">'+fmtN(r.targetTotal)+'</td>'+
+          '<td class="td-r">'+fmtN(r.reforecast)+'</td>'+
+          '<td class="td-r">'+fmtN(r.reforecast2)+'</td>'+
+          '<td class="td-r td-b">'+fmtN(r.reforecastTotal)+'</td>'+
+          '<td class="td-r">'+fmtN(r.actual)+'</td>'+
+          '<td class="td-r">'+fmtN(r.actual2)+'</td>'+
+          '<td class="td-r td-b">'+fmtN(r.actualTotal)+'</td>'+
+          '<td>'+bpct(r.reforecast,r.target)+'</td>'+
+          '<td>'+bpct(r.reforecastTotal,r.targetTotal)+'</td>'+
+        '</tr>';
+      }).join('')+
+      '</tbody></table></div></div>';
 }
 
-// ─── BUSINESS OVERVIEW ───────────────────────────────────────────────────────
+// ── BUSINESS OVERVIEW ─────────────────────────────────────────────────────────
 function renderOverview(){
-  var tT=sum(brandSums,'target'),tR=sum(brandSums,'reforecast'),tA=sum(brandSums,'actual'),tS=sum(brandSums,'ss26');
+  // All totals use Total fields (sum of window 1 + window 2)
+  var tT=sumF(brandSums,'targetTotal'),tR=sumF(brandSums,'reforecastTotal'),tA=sumF(brandSums,'actualTotal');
+  var tS=sumF(brandSums,'ss26Total');
+  var t1=sumF(brandSums,'target'),t2=sumF(brandSums,'target2');
+  var r1=sumF(brandSums,'reforecast'),r2=sumF(brandSums,'reforecast2');
+  var a1=sumF(brandSums,'actual'),a2=sumF(brandSums,'actual2');
+  var s1=sumF(brandSums,'ss26'),s2=sumF(brandSums,'ss26_2');
   var tAc=brandSums.reduce(function(a,b){return a+b.activeCount;},0);
   var activeBrands=brandSums.filter(function(b){return b.activeCount>0;}).length;
-  var tGBP=sum(brandSums,'reforecastGBP'),tEUR=sum(brandSums,'reforecastEUR');
-  var tTgbp=sum(brandSums,'targetGBP'),tTeur=sum(brandSums,'targetEUR');
-  var tAgbp=sum(brandSums,'actualGBP'),tAeur=sum(brandSums,'actualEUR');
+  var tGBP=sumF(brandSums,'reforecastGBPTotal'),tEUR=sumF(brandSums,'reforecastEURTotal');
+  var tTgbp=sumF(brandSums,'targetGBPTotal'),tTeur=sumF(brandSums,'targetEURTotal');
+  var tAgbp=sumF(brandSums,'actualGBPTotal'),tAeur=sumF(brandSums,'actualEURTotal');
   var totalGBPActive=allRows.filter(function(r){return r.isActive&&r.currency==='GBP';}).length;
   var aov=totalGBPActive>0?tGBP/totalGBPActive:0;
   var rvtPct=pct(tR,tT),rvsPct=pct(tR,tS);
   var rvtVal=tR-tT,rvsVal=tR-tS;
 
-  document.getElementById('kpi-row1').innerHTML=
-    '<div class="kpi green"><div class="kpi-label">Total SS27 Target</div><div class="kpi-value">'+fmtZ(tT)+'</div><div class="kpi-sub neu">All currencies combined</div></div>'+
-    '<div class="kpi '+(rvtPct>=0?'green':'red')+'"><div class="kpi-label">Total SS27 Reforecast</div><div class="kpi-value">'+fmtZ(tR)+'</div><div class="kpi-sub '+dc(rvtPct)+'">'+fmtPct(rvtPct)+' vs target</div></div>'+
-    '<div class="kpi blue"><div class="kpi-label">Total SS27 Actual</div><div class="kpi-value">'+fmtZ(tA)+'</div><div class="kpi-sub neu">Confirmed orders to date</div></div>'+
-    '<div class="kpi '+(rvsPct>=0?'green':'amber')+'"><div class="kpi-label">Reforecast vs SS26 Forecast</div><div class="kpi-value">'+fmtPct(rvsPct)+'</div><div class="kpi-sub '+dc(rvsPct)+'">'+fmtDiff(rvsVal)+' year on year</div></div>'+
+  document.getElementById('ov-kpis').innerHTML=
+    '<div class="kpi green"><div class="kpi-label">Total SS27 Target</div><div class="kpi-value">'+fmtN(tT)+'</div><div class="kpi-sub neu">SS27: '+fmtN(t1)+' &nbsp;+&nbsp; SS27 2: '+fmtN(t2)+'</div></div>'+
+    '<div class="kpi '+(rvtPct>=0?'green':'red')+'"><div class="kpi-label">Total SS27 Reforecast</div><div class="kpi-value">'+fmtN(tR)+'</div><div class="kpi-sub '+dc(rvtPct)+'">'+fmtPct(rvtPct)+' vs total target</div></div>'+
+    '<div class="kpi blue"><div class="kpi-label">Total SS27 Actual</div><div class="kpi-value">'+fmtN(tA)+'</div><div class="kpi-sub neu">SS27: '+fmtN(a1)+' + SS27 2: '+fmtN(a2)+'</div></div>'+
+    '<div class="kpi '+(rvsPct>=0?'green':'amber')+'"><div class="kpi-label">Total Reforecast vs Total SS26 Actuals</div><div class="kpi-value">'+fmtPct(rvsPct)+'</div><div class="kpi-sub '+dc(rvsPct)+'">'+fmtDiff(rvsVal)+' year on year</div></div>'+
     '<div class="kpi purple"><div class="kpi-label">Total Active Accounts</div><div class="kpi-value">'+tAc.toLocaleString()+'</div><div class="kpi-sub neu">Across '+activeBrands+' active brands</div></div>'+
-    '<div class="kpi amber"><div class="kpi-label">Average Order Value (GBP)</div><div class="kpi-value">'+fmtZ(aov)+'</div><div class="kpi-sub neu">GBP accounts only</div></div>';
+    '<div class="kpi amber"><div class="kpi-label">Average Order Value (GBP)</div><div class="kpi-value">'+fmtN(aov)+'</div><div class="kpi-sub neu">GBP accounts · Total Reforecast / Active Accounts</div></div>';
 
+  // Business Top Sheet — every column separately then totals
   document.getElementById('bts-table').innerHTML='<tbody>'+
-    '<tr><td colspan="2" class="bts-section-row">All Currencies</td></tr>'+
-    '<tr><td>Total SS27 Target (All Currencies)</td><td class="td-right">'+fmtFull(tT)+'</td></tr>'+
-    '<tr><td>Total SS27 Reforecast (All Currencies)</td><td class="td-right">'+fmtFull(tR)+'</td></tr>'+
-    '<tr><td>Total SS27 Actual (All Currencies)</td><td class="td-right">'+fmtFull(tA)+'</td></tr>'+
-    '<tr><td>Total SS27 Reforecast vs Target (value difference)</td><td class="td-right '+dc(rvtVal)+'">'+fmtDiff(rvtVal)+'</td></tr>'+
-    '<tr><td>Total SS27 Reforecast vs Target (percentage)</td><td class="td-right '+dc(rvtPct)+'">'+fmtPct(rvtPct)+'</td></tr>'+
-    '<tr><td>Total SS27 Reforecast vs SS26 Forecast (value difference)</td><td class="td-right '+dc(rvsVal)+'">'+fmtDiff(rvsVal)+'</td></tr>'+
-    '<tr><td>Total SS27 Reforecast vs SS26 Forecast (percentage)</td><td class="td-right '+dc(rvsPct)+'">'+fmtPct(rvsPct)+'</td></tr>'+
-    '<tr><td colspan="2" class="bts-section-row">GBP Accounts</td></tr>'+
-    '<tr><td>SS27 Target — GBP Accounts</td><td class="td-right">'+fmtFull(tTgbp)+'</td></tr>'+
-    '<tr><td>SS27 Reforecast — GBP Accounts</td><td class="td-right">'+fmtFull(tGBP)+'</td></tr>'+
-    '<tr><td>SS27 Actual — GBP Accounts</td><td class="td-right">'+fmtFull(tAgbp)+'</td></tr>'+
-    '<tr><td colspan="2" class="bts-section-row">EUR Accounts</td></tr>'+
-    '<tr><td>SS27 Target — EUR Accounts</td><td class="td-right">'+fmtFull(tTeur)+'</td></tr>'+
-    '<tr><td>SS27 Reforecast — EUR Accounts</td><td class="td-right">'+fmtFull(tEUR)+'</td></tr>'+
-    '<tr><td>SS27 Actual — EUR Accounts</td><td class="td-right">'+fmtFull(tAeur)+'</td></tr>'+
-    '<tr><td colspan="2" class="bts-section-row">Summary</td></tr>'+
-    '<tr><td>Average Order Value (GBP accounts only)</td><td class="td-right">'+fmtFull(aov)+'</td></tr>'+
-    '<tr><td>Total Active Accounts</td><td class="td-right">'+tAc.toLocaleString()+'</td></tr>'+
-    '<tr><td>Total Active Brands</td><td class="td-right">'+activeBrands+' of '+BRANDS.length+'</td></tr>'+
+    '<tr class="sec-row"><td colspan="2">SS27 Window 1</td></tr>'+
+    '<tr><td colspan="2" style="font-size:11px;color:var(--text3);padding:6px 16px">ℹ All Currencies includes GBP + EUR + any rows with unknown currency. GBP and EUR sections include only rows with a valid recognised currency code.</td></tr>'+
+    '<tr><td>SS27 Target</td><td class="td-r">'+fmtFull(t1)+'</td></tr>'+
+    '<tr><td>SS27 Reforecast</td><td class="td-r">'+fmtFull(r1)+'</td></tr>'+
+    '<tr><td>SS27 Actual</td><td class="td-r">'+fmtFull(a1)+'</td></tr>'+
+    '<tr class="sec-row"><td colspan="2">SS27 Window 2</td></tr>'+
+    '<tr><td>SS27 2 Target</td><td class="td-r">'+fmtFull(t2)+'</td></tr>'+
+    '<tr><td>SS27 2 Reforecast</td><td class="td-r">'+fmtFull(r2)+'</td></tr>'+
+    '<tr><td>SS27 2 Actual</td><td class="td-r">'+fmtFull(a2)+'</td></tr>'+
+    '<tr class="sec-row"><td colspan="2">Total SS27 (Window 1 + Window 2)</td></tr>'+
+    '<tr><td>Total SS27 Target</td><td class="td-r td-b">'+fmtFull(tT)+'</td></tr>'+
+    '<tr><td>Total SS27 Reforecast</td><td class="td-r td-b">'+fmtFull(tR)+'</td></tr>'+
+    '<tr><td>Total SS27 Actual</td><td class="td-r td-b">'+fmtFull(tA)+'</td></tr>'+
+    '<tr class="sec-row"><td colspan="2">Reforecast vs Target</td></tr>'+
+    '<tr><td>Total Reforecast vs Total Target (value difference)</td><td class="td-r '+dc(rvtVal)+'">'+fmtDiff(rvtVal)+'</td></tr>'+
+    '<tr><td>Total Reforecast vs Total Target (%)</td><td class="td-r '+dc(rvtPct)+'">'+fmtPct(rvtPct)+'</td></tr>'+
+    '<tr class="sec-row"><td colspan="2">SS26 Actuals (Prior Year)</td></tr>'+
+    '<tr><td>SS26 Actuals</td><td class="td-r">'+fmtFull(s1)+'</td></tr>'+
+    '<tr><td>SS26 2 Actuals</td><td class="td-r">'+fmtFull(s2)+'</td></tr>'+
+    '<tr><td>Total SS26 Actuals</td><td class="td-r td-b">'+fmtFull(tS)+'</td></tr>'+
+    '<tr><td>Total Reforecast vs Total SS26 Actuals (value)</td><td class="td-r '+dc(rvsVal)+'">'+fmtDiff(rvsVal)+'</td></tr>'+
+    '<tr><td>Total Reforecast vs Total SS26 Actuals (%)</td><td class="td-r '+dc(rvsPct)+'">'+fmtPct(rvsPct)+'</td></tr>'+
+    '<tr class="sec-row"><td colspan="2">GBP Accounts</td></tr>'+
+    '<tr><td>GBP SS27 Target</td><td class="td-r">'+fmtFull(sumF(brandSums,'targetGBP'))+'</td></tr>'+
+    '<tr><td>GBP SS27 2 Target</td><td class="td-r">'+fmtFull(sumF(brandSums,'target2GBP'))+'</td></tr>'+
+    '<tr><td>GBP Total SS27 Target</td><td class="td-r td-b">'+fmtFull(tTgbp)+'</td></tr>'+
+    '<tr><td>GBP SS27 Reforecast</td><td class="td-r">'+fmtFull(sumF(brandSums,'reforecastGBP'))+'</td></tr>'+
+    '<tr><td>GBP SS27 2 Reforecast</td><td class="td-r">'+fmtFull(sumF(brandSums,'reforecast2GBP'))+'</td></tr>'+
+    '<tr><td>GBP Total SS27 Reforecast</td><td class="td-r td-b">'+fmtFull(tGBP)+'</td></tr>'+
+    '<tr><td>GBP Total SS27 Actual</td><td class="td-r">'+fmtFull(tAgbp)+'</td></tr>'+
+    '<tr class="sec-row"><td colspan="2">EUR Accounts</td></tr>'+
+    '<tr><td>EUR SS27 Target</td><td class="td-r">'+fmtFull(sumF(brandSums,'targetEUR'))+'</td></tr>'+
+    '<tr><td>EUR SS27 2 Target</td><td class="td-r">'+fmtFull(sumF(brandSums,'target2EUR'))+'</td></tr>'+
+    '<tr><td>EUR Total SS27 Target</td><td class="td-r td-b">'+fmtFull(tTeur)+'</td></tr>'+
+    '<tr><td>EUR SS27 Reforecast</td><td class="td-r">'+fmtFull(sumF(brandSums,'reforecastEUR'))+'</td></tr>'+
+    '<tr><td>EUR SS27 2 Reforecast</td><td class="td-r">'+fmtFull(sumF(brandSums,'reforecast2EUR'))+'</td></tr>'+
+    '<tr><td>EUR Total SS27 Reforecast</td><td class="td-r td-b">'+fmtFull(tEUR)+'</td></tr>'+
+    '<tr><td>EUR Total SS27 Actual</td><td class="td-r">'+fmtFull(tAeur)+'</td></tr>'+
+    '<tr class="sec-row"><td colspan="2">Summary</td></tr>'+
+    '<tr><td>Average Order Value (GBP accounts)</td><td class="td-r td-b">'+fmtFull(aov)+'</td></tr>'+
+    '<tr><td>Total Active Accounts</td><td class="td-r td-b">'+tAc.toLocaleString()+'</td></tr>'+
+    '<tr><td>Total Active Brands</td><td class="td-r td-b">'+activeBrands+' of '+BRANDS.length+'</td></tr>'+
     '</tbody>';
 
-  document.getElementById('kpi-col2').innerHTML=
-    '<div class="kpi green" style="flex:0"><div class="kpi-label">GBP Reforecast</div><div class="kpi-value" style="font-size:20px">'+fmtZ(tGBP)+'</div><div class="kpi-sub neu">Target: '+fmtZ(tTgbp)+'</div></div>'+
-    '<div class="kpi blue" style="flex:0"><div class="kpi-label">EUR Reforecast</div><div class="kpi-value" style="font-size:20px">'+fmtZ(tEUR)+'</div><div class="kpi-sub neu">Target: '+fmtZ(tTeur)+'</div></div>'+
-    '<div class="kpi purple" style="flex:0"><div class="kpi-label">Active Brands</div><div class="kpi-value" style="font-size:20px">'+activeBrands+' <span style="font-size:14px;color:var(--text3)">/ '+BRANDS.length+'</span></div><div class="kpi-sub neu">with at least 1 active account</div></div>'+
-    '<div class="kpi amber" style="flex:0"><div class="kpi-label">Multi-Brand Customers</div><div class="kpi-value" style="font-size:20px">'+custData.filter(function(c){return c.brands.size>1;}).length+'</div><div class="kpi-sub neu">buying 2 or more brands</div></div>';
+  document.getElementById('ov-kpis2').innerHTML=
+    '<div class="kpi green" style="flex:0"><div class="kpi-label">GBP Total Reforecast</div><div class="kpi-value" style="font-size:20px">'+fmtN(tGBP)+'</div><div class="kpi-sub neu">Target: '+fmtN(tTgbp)+'</div></div>'+
+    '<div class="kpi blue" style="flex:0"><div class="kpi-label">EUR Total Reforecast</div><div class="kpi-value" style="font-size:20px">'+fmtN(tEUR)+'</div><div class="kpi-sub neu">Target: '+fmtN(tTeur)+'</div></div>'+
+    '<div class="kpi purple" style="flex:0"><div class="kpi-label">Active Brands</div><div class="kpi-value" style="font-size:20px">'+activeBrands+' <span style="font-size:14px;color:var(--text3)">/ '+BRANDS.length+'</span></div></div>'+
+    '<div class="kpi amber" style="flex:0"><div class="kpi-label">Multi-Brand Customers</div><div class="kpi-value" style="font-size:20px">'+custData.filter(function(c){return c.brands.size>1;}).length+'</div><div class="kpi-sub neu">buying 2+ brands</div></div>';
 
   mkChart('ch-tvr',{type:'bar',data:{
-    labels:['SS27 Target','SS27 Reforecast','SS27 Actual'],
+    labels:['Total SS27 Target','Total SS27 Reforecast','Total SS27 Actual'],
     datasets:[{data:[tT,tR,tA],backgroundColor:['rgba(77,159,255,0.7)','rgba(0,212,161,0.85)','rgba(167,139,250,0.7)'],borderRadius:6,borderSkipped:false}]
-  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:function(v){return fmtZ(v);}},grid:{color:'rgba(255,255,255,0.05)'}},x:{grid:{display:false}}}}});
+  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:function(v){return fmtN(v);}},grid:{color:'rgba(255,255,255,0.05)'}},x:{grid:{display:false}}}}});
 
   mkChart('ch-cur',{type:'doughnut',data:{
-    labels:['GBP Reforecast','EUR Reforecast'],
+    labels:['GBP Total Reforecast','EUR Total Reforecast'],
     datasets:[{data:[tGBP,tEUR],backgroundColor:['#00d4a1','#4d9fff'],borderWidth:0,hoverOffset:8}]
   },options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'bottom',labels:{padding:20,font:{size:12},color:'#8b93a8'}}}}});
 
-  var sortedBrands=[...brandSums].sort(function(a,b){return b.reforecast-a.reforecast;});
-  document.getElementById('ch-brands-wrap').style.height=Math.max(400,sortedBrands.length*36+60)+'px';
+  var sb=[...brandSums].sort(function(a,b){return b.reforecastTotal-a.reforecastTotal;});
+  document.getElementById('ch-brands-wrap').style.height=Math.max(400,sb.length*36+60)+'px';
   mkChart('ch-brands',{type:'bar',data:{
-    labels:sortedBrands.map(function(b){return b.name;}),
+    labels:sb.map(function(b){return b.name;}),
     datasets:[
-      {label:'SS27 Target',data:sortedBrands.map(function(b){return b.target;}),backgroundColor:'rgba(77,159,255,0.35)',borderRadius:3},
-      {label:'SS27 Reforecast',data:sortedBrands.map(function(b){return b.reforecast;}),backgroundColor:'rgba(0,212,161,0.8)',borderRadius:3}
+      {label:'Total SS27 Target',data:sb.map(function(b){return b.targetTotal;}),backgroundColor:'rgba(77,159,255,0.35)',borderRadius:3},
+      {label:'Total SS27 Reforecast',data:sb.map(function(b){return b.reforecastTotal;}),backgroundColor:'rgba(0,212,161,0.8)',borderRadius:3}
     ]
-  },options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{padding:20,color:'#8b93a8',font:{size:12}}}},scales:{x:{ticks:{callback:function(v){return fmtZ(v);}},grid:{color:'rgba(255,255,255,0.05)'}},y:{grid:{display:false},ticks:{font:{size:11},color:'#8b93a8'}}}}});
+  },options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{padding:20,color:'#8b93a8',font:{size:12}}}},scales:{x:{ticks:{callback:function(v){return fmtN(v);}},grid:{color:'rgba(255,255,255,0.05)'}},y:{grid:{display:false},ticks:{font:{size:11},color:'#8b93a8'}}}}});
 
-  var gapSorted=[...brandSums].filter(function(b){return b.rfVsTarget!==null;}).sort(function(a,b){return b.rfVsTarget-a.rfVsTarget;});
-  document.getElementById('ch-gap-wrap').style.height=Math.max(400,gapSorted.length*36+60)+'px';
+  var gs=[...brandSums].filter(function(b){return b.rfTotalVsTargetTotal!==null;}).sort(function(a,b){return b.rfTotalVsTargetTotal-a.rfTotalVsTargetTotal;});
+  document.getElementById('ch-gap-wrap').style.height=Math.max(400,gs.length*36+60)+'px';
   mkChart('ch-gap',{type:'bar',data:{
-    labels:gapSorted.map(function(b){return b.name;}),
-    datasets:[{label:'Reforecast vs Target (%)',data:gapSorted.map(function(b){return b.rfVsTarget;}),backgroundColor:gapSorted.map(function(b){return b.rfVsTarget>=0?'rgba(0,212,161,0.8)':'rgba(255,92,114,0.8)';}),borderRadius:3}]
+    labels:gs.map(function(b){return b.name;}),
+    datasets:[{label:'Total Reforecast vs Total Target (%)',data:gs.map(function(b){return b.rfTotalVsTargetTotal;}),backgroundColor:gs.map(function(b){return b.rfTotalVsTargetTotal>=0?'rgba(0,212,161,0.8)':'rgba(255,92,114,0.8)';}),borderRadius:3}]
   },options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{callback:function(v){return v+'%';}},grid:{color:'rgba(255,255,255,0.05)'}},y:{grid:{display:false},ticks:{font:{size:11},color:'#8b93a8'}}}}});
+}
+
+
+// ── SALES INSIGHTS ────────────────────────────────────────────────────────────
+function renderInsights(){
+  if(!brandSums.length)return;
+
+  // Top/Bottom 10 brands by total reforecast vs total target %
+  var withPct=brandSums.filter(function(b){return b.rfTotalVsTargetTotal!==null;});
+  var topBeating=[...withPct].sort(function(a,b){return b.rfTotalVsTargetTotal-a.rfTotalVsTargetTotal;}).slice(0,10);
+  var bottomMissing=[...withPct].sort(function(a,b){return a.rfTotalVsTargetTotal-b.rfTotalVsTargetTotal;}).slice(0,10);
+
+  // Growth / Decline vs SS26
+  var withSS26=brandSums.filter(function(b){return b.ss26Total>0;});
+  var topGrowth=[...withSS26].sort(function(a,b){return(b.reforecastTotal-b.ss26Total)-(a.reforecastTotal-a.ss26Total);}).slice(0,10);
+  var topDecline=[...withSS26].sort(function(a,b){return(a.reforecastTotal-a.ss26Total)-(b.reforecastTotal-b.ss26Total);}).slice(0,10);
+
+  // Revenue concentration
+  var totalRf=sumF(brandSums,'reforecastTotal');
+  var custSorted=[...custData].sort(function(a,b){return b.reforecastTotal-a.reforecastTotal;});
+  var top10rf=custSorted.slice(0,10).reduce(function(a,c){return a+c.reforecastTotal;},0);
+  var top20rf=custSorted.slice(0,20).reduce(function(a,c){return a+c.reforecastTotal;},0);
+  var top50rf=custSorted.slice(0,50).reduce(function(a,c){return a+c.reforecastTotal;},0);
+  var c10pct=totalRf>0?top10rf/totalRf*100:0;
+  var c20pct=totalRf>0?top20rf/totalRf*100:0;
+  var c50pct=totalRf>0?top50rf/totalRf*100:0;
+
+  // New / Reactivated accounts by brand
+  var newAccs=allRows.filter(function(r){return r.status==='new aw26'||r.status==='new ss26';});
+  var reactivated=allRows.filter(function(r){return r.status==='reactivated';});
+  var newByBrand={};
+  newAccs.forEach(function(r){newByBrand[r.brand]=(newByBrand[r.brand]||0)+1;});
+  var newBrandList=Object.keys(newByBrand).map(function(k){return{name:k,count:newByBrand[k]};}).sort(function(a,b){return b.count-a.count;}).slice(0,10);
+
+  function insCard(title,sub,rows,valClass){
+    return'<div class="ins-card">'+
+      '<div class="ins-card-hdr"><div><div class="ins-card-title">'+title+'</div><div class="ins-card-sub">'+sub+'</div></div></div>'+
+      rows.map(function(r,i){
+        return'<div class="ins-row">'+
+          '<span class="ins-rank">'+(i+1)+'</span>'+
+          '<span class="ins-name">'+r.name+'</span>'+
+          '<span class="ins-val '+(valClass||'')+'" style="color:'+(r.color||'inherit')+'">'+r.val+'</span>'+
+        '</div>';
+      }).join('')+
+    '</div>';
+  }
+
+  document.getElementById('ins-top-bottom').innerHTML=
+    insCard('Top 10 Brands — Beating Target','Total Reforecast vs Total Target %',
+      topBeating.map(function(b){return{name:b.name,val:fmtPct(b.rfTotalVsTargetTotal),color:'var(--green-tx)'};}),'')+
+    insCard('Bottom 10 Brands — Missing Target','Total Reforecast vs Total Target %',
+      bottomMissing.map(function(b){return{name:b.name,val:fmtPct(b.rfTotalVsTargetTotal),color:'var(--red-tx)'};}));
+
+  document.getElementById('ins-growth-decline').innerHTML=
+    insCard('Top Growth Brands','Total Reforecast vs Total SS26 Actuals (value increase)',
+      topGrowth.map(function(b){var d=b.reforecastTotal-b.ss26Total;return{name:b.name,val:(d>=0?'+':'')+fmtN(d),color:d>=0?'var(--green-tx)':'var(--red-tx)'};}),'')+
+    insCard('Biggest Decline Brands','Total Reforecast vs Total SS26 Actuals (value decrease)',
+      topDecline.filter(function(b){return b.reforecastTotal<b.ss26Total;}).map(function(b){var d=b.reforecastTotal-b.ss26Total;return{name:b.name,val:fmtDiff(d),color:'var(--red-tx)'};}));
+
+  // Concentration card
+  var concHtml='<div class="ins-card" style="grid-column:1">'+
+    '<div class="ins-card-hdr"><div><div class="ins-card-title">Revenue Concentration</div><div class="ins-card-sub">How much revenue is concentrated in your top customers</div></div></div>'+
+    '<div style="padding:16px 18px">'+
+      '<div class="conc-bar-wrap"><div class="conc-bar-label"><span>Top 10 customers</span><span style="font-weight:700;color:var(--amber-tx)">'+c10pct.toFixed(1)+'% of total revenue</span></div><div class="conc-bar-outer"><div class="conc-bar-inner" style="width:'+Math.min(100,c10pct).toFixed(1)+'%"></div></div></div>'+
+      '<div class="conc-bar-wrap"><div class="conc-bar-label"><span>Top 20 customers</span><span style="font-weight:700;color:var(--blue-tx)">'+c20pct.toFixed(1)+'% of total revenue</span></div><div class="conc-bar-outer"><div class="conc-bar-inner" style="background:var(--blue);width:'+Math.min(100,c20pct).toFixed(1)+'%"></div></div></div>'+
+      '<div class="conc-bar-wrap"><div class="conc-bar-label"><span>Top 50 customers</span><span style="font-weight:700;color:var(--green-tx)">'+c50pct.toFixed(1)+'% of total revenue</span></div><div class="conc-bar-outer"><div class="conc-bar-inner" style="width:'+Math.min(100,c50pct).toFixed(1)+'%"></div></div></div>'+
+      '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);font-size:12px;color:var(--text3)">Total revenue = '+fmtN(totalRf)+' &nbsp;·&nbsp; '+custData.length.toLocaleString()+' customers total</div>'+
+    '</div>'+
+  '</div>';
+
+  // New & Reactivated accounts card
+  var newHtml='<div class="ins-card" style="grid-column:2">'+
+    '<div class="ins-card-hdr"><div><div class="ins-card-title">New & Reactivated Accounts</div><div class="ins-card-sub">'+newAccs.length+' new accounts · '+reactivated.length+' reactivated across all brands</div></div></div>'+
+    newBrandList.map(function(b,i){
+      return'<div class="ins-row"><span class="ins-rank">'+(i+1)+'</span><span class="ins-name">'+b.name+'</span><span class="ins-val" style="color:var(--green-tx)">'+b.count+' new</span></div>';
+    }).join('')+
+    (reactivated.length>0?'<div style="padding:10px 18px;font-size:11px;color:var(--text3);border-top:1px solid var(--border)">'+reactivated.length+' reactivated accounts across '+[...new Set(reactivated.map(function(r){return r.brand;}))].length+' brands</div>':'')+
+  '</div>';
+
+  document.getElementById('ins-concentration-newaccs').innerHTML=concHtml+newHtml;
+
+  // Brand dependency — top customer as % of brand revenue
+  var depRows=brandSums.map(function(b){
+    if(!b.reforecastTotal)return null;
+    var custMap={};
+    b.rows.forEach(function(r){
+      var k=r.account.toLowerCase().trim();
+      custMap[k]=(custMap[k]||0)+r.reforecastTotal;
+    });
+    var vals=Object.values(custMap);
+    var maxVal=vals.length?Math.max.apply(null,vals):0;
+    var maxName=Object.keys(custMap).find(function(k){return custMap[k]===maxVal;})||'';
+    var pctOfBrand=b.reforecastTotal>0?maxVal/b.reforecastTotal*100:0;
+    return{name:b.name,topCust:maxName,pct:pctOfBrand,val:maxVal};
+  }).filter(function(x){return x&&x.pct>0;}).sort(function(a,b){return b.pct-a.pct;}).slice(0,12);
+
+  var depHtml='<div class="mtable"><div class="mtable-hdr">'+
+    '<div class="mtable-title">Brand Dependency — Top Customer Concentration</div>'+
+    '<div class="mtable-sub">Brands where one customer makes up a large % of total reforecast — a high % is a risk signal</div>'+
+    '</div><div class="table-wrap"><table>'+
+    '<thead><tr><th>Brand</th><th>Top Customer</th><th class="td-r">Customer Reforecast</th><th>% of Brand Revenue</th><th>Risk</th></tr></thead>'+
+    '<tbody>'+depRows.map(function(d){
+      var riskLabel=d.pct>30?'<span class="badge br">High Risk</span>':d.pct>15?'<span class="badge ba">Watch</span>':'<span class="badge bg">OK</span>';
+      var barW=Math.min(100,d.pct).toFixed(1);
+      var barColor=d.pct>30?'var(--red)':d.pct>15?'var(--amber)':'var(--green)';
+      return'<tr>'+
+        '<td class="td-b">'+d.name+'</td>'+
+        '<td style="text-transform:capitalize">'+d.topCust+'</td>'+
+        '<td class="td-r">'+fmtN(d.val)+'</td>'+
+        '<td><div style="display:flex;align-items:center;gap:8px"><div style="flex:1;height:5px;background:var(--surface3);border-radius:99px;overflow:hidden;min-width:80px"><div style="height:100%;border-radius:99px;background:'+barColor+';width:'+barW+'%"></div></div><span style="font-size:12px;font-weight:600;color:'+barColor+'">'+d.pct.toFixed(1)+'%</span></div></td>'+
+        '<td>'+riskLabel+'</td>'+
+      '</tr>';
+    }).join('')+'</tbody></table></div></div>';
+  document.getElementById('ins-brand-dependency').innerHTML=depHtml;
+}
+
+// ── AT RISK ACCOUNTS ──────────────────────────────────────────────────────────
+function renderAtRisk(){
+  var search=(document.getElementById('ar-search').value||'').toLowerCase();
+  var brandF=document.getElementById('ar-brand').value;
+  var currF=document.getElementById('ar-currency').value;
+  var threshold=parseFloat(document.getElementById('ar-threshold').value)||20;
+
+  var atRisk=allRows.filter(function(r){
+    if(!r.ss26Total||r.ss26Total<=0)return false;
+    var drop=pct(r.reforecastTotal,r.ss26Total);
+    if(drop===null||drop>-threshold)return false;
+    if(search&&!r.account.toLowerCase().includes(search))return false;
+    if(brandF&&r.brand!==brandF)return false;
+    if(currF&&r.currency!==currF)return false;
+    return true;
+  }).sort(function(a,b){
+    return(a.reforecastTotal-a.ss26)-(b.reforecastTotal-b.ss26);
+  });
+
+  var totalAtRisk=atRisk.reduce(function(a,r){return a+(r.ss26Total-r.reforecastTotal);},0);
+  var totalAccounts=atRisk.length;
+  var brands=new Set(atRisk.map(function(r){return r.brand;})).size;
+
+  document.getElementById('risk-kpis').innerHTML=
+    '<div class="kpi red"><div class="kpi-label">At Risk Accounts</div><div class="kpi-value">'+totalAccounts+'</div><div class="kpi-sub neu">dropping >'+threshold+'% vs SS26</div></div>'+
+    '<div class="kpi red"><div class="kpi-label">Total Revenue at Risk</div><div class="kpi-value">'+fmtN(totalAtRisk)+'</div><div class="kpi-sub neu">SS26 vs SS27 Reforecast gap</div></div>'+
+    '<div class="kpi amber"><div class="kpi-label">Brands Affected</div><div class="kpi-value">'+brands+'</div><div class="kpi-sub neu">brands with at-risk accounts</div></div>'+
+    '<div class="kpi amber"><div class="kpi-label">Avg Drop per Account</div><div class="kpi-value">'+fmtN(totalAccounts>0?totalAtRisk/totalAccounts:0)+'</div><div class="kpi-sub neu">average revenue decline</div></div>';
+
+  document.getElementById('ar-count').textContent=totalAccounts.toLocaleString()+' at-risk accounts shown';
+  document.getElementById('ar-tbody').innerHTML=atRisk.slice(0,200).map(function(r){
+    var dropPct=pct(r.reforecastTotal,r.ss26Total);
+    var atRiskVal=r.ss26-r.reforecastTotal;
+    return'<tr>'+
+      '<td class="td-b">'+r.account+'</td>'+
+      '<td>'+r.brand+'</td>'+
+      '<td>'+(r.country||'—')+'</td>'+
+      '<td><span class="badge '+(r.currency==='GBP'?'bg':r.currency==='EUR'?'bb':'ba')+'" style="font-size:10px">'+r.currency+'</span></td>'+
+      '<td><span class="badge '+(r.isActive?'bg':'ba')+'" style="font-size:10px">'+r.status+'</span></td>'+
+      '<td class="td-r">'+fmtN(r.ss26Total)+'</td>'+
+      '<td class="td-r">'+fmtN(r.reforecast)+'</td>'+
+      '<td class="td-r td-b">'+fmtN(r.reforecastTotal)+'</td>'+
+      '<td><span class="badge br">▼ '+Math.abs(dropPct).toFixed(1)+'%</span></td>'+
+      '<td class="td-r" style="color:var(--red-tx);font-weight:600">-'+fmtN(r.ss26Total-r.reforecastTotal)+'</td>'+
+    '</tr>';
+  }).join('');
+}
+
+// ── CROSS-SELL OPPORTUNITIES ──────────────────────────────────────────────────
+function renderCrossSell(){
+  var selectedBrand=document.getElementById('xb-brand').value;
+  var search=(document.getElementById('xb-search').value||'').toLowerCase();
+  var allBrandNames=brandSums.map(function(b){return b.name;});
+
+  var totalOpps=0,totalPotential=0;
+
+  var rows;
+  if(selectedBrand){
+    // Customers NOT buying selectedBrand but buying at least one other brand
+    rows=custData.filter(function(c){
+      if(c.brands.has(selectedBrand))return false;
+      if(c.brands.size<1)return false;
+      if(search&&!c.account.toLowerCase().includes(search))return false;
+      return true;
+    }).sort(function(a,b){return b.reforecastTotal-a.reforecastTotal;});
+  } else {
+    // Show all multi-brand gaps — customers buying some brands but not others
+    rows=custData.filter(function(c){
+      if(c.brands.size<1)return false;
+      if(c.brands.size>=allBrandNames.length)return false;
+      if(search&&!c.account.toLowerCase().includes(search))return false;
+      return true;
+    }).sort(function(a,b){return b.reforecastTotal-a.reforecastTotal;}).slice(0,100);
+  }
+
+  totalOpps=rows.length;
+  totalPotential=rows.reduce(function(a,c){return a+c.reforecastTotal;},0);
+  var multiBuyers=rows.filter(function(c){return c.brands.size>1;}).length;
+
+  document.getElementById('cs-opp-kpis').innerHTML=
+    '<div class="kpi green"><div class="kpi-label">Cross-Sell Opportunities</div><div class="kpi-value">'+totalOpps.toLocaleString()+'</div><div class="kpi-sub neu">'+(selectedBrand?'customers not yet buying '+selectedBrand:'customers with brand gaps')+'</div></div>'+
+    '<div class="kpi blue"><div class="kpi-label">Current Spend of Opportunity Customers</div><div class="kpi-value">'+fmtN(totalPotential)+'</div><div class="kpi-sub neu">their existing reforecast across current brands</div></div>'+
+    '<div class="kpi purple"><div class="kpi-label">Already Multi-Brand Buyers</div><div class="kpi-value">'+multiBuyers+'</div><div class="kpi-sub neu">buying 2+ other brands — warm prospects</div></div>'+
+    '<div class="kpi amber"><div class="kpi-label">Avg Current Spend per Customer</div><div class="kpi-value">'+fmtN(totalOpps>0?totalPotential/totalOpps:0)+'</div><div class="kpi-sub neu">existing brand spend ÷ opportunity count</div></div>';
+
+  document.getElementById('xb-count').textContent='Showing '+Math.min(rows.length,200).toLocaleString()+' of '+rows.length.toLocaleString()+' opportunities';
+  document.getElementById('xb-tbody').innerHTML=rows.slice(0,200).map(function(c){
+    var notBuying=allBrandNames.filter(function(n){return!c.brands.has(n);});
+    var bc=c.brands.size;
+    return'<tr>'+
+      '<td class="td-b">'+c.account+'</td>'+
+      '<td>'+(c.country||'—')+'</td>'+
+      '<td style="font-size:12px;color:var(--green-tx);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+ [...c.brands].join(', ')+'</td>'+
+      '<td style="font-size:12px;color:var(--text3);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(selectedBrand?selectedBrand:notBuying.slice(0,3).join(', ')+(notBuying.length>3?' +'+( notBuying.length-3)+' more':''))+'</td>'+
+      '<td class="td-r td-b">'+fmtN(c.reforecastTotal)+'</td>'+
+      '<td class="td-r"><span class="badge '+(bc>2?'bg':bc>1?'bp':'ba')+'">'+bc+'</span></td>'+
+    '</tr>';
+  }).join('');
+}
+
+// ── DASHBOARD HEALTH ──────────────────────────────────────────────────────────
+function renderHealth(){
+  var totalRows=allRows.length;
+  var unknownCurr=allRows.filter(function(r){return r.currency==='UNKNOWN';}).length;
+  var noStatus=allRows.filter(function(r){return!r.status;}).length;
+  var noAccount=allRows.filter(function(r){return!r.account;}).length;
+  var zeroTarget=brandSums.filter(function(b){return b.targetTotal===0&&b.reforecastTotal>0;}).length;
+  var fallbackCount=globalWarnings.filter(function(w){return w.includes('fallback');}).length;
+  var errCount=document.getElementById('error-area').innerHTML.includes('err-banner')?
+    (document.getElementById('error-area').innerHTML.match(/sheet\(s\) failed/)?1:0):0;
+  var loadedCount=brandSums.length;
+
+  document.getElementById('health-stats').innerHTML=
+    '<div class="health-stat"><div class="health-icon" style="color:var(--green)">✓</div><div><div class="health-label">Sheets Loaded</div><div class="health-value" style="color:var(--green-tx)">'+loadedCount+' / '+BRANDS.length+'</div></div></div>'+
+    '<div class="health-stat"><div class="health-icon" style="color:var(--text)">⊞</div><div><div class="health-label">Total Data Rows</div><div class="health-value">'+totalRows.toLocaleString()+'</div></div></div>'+
+    '<div class="health-stat"><div class="health-icon" style="color:'+(unknownCurr>0?'var(--amber)':'var(--green)')+'">'+( unknownCurr>0?'⚠':'✓')+'</div><div><div class="health-label">Unknown Currency Rows</div><div class="health-value" style="color:'+(unknownCurr>0?'var(--amber-tx)':'var(--green-tx)')+'">'+unknownCurr+'</div></div></div>'+
+    '<div class="health-stat"><div class="health-icon" style="color:'+(noStatus>0?'var(--amber)':'var(--green)')+'">'+( noStatus>0?'⚠':'✓')+'</div><div><div class="health-label">Missing Status Rows</div><div class="health-value" style="color:'+(noStatus>0?'var(--amber-tx)':'var(--green-tx)')+'">'+noStatus+'</div></div></div>'+
+    '<div class="health-stat"><div class="health-icon" style="color:'+(fallbackCount>0?'var(--amber)':'var(--green)')+'">'+( fallbackCount>0?'⚠':'✓')+'</div><div><div class="health-label">Fallback Columns Used</div><div class="health-value" style="color:'+(fallbackCount>0?'var(--amber-tx)':'var(--green-tx)')+'">'+fallbackCount+'</div></div></div>'+
+    '<div class="health-stat"><div class="health-icon" style="color:'+(zeroTarget>0?'var(--amber)':'var(--green)')+'">'+( zeroTarget>0?'⚠':'✓')+'</div><div><div class="health-label">Brands: Reforecast but No Target</div><div class="health-value" style="color:'+(zeroTarget>0?'var(--amber-tx)':'var(--green-tx)')+'">'+zeroTarget+'</div></div></div>'+
+    '<div class="health-stat"><div class="health-icon">⏰</div><div><div class="health-label">Last Refresh</div><div class="health-value" style="font-size:16px">'+document.getElementById('last-upd').textContent.replace('Updated: ','')+'</div></div></div>';
+
+  // Sheet load status
+  var sheetHtml=BRANDS.map(function(brand){
+    var loaded=brandSums.find(function(b){return b.name===brand.name;});
+    var warns=globalWarnings.filter(function(w){return w.startsWith(brand.name+':');});
+    var statusIcon=!loaded?'<span style="color:var(--red-tx)">✗ Failed to load</span>':
+      warns.length>0?'<span style="color:var(--amber-tx)">⚠ Loaded with warnings</span>':
+      '<span style="color:var(--green-tx)">✓ Loaded OK</span>';
+    return'<div class="sheet-row">'+
+      '<span class="td-b">'+brand.name+'</span>'+
+      '<span>'+statusIcon+'</span>'+
+      (loaded?'<span style="font-size:11px;color:var(--text3)">'+loaded.totalCount+' rows</span>':'<span></span>')+
+    '</div>';
+  }).join('');
+  document.getElementById('health-sheets').innerHTML=sheetHtml||'<div style="padding:16px;color:var(--text3);font-size:13px">No data loaded yet.</div>';
+
+  // Warnings list
+  var warnHtml=globalWarnings.length>0?globalWarnings.map(function(w){
+    return'<div style="padding:9px 16px;border-bottom:1px solid var(--border);font-size:12px;color:var(--amber-tx);line-height:1.5">⚠ '+w+'</div>';
+  }).join(''):'<div style="padding:16px;color:var(--green-tx);font-size:13px">✓ No warnings — all columns found by name, all currencies valid.</div>';
+  document.getElementById('health-warnings').innerHTML=warnHtml;
 }
 
 window.addEventListener('load',loadAll);

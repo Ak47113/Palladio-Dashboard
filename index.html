@@ -494,7 +494,7 @@ const COL_ALIASES={
   COUNTRY:   ['country'],
   CITY:      ['major city','city'],
   STATUS:    ['status'],
-  FX:        ['fx'],
+  FX:        ['fx','currency','curr','ccy','fx '],  // covers common spelling variations
   SS26:      ['ss26 actuals'],
   SS26_2:    ['ss26 2 actuals'],
   AW26:      ['aw26 actuals'],
@@ -507,12 +507,15 @@ const COL_ALIASES={
   ACTUAL2:   ['ss27 2 actuals']
 };
 
-// Fallback fixed positions (verified against standard sheet layout)
+// Fallback fixed positions for required columns only.
+// FX is NOT in fallback — if not found by header name, currency is UNKNOWN.
+// A wrong fallback for FX causes silent misreads (e.g. blank column instead of EUR).
 const COL_FALLBACK={
-  ACCOUNT:0,COUNTRY:3,CITY:2,STATUS:7,FX:6,
+  ACCOUNT:0,COUNTRY:3,CITY:2,STATUS:7,
   SS26:17,SS26_2:19,AW26:21,AW26_2:23,
   TARGET:25,REFORECAST:26,ACTUAL:27,
   TARGET2:29,REFORECAST2:30,ACTUAL2:31
+  // FX intentionally excluded — must be found by header name only
 };
 
 let allRows=[],brandSums=[],custData=[],charts={};
@@ -597,6 +600,18 @@ function buildColMap(headerRow,brandName){
     globalWarnings.push(msg);
     console.warn(msg);
   }
+
+  // FX must be found by header name — if not found, warn loudly
+  // A wrong fallback for FX causes all accounts to appear as unknown currency
+  if(map.FX<0){
+    var fxMsg=brandName+': FX column not found by header name. All rows will be marked UNKNOWN currency. Check the sheet has a column header exactly matching "fx" in row 10.';
+    globalWarnings.push(fxMsg);
+    console.warn(fxMsg);
+  } else {
+    console.log(brandName+': FX column found at index '+map.FX+' (header: "'+
+      (headerRow[map.FX]||'').replace(/"/g,'').trim()+'")');
+  }
+
   return map;
 }
 
@@ -648,6 +663,14 @@ function parseRows(rows,brandName){
   var dataRows=rows.slice(dataStartIdx);
   var result=[];
   var unknownCurrencyRows=[];
+
+  // Log first 3 FX values to help diagnose column misreads
+  for(var _d=0;_d<Math.min(3,dataRows.length);_d++){
+    var _r=dataRows[_d];
+    var _acc=(_r[cm.ACCOUNT]||'').replace(/"/g,'').trim();
+    var _fx=cm.FX>=0?(_r[cm.FX]||'blank'):'col-not-found';
+    if(_acc)console.log(brandName+' row '+(dataStartIdx+_d+1)+': account="'+_acc+'" fx_col='+cm.FX+' fx_val="'+_fx+'"');
+  }
 
   for(var i=0;i<dataRows.length;i++){
     var sheetRowNumber=dataStartIdx+i+1;
@@ -1200,8 +1223,7 @@ function renderOverview(){
   // Forecast Coverage = Total Reforecast / Total Target
   var coveragePct=tT>0?tR/tT*100:0;
   var coverageClass=coveragePct>=100?'green':coveragePct>=90?'amber':'red';
-  var coverageLabel=coveragePct>=100?'On track':'coveragePct>=90?'Close to target':'Below target'';
-  coverageLabel=coveragePct>=100?'On track':coveragePct>=90?'Close to target':'Below target';
+  var coverageLabel=coveragePct>=100?'On track':coveragePct>=90?'Close to target':'Below target';
 
   // Actual Achievement = Total Actual / Total Target
   var achievePct=tT>0?tA/tT*100:0;

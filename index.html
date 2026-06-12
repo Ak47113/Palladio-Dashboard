@@ -4,6 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Palladio SS27 — Sales Intelligence Dashboard</title>
+<!-- Build: FX debug logging added -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -701,7 +702,23 @@ function parseRows(rows,brandName){
       var hasSalesData=(target>0||target2>0||reforecast>0||reforecast2>0||actual>0||actual2>0||ss26>0||ss26_2>0);
       if(!hasSalesData)continue; // skip empty/template rows silently
       currency='UNKNOWN';
-      unknownCurrencyRows.push({row:sheetRowNumber,account:acc,fx:fxRaw||'blank'});
+      console.log('UNKNOWN FX DEBUG', {
+        brand: brandName,
+        sheetRowNumber: sheetRowNumber,
+        account: acc,
+        fxColumnIndex: cm.FX,
+        fxRawOriginal: cm.FX >= 0 ? row[cm.FX] : 'FX_COL_NOT_FOUND',
+        fxRawNormalized: fxRaw || 'blank',
+        headerValueAtFxColumn: cm.FX >= 0 ? (headerRow[cm.FX] || '') : 'FX_COL_NOT_FOUND',
+        fullRow: row
+      });
+      unknownCurrencyRows.push({
+        row: sheetRowNumber,
+        account: acc,
+        fx: fxRaw || 'blank',
+        fxColumnIndex: cm.FX,
+        fxRawOriginal: cm.FX >= 0 ? row[cm.FX] : 'FX_COL_NOT_FOUND'
+      });
     }
 
     result.push({

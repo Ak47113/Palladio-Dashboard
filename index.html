@@ -231,6 +231,7 @@ tr:hover td{background:var(--surface2)}
               <th onclick="sortB('reforecastEURTotal')" class="td-r">EUR Total Reforecast</th>
               <th onclick="sortB('activeCount')" class="td-r">Active Accounts</th>
               <th onclick="sortB('conversionRate')" class="td-r">Activation Rate</th>
+              <th onclick="sortB('forecastCoverage')" class="td-r">Forecast Coverage</th>
             </tr></thead>
             <tbody id="brands-tbody"></tbody>
           </table>
@@ -772,6 +773,7 @@ async function loadAll(){
       bs.rfTotalVsSS26Total=pct(bs.reforecastTotal,bs.ss26Total);
       bs.aov=bs.gbpActiveCount>0?bs.reforecastGBPTotal/bs.gbpActiveCount:0;
       bs.conversionRate=bs.totalCount>0?bs.activeCount/bs.totalCount*100:0;
+      bs.forecastCoverage=bs.targetTotal>0?bs.reforecastTotal/bs.targetTotal*100:0;
       brandSums.push(bs);
     }catch(e){errors.push(brand.name+': '+e.message);}
     loaded++;
@@ -1003,13 +1005,14 @@ function renderBrandCards(brands){
       (topAccs.length>0?
         '<div class="bc-accs"><div class="bc-acc-title">Top Active Accounts by Total Reforecast</div>'+accsHtml+'</div>':'')+
       '<div class="bc-footer">'+
-        '<div style="font-size:11px;color:var(--text3);white-space:nowrap;min-width:130px">Total target attainment</div>'+
+        '<div style="font-size:11px;color:var(--text3);white-space:nowrap;min-width:130px">Forecast coverage</div>'+
         '<div style="flex:1;height:6px;background:var(--surface3);border-radius:99px;overflow:hidden">'+
           '<div style="height:100%;border-radius:99px;background:'+barColor+';width:'+attainPct.toFixed(1)+'%"></div>'+
         '</div>'+
         '<div style="font-size:13px;font-weight:700;color:'+perfColor+';white-space:nowrap;min-width:50px;text-align:right">'+
           (b.targetTotal>0?(b.reforecastTotal/b.targetTotal*100).toFixed(1)+'%':'No target')+
         '</div>'+
+        (b.actualTotal>0&&b.targetTotal>0?'<div style="font-size:11px;color:var(--text3);margin-left:16px;white-space:nowrap">Actual: '+(b.actualTotal/b.targetTotal*100).toFixed(1)+'% achieved</div>':'')+
       '</div>'+
     '</div>';
   });
@@ -1043,6 +1046,7 @@ function renderBrandsTable(){
       '<td class="td-r">'+fmtN(b.reforecastEURTotal)+'</td>'+
       '<td class="td-r"><span class="badge bb">'+b.activeCount+'</span></td>'+
       '<td class="td-r">'+b.conversionRate.toFixed(0)+'%</td>'+
+      '<td class="td-r"><span style="font-weight:700;color:'+(b.forecastCoverage>=100?'var(--green-tx)':b.forecastCoverage>=90?'var(--amber-tx)':'var(--red-tx)')+'">'+b.forecastCoverage.toFixed(1)+'%</span></td>'+
     '</tr>';
   }).join('');
 }
@@ -1104,9 +1108,11 @@ function renderSingle(){
   if(!name)return;
   var b=brandSums.find(function(x){return x.name===name;});if(!b)return;
   currentBrandRows=b.rows;
+  var sbCoverage=b.targetTotal>0?b.reforecastTotal/b.targetTotal*100:0;
+  var sbCoverageClass=sbCoverage>=100?'green':sbCoverage>=90?'amber':'red';
   document.getElementById('sb-kpis').innerHTML=
     '<div class="kpi-grid">'+
-      '<div class="kpi '+(b.rfTotalVsTargetTotal>=0?'green':'red')+'"><div class="kpi-label">Total SS27 Target</div><div class="kpi-value">'+fmtN(b.targetTotal)+'</div><div class="kpi-sub neu">SS27: '+fmtN(b.target)+' &nbsp;+&nbsp; SS27 2: '+fmtN(b.target2)+'</div></div>'+
+      '<div class="kpi '+sbCoverageClass+'"><div class="kpi-label">Forecast Coverage</div><div class="kpi-value">'+sbCoverage.toFixed(1)+'%</div><div class="kpi-sub '+(sbCoverage>=100?'up':sbCoverage>=90?'neu':'dn')+'">'+(sbCoverage>=100?'On track':sbCoverage>=90?'Close to target':'Below target')+'</div></div>'+
       '<div class="kpi '+(b.rfTotalVsTargetTotal>=0?'green':'red')+'"><div class="kpi-label">Total SS27 Reforecast</div><div class="kpi-value">'+fmtN(b.reforecastTotal)+'</div><div class="kpi-sub '+dc(b.rfTotalVsTargetTotal)+'">'+fmtPct(b.rfTotalVsTargetTotal)+' vs total target</div></div>'+
       '<div class="kpi blue"><div class="kpi-label">Total SS27 Actual</div><div class="kpi-value">'+fmtN(b.actualTotal)+'</div></div>'+
       '<div class="kpi '+(b.rfTotalVsSS26Total>=0?'green':'amber')+'"><div class="kpi-label">Total Reforecast vs Total SS26 Actuals</div><div class="kpi-value">'+fmtPct(b.rfTotalVsSS26Total)+'</div><div class="kpi-sub '+dc(b.rfTotalVsSS26Total)+'">year on year</div></div>'+
@@ -1191,13 +1197,22 @@ function renderOverview(){
   var rvtPct=pct(tR,tT),rvsPct=pct(tR,tS);
   var rvtVal=tR-tT,rvsVal=tR-tS;
 
+  // Forecast Coverage = Total Reforecast / Total Target
+  var coveragePct=tT>0?tR/tT*100:0;
+  var coverageClass=coveragePct>=100?'green':coveragePct>=90?'amber':'red';
+  var coverageLabel=coveragePct>=100?'On track':'coveragePct>=90?'Close to target':'Below target'';
+  coverageLabel=coveragePct>=100?'On track':coveragePct>=90?'Close to target':'Below target';
+
+  // Actual Achievement = Total Actual / Total Target
+  var achievePct=tT>0?tA/tT*100:0;
+
   document.getElementById('ov-kpis').innerHTML=
-    '<div class="kpi green"><div class="kpi-label">Total SS27 Target</div><div class="kpi-value">'+fmtN(tT)+'</div><div class="kpi-sub neu">SS27: '+fmtN(t1)+' &nbsp;+&nbsp; SS27 2: '+fmtN(t2)+'</div></div>'+
+    '<div class="kpi '+coverageClass+'"><div class="kpi-label">Forecast Coverage</div><div class="kpi-value">'+coveragePct.toFixed(1)+'%</div><div class="kpi-sub '+(coveragePct>=100?'up':coveragePct>=90?'neu':'dn')+'">'+coverageLabel+' &nbsp;·&nbsp; Target: '+fmtN(tT)+'</div></div>'+
     '<div class="kpi '+(rvtPct>=0?'green':'red')+'"><div class="kpi-label">Total SS27 Reforecast</div><div class="kpi-value">'+fmtN(tR)+'</div><div class="kpi-sub '+dc(rvtPct)+'">'+fmtPct(rvtPct)+' vs total target</div></div>'+
-    '<div class="kpi blue"><div class="kpi-label">Total SS27 Actual</div><div class="kpi-value">'+fmtN(tA)+'</div><div class="kpi-sub neu">SS27: '+fmtN(a1)+' + SS27 2: '+fmtN(a2)+'</div></div>'+
-    '<div class="kpi '+(rvsPct>=0?'green':'amber')+'"><div class="kpi-label">Total Reforecast vs Total SS26 Actuals</div><div class="kpi-value">'+fmtPct(rvsPct)+'</div><div class="kpi-sub '+dc(rvsPct)+'">'+fmtDiff(rvsVal)+' year on year</div></div>'+
+    '<div class="kpi blue"><div class="kpi-label">Actual Achievement</div><div class="kpi-value">'+achievePct.toFixed(1)+'%</div><div class="kpi-sub neu">'+fmtN(tA)+' actual of '+fmtN(tT)+' target</div></div>'+
+    '<div class="kpi '+(rvsPct>=0?'green':'amber')+'"><div class="kpi-label">Growth vs SS26 Actuals</div><div class="kpi-value">'+fmtPct(rvsPct)+'</div><div class="kpi-sub '+dc(rvsPct)+'">'+fmtDiff(rvsVal)+' year on year</div></div>'+
     '<div class="kpi purple"><div class="kpi-label">Total Active Accounts</div><div class="kpi-value">'+tAc.toLocaleString()+'</div><div class="kpi-sub neu">Across '+activeBrands+' active brands</div></div>'+
-    '<div class="kpi amber"><div class="kpi-label">Average Order Value (GBP)</div><div class="kpi-value">'+fmtN(aov)+'</div><div class="kpi-sub neu">GBP accounts · Total Reforecast / Active Accounts</div></div>';
+    '<div class="kpi amber"><div class="kpi-label">Total SS27 Target</div><div class="kpi-value">'+fmtN(tT)+'</div><div class="kpi-sub neu">SS27: '+fmtN(t1)+' + SS27 2: '+fmtN(t2)+'</div></div>';
 
   // Business Top Sheet — every column separately then totals
   document.getElementById('bts-table').innerHTML='<tbody>'+
@@ -1348,12 +1363,37 @@ function renderInsights(){
   '</div>';
 
   // New & Reactivated accounts card
+  // Revenue from new and reactivated accounts
+  var newAccRevenue=newAccs.reduce(function(a,r){return a+r.reforecastTotal;},0);
+  var reactivatedRevenue=reactivated.reduce(function(a,r){return a+r.reforecastTotal;},0);
+  var totalNewRevenue=newAccRevenue+reactivatedRevenue;
+  var totalRevenue=sumF(brandSums,'reforecastTotal');
+  var newRevPct=totalRevenue>0?totalNewRevenue/totalRevenue*100:0;
+
   var newHtml='<div class="ins-card" style="grid-column:2">'+
-    '<div class="ins-card-hdr"><div><div class="ins-card-title">New & Reactivated Accounts</div><div class="ins-card-sub">'+newAccs.length+' new accounts · '+reactivated.length+' reactivated across all brands</div></div></div>'+
+    '<div class="ins-card-hdr"><div>'+
+      '<div class="ins-card-title">New & Reactivated Account Revenue</div>'+
+      '<div class="ins-card-sub">'+newAccs.length+' new accounts · '+reactivated.length+' reactivated · '+newRevPct.toFixed(1)+'% of total reforecast</div>'+
+    '</div></div>'+
+    '<div style="padding:14px 18px;display:grid;grid-template-columns:1fr 1fr;gap:12px;border-bottom:1px solid var(--border)">'+
+      '<div style="background:var(--green-lt);border-radius:8px;padding:12px">'+
+        '<div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">New Account Revenue</div>'+
+        '<div style="font-size:20px;font-weight:700;color:var(--green-tx)">'+fmtN(newAccRevenue)+'</div>'+
+        '<div style="font-size:11px;color:var(--text3);margin-top:4px">'+newAccs.length+' new accounts</div>'+
+      '</div>'+
+      '<div style="background:var(--blue-lt);border-radius:8px;padding:12px">'+
+        '<div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">Reactivated Revenue</div>'+
+        '<div style="font-size:20px;font-weight:700;color:var(--blue-tx)">'+fmtN(reactivatedRevenue)+'</div>'+
+        '<div style="font-size:11px;color:var(--text3);margin-top:4px">'+reactivated.length+' reactivated accounts</div>'+
+      '</div>'+
+    '</div>'+
     newBrandList.map(function(b,i){
-      return'<div class="ins-row"><span class="ins-rank">'+(i+1)+'</span><span class="ins-name">'+b.name+'</span><span class="ins-val" style="color:var(--green-tx)">'+b.count+' new</span></div>';
+      var bNewAccs=newAccs.filter(function(r){return r.brand===b.name;});
+      var bRevenue=bNewAccs.reduce(function(a,r){return a+r.reforecastTotal;},0);
+      return'<div class="ins-row"><span class="ins-rank">'+(i+1)+'</span><span class="ins-name">'+b.name+'</span>'+
+        '<span style="font-size:12px;color:var(--text3);margin-right:8px">'+b.count+' new</span>'+
+        '<span class="ins-val" style="color:var(--green-tx)">'+fmtN(bRevenue)+'</span></div>';
     }).join('')+
-    (reactivated.length>0?'<div style="padding:10px 18px;font-size:11px;color:var(--text3);border-top:1px solid var(--border)">'+reactivated.length+' reactivated accounts across '+[...new Set(reactivated.map(function(r){return r.brand;}))].length+' brands</div>':'')+
   '</div>';
 
   document.getElementById('ins-concentration-newaccs').innerHTML=concHtml+newHtml;

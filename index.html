@@ -4,7 +4,6 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Palladio SS27 — Sales Intelligence Dashboard</title>
-<!-- Build: FX debug logging added -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -181,6 +180,7 @@ tr:hover td{background:var(--surface2)}
       <div class="nav-item" onclick="showPage('atRisk')"><span class="nav-icon">⚠</span> At Risk Accounts</div>
       <div class="nav-item" onclick="showPage('crossSell')"><span class="nav-icon">⊞</span> Cross-Sell Opportunities</div>
       <div class="nav-item" onclick="showPage('health')"><span class="nav-icon">✦</span> Dashboard Health</div>
+      <div class="nav-item" onclick="showPage('errors')"><span class="nav-icon" id="errors-nav-icon">●</span> <span id="errors-nav-label">Errors & Warnings</span></div>
     </div>
     <div class="sidebar-footer">
       <div class="status-pill"><div class="dot on" id="sdot"></div><span id="slabel">Connected</span></div>
@@ -190,8 +190,7 @@ tr:hover td{background:var(--surface2)}
   </div>
 
   <div class="main">
-    <div id="error-area"></div>
-    <div id="warn-area"></div>
+    <!-- Errors moved to Errors & Warnings tab -->
 
     <!-- BRANDS DATA ANALYSIS -->
     <div class="page active" id="page-brandcards">
@@ -431,6 +430,17 @@ tr:hover td{background:var(--surface2)}
           </table>
         </div>
         <div style="padding:10px 16px;font-size:11px;color:var(--text3);border-top:1px solid var(--border)" id="xb-count"></div>
+      </div>
+    </div>
+
+    <!-- ERRORS & WARNINGS PAGE -->
+    <div class="page" id="page-errors">
+      <div class="page-header">
+        <div class="page-title">Errors &amp; Warnings</div>
+        <div class="page-sub">All data quality issues, missing columns, unknown currencies, and sheet load failures — in one place</div>
+      </div>
+      <div id="errors-page-content">
+        <div style="color:var(--text3);font-size:14px;padding:40px 0;text-align:center">Loading...</div>
       </div>
     </div>
 
@@ -702,23 +712,7 @@ function parseRows(rows,brandName){
       var hasSalesData=(target>0||target2>0||reforecast>0||reforecast2>0||actual>0||actual2>0||ss26>0||ss26_2>0);
       if(!hasSalesData)continue; // skip empty/template rows silently
       currency='UNKNOWN';
-      console.log('UNKNOWN FX DEBUG', {
-        brand: brandName,
-        sheetRowNumber: sheetRowNumber,
-        account: acc,
-        fxColumnIndex: cm.FX,
-        fxRawOriginal: cm.FX >= 0 ? row[cm.FX] : 'FX_COL_NOT_FOUND',
-        fxRawNormalized: fxRaw || 'blank',
-        headerValueAtFxColumn: cm.FX >= 0 ? (headerRow[cm.FX] || '') : 'FX_COL_NOT_FOUND',
-        fullRow: row
-      });
-      unknownCurrencyRows.push({
-        row: sheetRowNumber,
-        account: acc,
-        fx: fxRaw || 'blank',
-        fxColumnIndex: cm.FX,
-        fxRawOriginal: cm.FX >= 0 ? row[cm.FX] : 'FX_COL_NOT_FOUND'
-      });
+      unknownCurrencyRows.push({row:sheetRowNumber,account:acc,fx:fxRaw||'blank'});
     }
 
     result.push({
@@ -751,12 +745,14 @@ function parseRows(rows,brandName){
 }
 // ── Fetch brand sheet ─────────────────────────────────────────────────────────
 async function fetchBrand(brand){
-  // /export includes hidden columns; gviz/tq skips them
-  var url='https://docs.google.com/spreadsheets/d/'+brand.id+'/export?format=csv&sheet=2025%2B';
+  // Use gviz/tq with full column range to get consistent column order.
+  // We request columns A through AJ (36 cols) which covers all known columns.
+  // This is more reliable than /export which shifts columns unpredictably.
+  var url='https://docs.google.com/spreadsheets/d/'+brand.id+'/gviz/tq?tqx=out:csv&sheet=2025%2B&range=A:AJ';
   var r=await fetch(url);
   if(!r.ok)throw new Error('HTTP '+r.status);
   var text=await r.text();
-  if(text.includes('Sign in')||text.includes('accounts.google.com'))throw new Error('Sheet not shared publicly');
+  if(text.includes('Sign in')||text.includes('accounts.google.com')||text.includes('ServiceLogin'))throw new Error('Sheet not shared publicly');
   return parseCSV(text);
 }
 
@@ -827,11 +823,17 @@ async function loadAll(){
   document.getElementById('last-upd').textContent='Updated: '+new Date().toLocaleTimeString();
   document.getElementById('slabel').textContent=(BRANDS.length-errors.length)+' / '+BRANDS.length+' brands';
 
-  var errHtml='',warnHtml='';
-  if(errors.length)errHtml='<div class="err-banner"><strong>'+errors.length+' sheet(s) failed to load:</strong><br>'+errors.join('<br>')+'</div>';
-  if(globalWarnings.length)warnHtml='<div class="warn-banner"><strong>Data quality notices ('+globalWarnings.length+'):</strong><br>'+globalWarnings.join('<br>')+'</div>';
-  document.getElementById('error-area').innerHTML=errHtml;
-  document.getElementById('warn-area').innerHTML=warnHtml;
+  // Update nav badge with error/warning count
+  var totalIssues=errors.length+globalWarnings.length;
+  var navIcon=document.getElementById('errors-nav-icon');
+  var navLabel=document.getElementById('errors-nav-label');
+  if(navIcon){navIcon.style.color=totalIssues>0?'var(--red-tx)':'var(--green-tx)';}
+  if(navLabel){
+    navLabel.textContent='Errors & Warnings'+(totalIssues>0?' ('+totalIssues+')':'');
+    navLabel.style.color=totalIssues>0?'var(--red-tx)':'var(--text2)';
+  }
+  // Store for errors page
+  window._loadErrors=errors;
 
   populateSelects();
   renderAll();
@@ -891,7 +893,7 @@ function showPage(id){
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
   document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
   document.getElementById('page-'+id).classList.add('active');
-  var labels={brandcards:'Brands Data',brands:'Brand Performance',customers:'Customer',single:'Single',overview:'Business Overview',insights:'Sales Insights',atRisk:'At Risk',crossSell:'Cross-Sell',health:'Dashboard Health'};
+  var labels={brandcards:'Brands Data',brands:'Brand Performance',customers:'Customer',single:'Single',overview:'Business Overview',insights:'Sales Insights',atRisk:'At Risk',crossSell:'Cross-Sell',health:'Dashboard Health',errors:'Errors'};
   document.querySelectorAll('.nav-item').forEach(function(n){
     if(n.textContent.trim().includes(labels[id]))n.classList.add('active');
   });
@@ -902,6 +904,7 @@ function showPage(id){
   if(id==='atRisk')renderAtRisk();
   if(id==='crossSell')renderCrossSell();
   if(id==='health')renderHealth();
+  if(id==='errors')renderErrors();
 }
 
 function renderAll(){filterBrandCards();renderBrandsTable();renderCust();}
@@ -1613,6 +1616,99 @@ function renderHealth(){
     return'<div style="padding:9px 16px;border-bottom:1px solid var(--border);font-size:12px;color:var(--amber-tx);line-height:1.5">⚠ '+w+'</div>';
   }).join(''):'<div style="padding:16px;color:var(--green-tx);font-size:13px">✓ No warnings — all columns found by name, all currencies valid.</div>';
   document.getElementById('health-warnings').innerHTML=warnHtml;
+}
+
+// ── ERRORS & WARNINGS PAGE ───────────────────────────────────────────────────
+function renderErrors(){
+  var el=document.getElementById('errors-page-content');
+  var loadErrors=window._loadErrors||[];
+  var warnings=globalWarnings||[];
+  var totalIssues=loadErrors.length+warnings.length;
+
+  if(totalIssues===0){
+    el.innerHTML=
+      '<div style="text-align:center;padding:60px 0">'+
+        '<div style="font-size:40px;margin-bottom:16px">✓</div>'+
+        '<div style="font-size:18px;font-weight:600;color:var(--green-tx);margin-bottom:8px">No errors or warnings</div>'+
+        '<div style="font-size:13px;color:var(--text3)">All '+BRANDS.length+' sheets loaded cleanly. All columns found by name. All currencies valid.</div>'+
+      '</div>';
+    return;
+  }
+
+  var html='';
+
+  // Sheet load failures
+  if(loadErrors.length>0){
+    html+='<div class="mtable" style="margin-bottom:20px">'+
+      '<div class="mtable-hdr">'+
+        '<div class="mtable-title" style="color:var(--red-tx)">✗ Sheet Load Failures ('+loadErrors.length+')</div>'+
+        '<div class="mtable-sub">These sheets could not be loaded at all — check they are shared as "Anyone with the link can view"</div>'+
+      '</div>'+
+      loadErrors.map(function(e){
+        var parts=e.split(': ');
+        var brand=parts[0];
+        var reason=parts.slice(1).join(': ');
+        return'<div style="display:flex;align-items:flex-start;gap:14px;padding:12px 18px;border-bottom:1px solid var(--border)">'+
+          '<span style="color:var(--red-tx);font-size:16px;margin-top:1px">✗</span>'+
+          '<div>'+
+            '<div style="font-weight:600;color:var(--text);margin-bottom:3px">'+brand+'</div>'+
+            '<div style="font-size:12px;color:var(--red-tx)">'+reason+'</div>'+
+            '<div style="font-size:11px;color:var(--text3);margin-top:4px">Fix: Go to the sheet → Share → Change to "Anyone with the link can view"</div>'+
+          '</div>'+
+        '</div>';
+      }).join('')+
+    '</div>';
+  }
+
+  // Group warnings by brand
+  var byBrand={};
+  warnings.forEach(function(w){
+    var colon=w.indexOf(':');
+    var brand=colon>=0?w.slice(0,colon).trim():'General';
+    var msg=colon>=0?w.slice(colon+1).trim():w;
+    if(!byBrand[brand])byBrand[brand]=[];
+    byBrand[brand].push(msg);
+  });
+
+  var brandWarningKeys=Object.keys(byBrand);
+  if(brandWarningKeys.length>0){
+    html+='<div class="mtable">'+
+      '<div class="mtable-hdr">'+
+        '<div class="mtable-title" style="color:var(--amber-tx)">⚠ Data Quality Warnings ('+warnings.length+')</div>'+
+        '<div class="mtable-sub">Issues detected during data loading — review each one before relying on affected numbers</div>'+
+      '</div>'+
+      brandWarningKeys.map(function(brand){
+        var msgs=byBrand[brand];
+        return msgs.map(function(msg){
+          // Determine type of warning for better explanation
+          var isUnknownCurr=msg.includes('unknown currency');
+          var isFallback=msg.includes('fallback');
+          var isHeaderRow=msg.includes('header not found at row 10');
+          var isFXMissing=msg.includes('FX column not found');
+          var fix=isUnknownCurr?
+              'Fix: Open the sheet and add a valid GBP or EUR value to the FX column for the listed rows.':
+            isFallback?
+              'Notice: Column was not found by header name — using a fixed position instead. Verify the numbers for this brand.':
+            isHeaderRow?
+              'Fix: Check that row 10 of the sheet contains the column headers (Account Name, FX, Status, etc).':
+            isFXMissing?
+              'Fix: Ensure the sheet has a column in row 10 with the header exactly "FX". This column determines GBP/EUR split.':
+              'Review this sheet manually.';
+          var color=isFallback?'var(--amber-tx)':'var(--red-tx)';
+          return'<div style="display:flex;align-items:flex-start;gap:14px;padding:12px 18px;border-bottom:1px solid var(--border)">'+
+            '<span style="color:'+color+';font-size:16px;margin-top:1px">⚠</span>'+
+            '<div>'+
+              '<div style="font-weight:600;color:var(--text);margin-bottom:3px">'+brand+'</div>'+
+              '<div style="font-size:12px;color:'+color+';line-height:1.6">'+msg+'</div>'+
+              '<div style="font-size:11px;color:var(--text3);margin-top:5px;line-height:1.5">'+fix+'</div>'+
+            '</div>'+
+          '</div>';
+        }).join('');
+      }).join('')+
+    '</div>';
+  }
+
+  el.innerHTML=html;
 }
 
 window.addEventListener('load',loadAll);

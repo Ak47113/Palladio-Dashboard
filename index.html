@@ -499,35 +499,43 @@ const BRANDS=[
 
 const ACTIVE_STATUSES=['active','new aw26','new ss26','reactivated'];
 
-// Exact column aliases — no partial matching for financial columns
+// Column aliases used for header-based mapping.
+// The dashboard now maps by HEADER NAME, not by fixed column letter/number.
+// This prevents errors when columns are inserted, removed, or moved in the brand sheets.
 const COL_ALIASES={
   ACCOUNT:   ['account name','account'],
   COUNTRY:   ['country'],
   CITY:      ['major city','city'],
   STATUS:    ['status'],
-  FX:        ['fx','currency','curr','ccy','fx '],  // covers common spelling variations
+  FX:        ['fx','currency','curr','ccy'],
   SS26:      ['ss26 actuals'],
   SS26_2:    ['ss26 2 actuals'],
   AW26:      ['aw26 actuals'],
   AW26_2:    ['aw26 2 actuals'],
-  TARGET:    ['ss27 targets'],
-  TARGET2:   ['ss27 2 targets'],
+  TARGET:    ['ss27 targets','ss27 target'],
+  TARGET2:   ['ss27 2 targets','ss27 2 target'],
   REFORECAST:['ss27 reforecast'],
   REFORECAST2:['ss27 2 reforecast'],
-  ACTUAL:    ['ss27 actuals'],
-  ACTUAL2:   ['ss27 2 actuals']
+  ACTUAL:    ['ss27 actuals','ss27 actual'],
+  ACTUAL2:   ['ss27 2 actuals','ss27 2 actual']
 };
 
-// Fallback fixed positions for required columns only.
-// FX is NOT in fallback — if not found by header name, currency is UNKNOWN.
-// A wrong fallback for FX causes silent misreads (e.g. blank column instead of EUR).
-const COL_FALLBACK={
-  ACCOUNT:0,COUNTRY:3,CITY:2,STATUS:7,
-  SS26:17,SS26_2:19,AW26:21,AW26_2:23,
-  TARGET:25,REFORECAST:26,ACTUAL:27,
-  TARGET2:29,REFORECAST2:30,ACTUAL2:31
-  // FX intentionally excluded — must be found by header name only
-};
+// Required columns: if any of these are missing, the brand is NOT loaded.
+// This is intentional: it is safer to show an error than to pull the wrong column.
+const REQUIRED_COLS=['ACCOUNT','STATUS','FX','SS26','SS26_2','TARGET','REFORECAST','ACTUAL'];
+
+// Optional columns: if absent, values default to 0 or blank.
+// SS27 2 columns are optional because some brands may only have one SS27 window.
+const OPTIONAL_COLS=['COUNTRY','CITY','AW26','AW26_2','TARGET2','REFORECAST2','ACTUAL2'];
+
+function normalizeHeader(value){
+  return String(value||'')
+    .toLowerCase()
+    .replace(/\u00a0/g,' ')
+    .replace(/[£€$]/g,'')
+    .replace(/[^a-z0-9]+/g,' ')
+    .trim();
+}
 
 let allRows=[],brandSums=[],custData=[],charts={};
 let bSort={col:'reforecastTotal',dir:-1};
@@ -572,57 +580,40 @@ function parseCSV(text){
   }).filter(function(r){return r.length>1||r[0];});
 }
 
-// ── Column map: exact match first, then fallback with warning ─────────────────
-// SS27 2 columns (TARGET2, REFORECAST2, ACTUAL2) are optional.
-// If not found, they stay -1 and values default to 0. No fallback, no warning.
-var OPTIONAL_COLS=['TARGET2','REFORECAST2','ACTUAL2'];
-
+// ── Column map: header-name based only ───────────────────────────────────────
 function buildColMap(headerRow,brandName){
-  var h=headerRow.map(function(x){return(x||'').replace(/"/g,'').toLowerCase().trim();});
+  var h=headerRow.map(normalizeHeader);
   var map={};
-  var usedFallback=[];
+  var missing=[];
 
   Object.keys(COL_ALIASES).forEach(function(key){
-    var aliases=COL_ALIASES[key];
+    var aliases=COL_ALIASES[key].map(normalizeHeader);
     var idx=-1;
-    // Exact match only
     for(var a=0;a<aliases.length;a++){
       idx=h.indexOf(aliases[a]);
       if(idx>=0)break;
     }
-    // Optional columns: if not found, leave as -1. No fallback, no warning.
-    if(idx<0&&OPTIONAL_COLS.indexOf(key)>=0){
+
+    if(idx<0){
+      if(REQUIRED_COLS.indexOf(key)>=0){
+        missing.push(key+' (expected header: '+COL_ALIASES[key].join(' / ')+')');
+      }
       map[key]=-1;
       return;
     }
-    // Required columns: use fallback position if not found by name, and warn
-    if(idx<0&&COL_FALLBACK[key]!==undefined){
-      idx=COL_FALLBACK[key];
-      var requiredFinancial=['TARGET','REFORECAST','ACTUAL','SS26','SS26_2'];
-      if(requiredFinancial.indexOf(key)>=0){
-        usedFallback.push(key+'(col '+idx+')');
-      }
-    }
+
     map[key]=idx;
   });
 
-  if(usedFallback.length>0){
-    var msg=brandName+': required columns not found by name, using fallback positions for: '+usedFallback.join(', ');
+  if(missing.length>0){
+    var found=h.filter(Boolean).join(', ');
+    var msg=brandName+': missing required header(s): '+missing.join('; ')+'. This brand was skipped to avoid incorrect calculations. Headers found: '+found;
     globalWarnings.push(msg);
-    console.warn(msg);
+    console.error(msg);
+    throw new Error(msg);
   }
 
-  // FX must be found by header name — if not found, warn loudly
-  // A wrong fallback for FX causes all accounts to appear as unknown currency
-  if(map.FX<0){
-    var fxMsg=brandName+': FX column not found by header name. All rows will be marked UNKNOWN currency. Check the sheet has a column header exactly matching "fx" in row 10.';
-    globalWarnings.push(fxMsg);
-    console.warn(fxMsg);
-  } else {
-    console.log(brandName+': FX column found at index '+map.FX+' (header: "'+
-      (headerRow[map.FX]||'').replace(/"/g,'').trim()+'")');
-  }
-
+  console.log(brandName+': columns mapped by header name:', map);
   return map;
 }
 
@@ -645,7 +636,7 @@ function parseRows(rows,brandName){
 
   // Use fixed row 10 as header
   var headerRow=rows[HEADER_ROW_INDEX];
-  var headerCheck=headerRow.map(function(x){return(x||'').replace(/"/g,'').toLowerCase().trim();});
+  var headerCheck=headerRow.map(normalizeHeader);
   var fixedHeaderValid=headerCheck.some(function(x){return x==='account name'||x==='account';});
   var dataStartIdx=DATA_START_INDEX;
 
@@ -653,7 +644,7 @@ function parseRows(rows,brandName){
     // Fallback: scan rows 0-14 for header
     var scanned=-1;
     for(var i=0;i<Math.min(15,rows.length);i++){
-      var h=rows[i].map(function(x){return(x||'').replace(/"/g,'').toLowerCase().trim();});
+      var h=rows[i].map(normalizeHeader);
       if(h.some(function(x){return x==='account name'||x==='account';})){scanned=i;break;}
     }
     if(scanned<0)return[];
@@ -842,8 +833,10 @@ async function loadAll(){
 async function refreshAll(){
   document.getElementById('sdot').classList.remove('on');
   document.getElementById('slabel').textContent='Refreshing...';
-  document.getElementById('error-area').innerHTML='';
-  document.getElementById('warn-area').innerHTML='';
+  var errorArea=document.getElementById('error-area');
+  var warnArea=document.getElementById('warn-area');
+  if(errorArea)errorArea.innerHTML='';
+  if(warnArea)warnArea.innerHTML='';
   document.getElementById('loading-overlay').style.display='flex';
   await loadAll();
   document.getElementById('sdot').classList.add('on');
@@ -1582,9 +1575,7 @@ function renderHealth(){
   var noStatus=allRows.filter(function(r){return!r.status;}).length;
   var noAccount=allRows.filter(function(r){return!r.account;}).length;
   var zeroTarget=brandSums.filter(function(b){return b.targetTotal===0&&b.reforecastTotal>0;}).length;
-  var fallbackCount=globalWarnings.filter(function(w){return w.includes('fallback');}).length;
-  var errCount=document.getElementById('error-area').innerHTML.includes('err-banner')?
-    (document.getElementById('error-area').innerHTML.match(/sheet\(s\) failed/)?1:0):0;
+  var fallbackCount=globalWarnings.filter(function(w){return w.includes('missing required header');}).length;
   var loadedCount=brandSums.length;
 
   document.getElementById('health-stats').innerHTML=
@@ -1592,7 +1583,7 @@ function renderHealth(){
     '<div class="health-stat"><div class="health-icon" style="color:var(--text)">⊞</div><div><div class="health-label">Total Data Rows</div><div class="health-value">'+totalRows.toLocaleString()+'</div></div></div>'+
     '<div class="health-stat"><div class="health-icon" style="color:'+(unknownCurr>0?'var(--amber)':'var(--green)')+'">'+( unknownCurr>0?'⚠':'✓')+'</div><div><div class="health-label">Unknown Currency Rows</div><div class="health-value" style="color:'+(unknownCurr>0?'var(--amber-tx)':'var(--green-tx)')+'">'+unknownCurr+'</div></div></div>'+
     '<div class="health-stat"><div class="health-icon" style="color:'+(noStatus>0?'var(--amber)':'var(--green)')+'">'+( noStatus>0?'⚠':'✓')+'</div><div><div class="health-label">Missing Status Rows</div><div class="health-value" style="color:'+(noStatus>0?'var(--amber-tx)':'var(--green-tx)')+'">'+noStatus+'</div></div></div>'+
-    '<div class="health-stat"><div class="health-icon" style="color:'+(fallbackCount>0?'var(--amber)':'var(--green)')+'">'+( fallbackCount>0?'⚠':'✓')+'</div><div><div class="health-label">Fallback Columns Used</div><div class="health-value" style="color:'+(fallbackCount>0?'var(--amber-tx)':'var(--green-tx)')+'">'+fallbackCount+'</div></div></div>'+
+    '<div class="health-stat"><div class="health-icon" style="color:'+(fallbackCount>0?'var(--amber)':'var(--green)')+'">'+( fallbackCount>0?'⚠':'✓')+'</div><div><div class="health-label">Missing Required Headers</div><div class="health-value" style="color:'+(fallbackCount>0?'var(--amber-tx)':'var(--green-tx)')+'">'+fallbackCount+'</div></div></div>'+
     '<div class="health-stat"><div class="health-icon" style="color:'+(zeroTarget>0?'var(--amber)':'var(--green)')+'">'+( zeroTarget>0?'⚠':'✓')+'</div><div><div class="health-label">Brands: Reforecast but No Target</div><div class="health-value" style="color:'+(zeroTarget>0?'var(--amber-tx)':'var(--green-tx)')+'">'+zeroTarget+'</div></div></div>'+
     '<div class="health-stat"><div class="health-icon">⏰</div><div><div class="health-label">Last Refresh</div><div class="health-value" style="font-size:16px">'+document.getElementById('last-upd').textContent.replace('Updated: ','')+'</div></div></div>';
 
@@ -1614,7 +1605,7 @@ function renderHealth(){
   // Warnings list
   var warnHtml=globalWarnings.length>0?globalWarnings.map(function(w){
     return'<div style="padding:9px 16px;border-bottom:1px solid var(--border);font-size:12px;color:var(--amber-tx);line-height:1.5">⚠ '+w+'</div>';
-  }).join(''):'<div style="padding:16px;color:var(--green-tx);font-size:13px">✓ No warnings — all columns found by name, all currencies valid.</div>';
+  }).join(''):'<div style="padding:16px;color:var(--green-tx);font-size:13px">✓ No warnings — all required columns found by name, all currencies valid.</div>';
   document.getElementById('health-warnings').innerHTML=warnHtml;
 }
 
@@ -1630,7 +1621,7 @@ function renderErrors(){
       '<div style="text-align:center;padding:60px 0">'+
         '<div style="font-size:40px;margin-bottom:16px">✓</div>'+
         '<div style="font-size:18px;font-weight:600;color:var(--green-tx);margin-bottom:8px">No errors or warnings</div>'+
-        '<div style="font-size:13px;color:var(--text3)">All '+BRANDS.length+' sheets loaded cleanly. All columns found by name. All currencies valid.</div>'+
+        '<div style="font-size:13px;color:var(--text3)">All '+BRANDS.length+' sheets loaded cleanly. All required columns found by name. All currencies valid.</div>'+
       '</div>';
     return;
   }
@@ -1682,13 +1673,13 @@ function renderErrors(){
         return msgs.map(function(msg){
           // Determine type of warning for better explanation
           var isUnknownCurr=msg.includes('unknown currency');
-          var isFallback=msg.includes('fallback');
+          var isFallback=msg.includes('missing required header');
           var isHeaderRow=msg.includes('header not found at row 10');
           var isFXMissing=msg.includes('FX column not found');
           var fix=isUnknownCurr?
               'Fix: Open the sheet and add a valid GBP or EUR value to the FX column for the listed rows.':
             isFallback?
-              'Notice: Column was not found by header name — using a fixed position instead. Verify the numbers for this brand.':
+              'Fix: Rename/add the missing header in row 10. The dashboard now maps by header name only and will not guess column positions.':
             isHeaderRow?
               'Fix: Check that row 10 of the sheet contains the column headers (Account Name, FX, Status, etc).':
             isFXMissing?

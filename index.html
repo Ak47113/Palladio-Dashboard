@@ -500,59 +500,35 @@ const BRANDS=[
 const ACTIVE_STATUSES=['active','new aw26','new ss26','reactivated'];
 
 // Column detection by header name ONLY — no fixed position fallback for financial columns.
-// Safe approach: find the correct column from the header text, even if columns are added,
-// removed, moved, or brand sheets have different layouts.
-// It uses fuzzy token matching, so headers like "SS26 Actuals £", "SS26  Actuals",
-// "SS27 Target", and "SS27 Targets" can all be recognised.
+// This is the only safe approach when sheets can have extra/hidden/moved columns.
+// Normalization: lowercase, collapse multiple spaces, trim — so "SS26  Actuals" = "ss26 actuals"
 
 function normalizeHeader(h){
-  return (h||'')
-    .toString()
-    .toLowerCase()
-    .replace(/\u00a0/g,' ')
-    .replace(/[£€$]/g,' ')
-    .replace(/[^a-z0-9]+/g,' ')
-    .replace(/\s+/g,' ')
-    .trim();
+  return (h||'').toString().toLowerCase().replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
 }
 
-function headerTokens(h){
-  var s=normalizeHeader(h);
-  if(!s)return [];
-  return s.split(' ').map(function(t){
-    // light stemming so "targets" = "target", "actuals" = "actual", "units" = "unit"
-    if(t.length>3 && t.endsWith('s')) return t.slice(0,-1);
-    return t;
-  });
-}
-function hasTok(toks,t){return toks.indexOf(t)>=0;}
-function hasAnyTok(toks,arr){return arr.some(function(t){return hasTok(toks,t);});}
+// Known header names for each field — first match wins
+const COL_ALIASES={
+  ACCOUNT:    ['account name','account'],
+  COUNTRY:    ['country'],
+  CITY:       ['major city','city'],
+  STATUS:     ['status'],
+  FX:         ['fx','currency','ccy','curr'],
+  SS26:       ['ss26 actuals','ss26 actual'],
+  SS26_2:     ['ss26 2 actuals','ss26 2 actual'],
+  AW26:       ['aw26 actuals','aw26 actual'],
+  AW26_2:     ['aw26 2 actuals','aw26 2 actual'],
+  TARGET:     ['ss27 targets','ss27 target'],
+  TARGET2:    ['ss27 2 targets','ss27 2 target'],
+  REFORECAST: ['ss27 reforecast'],
+  REFORECAST2:['ss27 2 reforecast'],
+  ACTUAL:     ['ss27 actuals','ss27 actual'],
+  ACTUAL2:    ['ss27 2 actuals','ss27 2 actual']
+};
 
-function findHeaderIndex(headerRow,predicate){
-  for(var i=0;i<headerRow.length;i++){
-    var toks=headerTokens(headerRow[i]);
-    if(predicate(toks,normalizeHeader(headerRow[i]),i))return i;
-  }
-  return -1;
-}
-
-function scoreHeaderRow(row){
-  var score=0;
-  row.forEach(function(cell){
-    var toks=headerTokens(cell);
-    if(!toks.length)return;
-    if(hasTok(toks,'account') && hasTok(toks,'name'))score+=5;
-    else if(hasTok(toks,'account'))score+=3;
-    if(hasTok(toks,'fx')||hasTok(toks,'currency')||hasTok(toks,'ccy')||hasTok(toks,'curr'))score+=2;
-    if(hasTok(toks,'status'))score+=2;
-    if(hasTok(toks,'ss26')&&hasTok(toks,'actual')&&!hasTok(toks,'unit'))score+=4;
-    if(hasTok(toks,'ss27')&&hasAnyTok(toks,['target','reforecast','actual'])&&!hasTok(toks,'unit'))score+=4;
-    if(hasTok(toks,'aw26')&&hasTok(toks,'actual')&&!hasTok(toks,'unit'))score+=1;
-  });
-  return score;
-}
-
+// These are REQUIRED financial columns — if missing, brand is skipped with an error
 const REQUIRED_FINANCIAL=['TARGET','REFORECAST','ACTUAL','SS26'];
+// These are optional — missing means 0, no error
 const OPTIONAL_COLS=['TARGET2','REFORECAST2','ACTUAL2','SS26_2','AW26','AW26_2'];
 
 let allRows=[],brandSums=[],custData=[],charts={};
@@ -600,145 +576,172 @@ function parseCSV(text){
 
 // ── Column map: header name ONLY, no fixed position fallback for financial data ──
 function buildColMap(headerRow,brandName){
+  // Normalize all headers: lowercase, collapse spaces, strip non-alphanumeric
+  var h=headerRow.map(function(x){return normalizeHeader((x||'').replace(/"/g,''));});
+
   var map={};
-
-  map.ACCOUNT=findHeaderIndex(headerRow,function(t){
-    return hasTok(t,'account') && (hasTok(t,'name') || t.length===1 || t.join(' ')==='account');
-  });
-  map.COUNTRY=findHeaderIndex(headerRow,function(t){return hasTok(t,'country');});
-  map.CITY=findHeaderIndex(headerRow,function(t){return hasTok(t,'city') || (hasTok(t,'major')&&hasTok(t,'city'));});
-  map.STATUS=findHeaderIndex(headerRow,function(t){return hasTok(t,'status');});
-  map.FX=findHeaderIndex(headerRow,function(t){return hasTok(t,'fx')||hasTok(t,'currency')||hasTok(t,'ccy')||hasTok(t,'curr');});
-
-  // SS26 columns: must be Actuals, never Units. Window 1 excludes the "2" column.
-  map.SS26=findHeaderIndex(headerRow,function(t){
-    return hasTok(t,'ss26') && hasTok(t,'actual') && !hasTok(t,'unit') && !hasTok(t,'2');
-  });
-  map.SS26_2=findHeaderIndex(headerRow,function(t){
-    return hasTok(t,'ss26') && hasTok(t,'2') && hasTok(t,'actual') && !hasTok(t,'unit');
-  });
-
-  // AW26 optional columns: also Actuals, never Units.
-  map.AW26=findHeaderIndex(headerRow,function(t){
-    return hasTok(t,'aw26') && hasTok(t,'actual') && !hasTok(t,'unit') && !hasTok(t,'2');
-  });
-  map.AW26_2=findHeaderIndex(headerRow,function(t){
-    return hasTok(t,'aw26') && hasTok(t,'2') && hasTok(t,'actual') && !hasTok(t,'unit');
-  });
-
-  // SS27 window 1: target/reforecast/actual, excluding SS27 2 and Units.
-  map.TARGET=findHeaderIndex(headerRow,function(t){
-    return hasTok(t,'ss27') && hasTok(t,'target') && !hasTok(t,'unit') && !hasTok(t,'2');
-  });
-  map.REFORECAST=findHeaderIndex(headerRow,function(t){
-    return hasTok(t,'ss27') && hasTok(t,'reforecast') && !hasTok(t,'unit') && !hasTok(t,'2');
-  });
-  map.ACTUAL=findHeaderIndex(headerRow,function(t){
-    return hasTok(t,'ss27') && hasTok(t,'actual') && !hasTok(t,'unit') && !hasTok(t,'2');
-  });
-
-  // SS27 window 2: optional.
-  map.TARGET2=findHeaderIndex(headerRow,function(t){
-    return hasTok(t,'ss27') && hasTok(t,'2') && hasTok(t,'target') && !hasTok(t,'unit');
-  });
-  map.REFORECAST2=findHeaderIndex(headerRow,function(t){
-    return hasTok(t,'ss27') && hasTok(t,'2') && hasTok(t,'reforecast') && !hasTok(t,'unit');
-  });
-  map.ACTUAL2=findHeaderIndex(headerRow,function(t){
-    return hasTok(t,'ss27') && hasTok(t,'2') && hasTok(t,'actual') && !hasTok(t,'unit');
-  });
-
   var missing=[];
-  REQUIRED_FINANCIAL.forEach(function(k){if(map[k]<0)missing.push(k);});
+
+  Object.keys(COL_ALIASES).forEach(function(key){
+    var aliases=COL_ALIASES[key];
+    var idx=-1;
+    for(var a=0;a<aliases.length;a++){
+      // Normalize alias too so comparison is apples-to-apples
+      var normAlias=normalizeHeader(aliases[a]);
+      idx=h.indexOf(normAlias);
+      if(idx>=0)break;
+    }
+    map[key]=idx;
+
+    if(idx<0){
+      var isOptional=OPTIONAL_COLS.indexOf(key)>=0;
+      if(!isOptional&&REQUIRED_FINANCIAL.indexOf(key)>=0){
+        missing.push(key);
+      }
+      // For optional cols: silently leave as -1
+    }
+  });
+
+  // Warn about missing required financial columns
   if(missing.length>0){
     var msg=brandName+': required financial columns not found by header name: '+missing.join(', ')+
-      '. No fixed column fallback was used. Check the sheet header row.';
+      '. This brand will have incorrect totals. Check row 10 of the sheet contains these exact headers.';
     globalWarnings.push(msg);
     console.warn(msg);
   }
 
+  // Warn if FX missing (affects currency split but not totals)
   if(map.FX<0){
-    var fxMsg=brandName+': FX column not found by header name. Rows with sales data will be included in all-currency totals as UNKNOWN, but excluded from GBP/EUR totals.';
+    var fxMsg=brandName+': FX column not found — all accounts marked UNKNOWN currency, excluded from GBP/EUR totals.';
     globalWarnings.push(fxMsg);
     console.warn(fxMsg);
+  } else {
+    console.log(brandName+': FX col='+map.FX+' TARGET col='+map.TARGET+' RF col='+map.REFORECAST+' SS26 col='+map.SS26);
   }
 
-  console.log(brandName+': detected columns '+JSON.stringify(map));
   return map;
 }
 
+// Safe numeric extractor — strips currency symbols, commas, quotes, whitespace
 function toNum(row,idx){
   if(idx===undefined||idx<0||idx>=row.length)return 0;
-  var raw=(row[idx]||'').toString().replace(/[£€$,"\s]/g,'').trim();
-  if(!raw||raw==='-'||raw.toLowerCase()==='n/a'||raw.toLowerCase()==='tbc')return 0;
+  var cell=row[idx];
+  if(cell===null||cell===undefined)return 0;
+  // Remove currency symbols, commas, quotes, all whitespace
+  var raw=cell.toString()
+    .replace(/\u00A3/g,'')  // £
+    .replace(/\u20AC/g,'')  // €
+    .replace(/[$,\"]/g,'')
+    .replace(/\s/g,'')
+    .trim();
+  if(!raw||raw==='-')return 0;
+  var lower=raw.toLowerCase();
+  if(lower==='n/a'||lower==='tbc'||lower==='na'||lower==='nil')return 0;
   var v=parseFloat(raw);
   return isNaN(v)?0:v;
 }
 
-// ── Parse sheet rows ──────────────────────────────────────────────────────────
+// ── Parse sheet rows ──────────────────────────────────────────────────────────────────────────────────────────────────
 // Columns are found by header NAME only - never by fixed position.
-// We scan for the best header row instead of assuming row 10. This avoids zeros caused
-// by the Google CSV endpoint compressing blank rows or sheets having extra notes above.
+// The gviz/tq CSV endpoint compresses empty rows at the top, so we cannot
+// rely on a fixed row index. We scan all rows for the one containing "account name".
+// This is safe even if sheets have extra/hidden/moved columns.
 
 function parseRows(rows,brandName){
   if(!rows||rows.length<2)return[];
 
-  // Choose the highest-scoring header row in the first 80 rows.
-  // This is safer than stopping at the first row containing "account".
-  var hr=-1,bestScore=0;
-  for(var i=0;i<Math.min(80,rows.length);i++){
-    var score=scoreHeaderRow(rows[i]);
-    if(score>bestScore){bestScore=score;hr=i;}
+  // Scan for header row by finding "account name" + at least one financial header.
+  // We scan up to 30 rows to handle sheets with many header/legend rows at top.
+  var hr=-1;
+  for(var i=0;i<Math.min(30,rows.length);i++){
+    var norm=rows[i].map(function(x){return normalizeHeader((x||'').replace(/"/g,''));});
+    var hasAccount=norm.some(function(h){return h==='account name'||h==='account';});
+    if(!hasAccount)continue;
+    var hasFinancial=norm.some(function(h){
+      return h==='ss27 targets'||h==='ss27 reforecast'||h==='ss27 actuals'||
+             h==='ss26 actuals'||h==='fx'||h==='status';
+    });
+    if(hasFinancial){hr=i;break;}
   }
 
-  if(hr<0||bestScore<7){
-    globalWarnings.push(brandName+': Could not find a reliable header row. Best score was '+bestScore+'.');
+  // Fallback: find any row with exact "account name" header
+  if(hr<0){
+    for(var i=0;i<Math.min(30,rows.length);i++){
+      var norm=rows[i].map(function(x){return normalizeHeader((x||'').replace(/"/g,''));});
+      if(norm.some(function(h){return h==='account name';})){hr=i;break;}
+    }
+  }
+
+  if(hr<0){
+    globalWarnings.push(brandName+': Could not find header row. Sheet may have an unexpected structure.');
     return[];
   }
 
   var cm=buildColMap(rows[hr],brandName);
   if(cm.ACCOUNT<0){
-    globalWarnings.push(brandName+': Account Name column not found by header name.');
+    globalWarnings.push(brandName+': Account Name column not found.');
     return[];
   }
 
-  console.log(brandName+': header row detected at CSV row '+(hr+1)+' with score '+bestScore);
+  // Log what we found for debugging
+  console.log(brandName+': header at CSV row '+(hr+1)+
+    ' | ACCOUNT='+cm.ACCOUNT+' FX='+cm.FX+' STATUS='+cm.STATUS+
+    ' TARGET='+cm.TARGET+' RF='+cm.REFORECAST+' ACTUAL='+cm.ACTUAL+
+    ' SS26='+cm.SS26);
+
+  // Log first 3 data rows FX values for diagnosis
+  for(var d=hr+1;d<Math.min(hr+4,rows.length);d++){
+    var r=rows[d];
+    var a=(r[cm.ACCOUNT]||'').replace(/"/g,'').trim();
+    var fx=cm.FX>=0?(r[cm.FX]||'?'):'NO-FX-COL';
+    if(a)console.log(brandName+' sample row '+(d+1)+': acc="'+a+'" fx="'+fx+'"');
+  }
 
   var dataRows=rows.slice(hr+1);
   var result=[];
   var unknownCurrencyRows=[];
 
   for(var i=0;i<dataRows.length;i++){
-    var sheetRowNumber=hr+i+2;
+    var sheetRowNumber=hr+1+i+1; // approximate sheet row number
     var row=dataRows[i];
     if(!row||row.length===0)continue;
 
     var acc=(row[cm.ACCOUNT]||'').replace(/"/g,'').trim();
-    if(!acc||/^(total|subtotal|grand|summary)$/i.test(acc))continue;
+    if(!acc||/^(total|subtotal|grand|summary)/i.test(acc))continue;
 
     var status=cm.STATUS>=0?(row[cm.STATUS]||'').replace(/"/g,'').toLowerCase().trim():'';
     var isActive=ACTIVE_STATUSES.some(function(s){return status===s;});
 
-    var target     =toNum(row,cm.TARGET);
-    var target2    =toNum(row,cm.TARGET2);
-    var reforecast =toNum(row,cm.REFORECAST);
-    var reforecast2=toNum(row,cm.REFORECAST2);
-    var actual     =toNum(row,cm.ACTUAL);
-    var actual2    =toNum(row,cm.ACTUAL2);
-    var ss26       =toNum(row,cm.SS26);
-    var ss26_2     =toNum(row,cm.SS26_2);
-    var aw26       =toNum(row,cm.AW26);
-    var aw26_2     =toNum(row,cm.AW26_2);
+    // Financial values — by column index found from header name
+    function n(key){
+      var idx=cm[key];
+      if(idx===undefined||idx<0||idx>=row.length)return 0;
+      var raw=(row[idx]||'').toString().replace(/[£€$,"\s]/g,'').trim();
+      if(!raw||raw==='-'||raw.toLowerCase()==='n/a'||raw.toLowerCase()==='tbc')return 0;
+      var v=parseFloat(raw);
+      return isNaN(v)?0:v;
+    }
 
-    // If the row has no financial data at all, skip it as a blank/template row.
-    var hasSalesData=(target>0||target2>0||reforecast>0||reforecast2>0||actual>0||actual2>0||ss26>0||ss26_2>0||aw26>0||aw26_2>0);
-    if(!hasSalesData)continue;
+    var target     =n('TARGET');
+    var target2    =n('TARGET2');
+    var reforecast =n('REFORECAST');
+    var reforecast2=n('REFORECAST2');
+    var actual     =n('ACTUAL');
+    var actual2    =n('ACTUAL2');
+    var ss26       =n('SS26');
+    var ss26_2     =n('SS26_2');
+    var aw26       =n('AW26');
+    var aw26_2     =n('AW26_2');
 
+    // Currency — by header name only, never fallback position
     var fxRaw=cm.FX>=0?(row[cm.FX]||'').replace(/"/g,'').trim().toUpperCase():'';
     var currency;
     if(fxRaw==='GBP'||fxRaw==='£')currency='GBP';
     else if(fxRaw==='EUR'||fxRaw==='€')currency='EUR';
     else{
+      // Only flag if row has real sales data
+      var hasSalesData=(target>0||reforecast>0||actual>0||ss26>0||target2>0||reforecast2>0);
+      if(!hasSalesData)continue;
       currency='UNKNOWN';
       unknownCurrencyRows.push({row:sheetRowNumber,account:acc,fx:fxRaw||'blank'});
     }
@@ -768,19 +771,14 @@ function parseRows(rows,brandName){
     globalWarnings.push(brandName+': '+unknownCurrencyRows.length+
       ' row(s) have sales data but unknown currency. Check: '+detail);
   }
-
-  if(result.length===0){
-    globalWarnings.push(brandName+': header was found but no financial data rows were parsed. Check detected columns in browser console.');
-  }
-
   return result;
 }
 // ── Fetch brand sheet ─────────────────────────────────────────────────────────
 async function fetchBrand(brand){
-  // Use gviz/tq with full column range to get consistent column order.
-  // We request columns A through ZZ which covers moved/added columns.
-  // This is more reliable than /export which shifts columns unpredictably.
-  var url='https://docs.google.com/spreadsheets/d/'+brand.id+'/gviz/tq?tqx=out:csv&sheet=2025%2B&range=A:ZZ';
+  // Use /export?format=csv — gives ALL rows in sheet order, ALL columns including hidden.
+  // Now safe to use because we detect columns by header NAME, not by fixed position.
+  // This is more reliable than gviz/tq which can reformat cells and skip frozen rows.
+  var url='https://docs.google.com/spreadsheets/d/'+brand.id+'/export?format=csv&sheet=2025%2B';
   var r=await fetch(url);
   if(!r.ok)throw new Error('HTTP '+r.status);
   var text=await r.text();
@@ -874,8 +872,8 @@ async function loadAll(){
 async function refreshAll(){
   document.getElementById('sdot').classList.remove('on');
   document.getElementById('slabel').textContent='Refreshing...';
-  var ea=document.getElementById('error-area'); if(ea)ea.innerHTML='';
-  var wa=document.getElementById('warn-area'); if(wa)wa.innerHTML='';
+  document.getElementById('error-area').innerHTML='';
+  document.getElementById('warn-area').innerHTML='';
   document.getElementById('loading-overlay').style.display='flex';
   await loadAll();
   document.getElementById('sdot').classList.add('on');
@@ -1615,9 +1613,8 @@ function renderHealth(){
   var noAccount=allRows.filter(function(r){return!r.account;}).length;
   var zeroTarget=brandSums.filter(function(b){return b.targetTotal===0&&b.reforecastTotal>0;}).length;
   var fallbackCount=globalWarnings.filter(function(w){return w.includes('fallback');}).length;
-  var errArea=document.getElementById('error-area');
-  var errHtml=errArea?errArea.innerHTML:'';
-  var errCount=errHtml.includes('err-banner')?(errHtml.match(/sheet\(s\) failed/)?1:0):0;
+  var errCount=document.getElementById('error-area').innerHTML.includes('err-banner')?
+    (document.getElementById('error-area').innerHTML.match(/sheet\(s\) failed/)?1:0):0;
   var loadedCount=brandSums.length;
 
   document.getElementById('health-stats').innerHTML=

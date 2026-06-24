@@ -707,7 +707,17 @@ function parseRows(rows,brandName){
     if(!row||row.length===0)continue;
 
     var acc=(row[cm.ACCOUNT]||'').replace(/"/g,'').trim();
-    if(!acc||/^(total|subtotal|grand|summary)/i.test(acc))continue;
+    if(!acc)continue;
+    // Skip rows whose "Account Name" is actually a totals row, a notes/legend
+    // line, or any non-account content. We're conservative: a real shop name
+    // is short, doesn't contain sentence punctuation, and doesn't start with
+    // common spreadsheet metadata words.
+    var accLower=acc.toLowerCase();
+    if(/^(total|subtotal|grand|summary|gbp total|eur total|spelling|notes?|comments?|key|legend)/i.test(acc))continue;
+    if(acc.length>60)continue;                       // free-text note row
+    if(/[.;]/.test(acc)&&acc.split(' ').length>6)continue; // full-sentence note row
+    if(accLower==='account name'||accLower==='account')continue; // duplicated header
+
 
     var status=cm.STATUS>=0?(row[cm.STATUS]||'').replace(/"/g,'').toLowerCase().trim():'';
     var isActive=ACTIVE_STATUSES.some(function(s){return status===s;});
@@ -774,12 +784,22 @@ function parseRows(rows,brandName){
   return result;
 }
 // ── Fetch brand sheet ─────────────────────────────────────────────────────────
+// CRITICAL: Google Sheets aggressively caches the /export endpoint at multiple
+// layers (Google CDN, browser HTTP cache, service workers). Without cache
+// busting, dashboards routinely show data that's minutes-to-hours stale —
+// which was the root cause of "wrong numbers" complaints. We bust the cache
+// with a timestamp query param AND fetch with cache:'no-store' AND
+// no-cache headers — all three are needed because each defeats one layer.
 async function fetchBrand(brand){
-  // Use /export?format=csv — gives ALL rows in sheet order, ALL columns including hidden.
-  // Now safe to use because we detect columns by header NAME, not by fixed position.
-  // This is more reliable than gviz/tq which can reformat cells and skip frozen rows.
-  var url='https://docs.google.com/spreadsheets/d/'+brand.id+'/export?format=csv&sheet=2025%2B';
-  var r=await fetch(url);
+  var ts=Date.now()+'-'+Math.random().toString(36).slice(2,8);
+  // /export honours sheet=<name> in practice and preserves row/column order
+  // exactly as in the sheet (unlike gviz, which collapses header rows).
+  var url='https://docs.google.com/spreadsheets/d/'+brand.id+
+          '/export?format=csv&sheet=2025%2B&_cb='+ts;
+  var r=await fetch(url,{
+    cache:'no-store',
+    headers:{'Cache-Control':'no-cache, no-store, max-age=0','Pragma':'no-cache'}
+  });
   if(!r.ok)throw new Error('HTTP '+r.status);
   var text=await r.text();
   if(text.includes('Sign in')||text.includes('accounts.google.com')||text.includes('ServiceLogin'))throw new Error('Sheet not shared publicly');
